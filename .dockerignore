@@ -1,0 +1,13 @@
+# Browser App
+*/node_modules
+
+# Python
+Pipfile
+Pipfile.lock
+.venv
+
+# Environment variables
+.env
+
+# Other Unneeded Items
+.DS_Store

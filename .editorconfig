@@ -1,0 +1,13 @@
+[**]
+insert_final_newline = true
+indent_style = space
+end_of_line = crlf
+
+[**.js]
+tab_width = 2
+
+[**.py]
+tab_width = 4
+
+[**.scss]
+tab_width = 4
