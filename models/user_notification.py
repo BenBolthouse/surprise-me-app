@@ -6,9 +6,9 @@ class UserNotification(db.Model):
 
     # Properties
     id = db.Column(db.Integer, primary_key=True)
-    user_id(db.Integer,
-            db.ForeignKey('users.id'),
-            nullable=False)
+    user_id = db.Column(db.Integer,
+                        db.ForeignKey('users.id'),
+                        nullable=False)
     notification_type = db.Column(db.String, nullable=False)
     hook = db.Column(db.String, default="")
     body = db.Column(db.String, nullable=False)

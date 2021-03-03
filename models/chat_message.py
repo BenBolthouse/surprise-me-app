@@ -6,9 +6,9 @@ class ChatMessage(db.Model):
 
     # Properties
     id = db.Column(db.Integer, primary_key=True)
-    user_connection_id(db.Integer,
-                       db.ForeignKey('user_connections.id'),
-                       nullable=False)
+    user_connection_id = db.Column(db.Integer,
+                                   db.ForeignKey('user_connections.id'),
+                                   nullable=False)
     sender_user_id = db.Column(db.Integer, nullable=False)
     body = db.Column(db.String, nullable=False)
     deleted = db.Column(db.Boolean, nullable=False, default=False)

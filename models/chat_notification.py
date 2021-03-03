@@ -6,9 +6,9 @@ class ChatNotification(db.Model):
 
     # Properties
     id = db.Column(db.Integer, primary_key=True)
-    user_connection_id(db.Integer,
-                       db.ForeignKey('user_connections.id'),
-                       nullable=False)
+    user_connection_id = db.Column(db.Integer,
+                                   db.ForeignKey('user_connections.id'),
+                                   nullable=False)
     recipient_user_id = db.Column(db.Integer, nullable=False)
     notification_type = db.Column(db.String, nullable=False)
     hook = db.Column(db.String, default="")
