@@ -2,7 +2,7 @@
   "name": "surprise-me-browser-app",
   "version": "0.1.0",
   "description": "Frontend React SPA for the Surprise Me social app.",
-  "main": "app.js",
+  "main": "./src/index.js",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build"
@@ -16,7 +16,7 @@
   "bugs": {
     "url": "https://github.com/BenBolthouse/surprise-me-app/issues"
   },
-  "homepage": "https://github.com/BenBolthouse/surprise-me-app#readme",
+  "homepage": "/",
   "eslintConfig": {
     "extends": "react-app"
   },
