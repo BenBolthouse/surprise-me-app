@@ -1,8 +1,8 @@
 from .db import db
 
 
-class Message(db.Model):
-    __tablename__ = "messages"
+class ChatMessage(db.Model):
+    __tablename__ = "chat_messages"
 
     # Properties
     id = db.Column(db.Integer, primary_key=True)
