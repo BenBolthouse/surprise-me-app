@@ -5,7 +5,7 @@ from flask_login import LoginManager
 
 
 from .config import Config
-from .models import db
+from models import db
 
 
 app = Flask(__name__)

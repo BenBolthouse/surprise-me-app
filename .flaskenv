@@ -1,1 +1,1 @@
-FLASK_APP=flask_api
+FLASK_APP=app
