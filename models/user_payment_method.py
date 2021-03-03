@@ -13,3 +13,7 @@ class UserPaymentMethod(db.Model):
     expiration = db.Column(db.Integer, nullable=False)
     exp_date = db.Column(db.DateTime, nullable=False)
     card_number = db.Column(db.String(255), nullable=False)
+
+    # TODO implement association getters and setters
+
+    # TODO implement scopes while creating routes
