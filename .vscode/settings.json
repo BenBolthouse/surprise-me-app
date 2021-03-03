@@ -2,6 +2,12 @@
   "cSpell.words": [
     "bolthouse",
     "browserslist",
-    "pipfile"
-  ]
+    "pipfile",
+    "werkzeug"
+  ],
+  "python.linting.pylintArgs": [
+    "--load-plugins",
+    "pylint_flask_sqlalchemy",
+    "pylint_flask"
+]
 }
