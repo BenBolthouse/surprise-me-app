@@ -136,3 +136,9 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# Browser App
+*/node_modules
+*.DS_STORE
+*build/
+*coverage/
