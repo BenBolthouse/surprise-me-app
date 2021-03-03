@@ -1,3 +1,6 @@
+import sqlalchemy as sa
+
+
 from .db import db
 
 
