@@ -22,13 +22,16 @@ class User(db.Model, UserMixin):
     updated_at = db.Column(db.DateTime, server_default=db.func.now())
 
     # Associations
+    _purchases = db.relationship("Purchase",
+                                 backref="users",
+                                 cascade="all, delete-orphan")
     _connections = db.relationship("UserConnection",
                                    backref="users",
                                    cascade="all, delete-orphan")
     _notifications = db.relationship("UserNotification",
                                      backref="users",
                                      cascade="all, delete-orphan")
-    _payment_methods = db.relationship("UserPaymentMethods",
+    _payment_methods = db.relationship("UserPaymentMethod",
                                        backref="users",
                                        cascade="all, delete-orphan")
 
