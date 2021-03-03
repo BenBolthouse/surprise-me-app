@@ -17,7 +17,7 @@ class User(db.Model, UserMixin):
     share_location = db.Column(db.Boolean, default=False)
     coord_lat = db.Column(sa.types.DECIMAL(precision=9, scale=6), nullable=False)
     coord_long = db.Column(sa.types.DECIMAL(precision=8, scale=6), nullable=False)
-    hashed_password = db.Column(db.String(64), nullable=False)
+    hashed_password = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, server_default=db.func.now())
 
@@ -28,6 +28,9 @@ class User(db.Model, UserMixin):
     _notifications = db.relationship("UserNotification",
                                      backref="users",
                                      cascade="all, delete-orphan")
+    _payment_methods = db.relationship("UserPaymentMethods",
+                                       backref="users",
+                                       cascade="all, delete-orphan")
 
     # Getters setters
     @property
