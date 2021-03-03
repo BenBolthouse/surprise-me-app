@@ -1,0 +1,25 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+flask = "*"
+flask-cors = "*"
+flask-login = "*"
+flask-sqlalchemy = "*"
+werkzeug = "*"
+sqlalchemy = "*"
+itsdangerous = "*"
+python-dotenv = "*"
+
+[dev-packages]
+psycopg2 = "*"
+autopep8 = "*"
+pylint = "*"
+psycopg2-binary = "==2.8.6"
+pylint-flask = "*"
+pylint-flask-sqlalchemy = "*"
+
+[requires]
+python_version = "3.9"
