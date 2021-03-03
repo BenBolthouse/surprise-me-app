@@ -16,9 +16,12 @@ class UserConnection(db.Model):
     established_at = db.Column(db.DateTime, nullable=True, default=None)
 
     # Associations
-    _messages = db.relationship("Message",
+    _messages = db.relationship("ChatMessage",
                                 backref="user_connections",
                                 cascade="all, delete-orphan")
+    _notifications = db.relationship("ChatNotification",
+                                     backref="user_connections",
+                                     cascade="all, delete-orphan")
 
     # TODO implement association getters and setters
 

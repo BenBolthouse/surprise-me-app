@@ -25,6 +25,9 @@ class User(db.Model, UserMixin):
     _connections = db.relationship("UserConnection",
                                    backref="users",
                                    cascade="all, delete-orphan")
+    _notifications = db.relationship("UserNotification",
+                                     backref="users",
+                                     cascade="all, delete-orphan")
 
     # Getters setters
     @property
