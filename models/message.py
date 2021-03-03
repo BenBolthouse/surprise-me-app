@@ -1,7 +1,7 @@
 from .db import db
 
 
-class Message(db.Model, UserMixin):
+class Message(db.Model):
     __tablename__ = "messages"
 
     # Properties

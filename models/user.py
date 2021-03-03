@@ -38,11 +38,6 @@ class User(db.Model, UserMixin):
     def password_is_valid(self, password):
         return check_password_hash(self.password, password)
 
-    # Scopes
-    def to_json_on_create(self):
-        return {
-            "id": self.id,
-            "firstName": self.first_name,
-            "lastName": self.last_name,
-            "email": self.email,
-        }
+    # TODO implement association getters and setters
+
+    # TODO implement scopes while creating routes

@@ -15,15 +15,11 @@ class UserConnection(db.Model):
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     established_at = db.Column(db.DateTime, nullable=True, default=None)
 
-    # Scopes
-    def to_json_on_create(self):
-        return {
-            "id": self.id,
-            "requestorId": self.requestor_user_id,
-            "connectionId": self.connection_user_id,
-            "createdAt": self.created_at,
-        }
+    # Associations
+    _messages = db.relationship("Message",
+                                backref="user_connections",
+                                cascade="all, delete-orphan")
 
-    def to_json_messages_quantity(self):
-        # TODO implement messages quantity scope
-        pass
+    # TODO implement association getters and setters
+
+    # TODO implement scopes while creating routes
