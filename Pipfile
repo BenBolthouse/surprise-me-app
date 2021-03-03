@@ -12,6 +12,8 @@ werkzeug = "*"
 sqlalchemy = "*"
 itsdangerous = "*"
 python-dotenv = "*"
+flask-migrate = "*"
+alembic = "*"
 
 [dev-packages]
 psycopg2 = "*"
