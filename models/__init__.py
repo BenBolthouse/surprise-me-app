@@ -1,4 +1,6 @@
 from .db import db
+from .chat_message import ChatMessage
+from .chat_notification import ChatNotification
 from .user import User
 from .user_connection import UserConnection
-from .message import Message
+from .user_notification import UserNotification
