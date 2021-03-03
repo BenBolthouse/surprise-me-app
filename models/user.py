@@ -9,6 +9,7 @@ from .db import db
 class User(db.Model, UserMixin):
     __tablename__ = "users"
 
+    # Properties
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(64), nullable=False)
     last_name = db.Column(db.String(64), nullable=False)
@@ -20,20 +21,22 @@ class User(db.Model, UserMixin):
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, server_default=db.func.now())
 
+    # Associations
+    _connections = db.relationship("UserConnection",
+                                   backref="users",
+                                   cascade="all, delete-orphan")
 
+    # Getters setters
     @property
     def password(self):
         return self.hashed_password
-
 
     @password.setter
     def password(self, password):
         self.hashed_password = generate_password_hash(password)
 
-
     def password_is_valid(self, password):
         return check_password_hash(self.password, password)
-
 
     # Scopes
     def to_json_on_create(self):
