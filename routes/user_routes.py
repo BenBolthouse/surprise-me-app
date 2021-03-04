@@ -4,13 +4,24 @@ from flask import Blueprint, request, jsonify
 from models import db, User
 
 
+from .user_routes_validation import user_validate_on_create
+
 user_routes = Blueprint("users", __name__, url_prefix="/api/users")
 
 
 @user_routes.route("", methods=["POST"])
+@user_validate_on_create()
 def create_new_user():
 
-    # 1. Respond 400 if requested email is in use
+    # Respond 400 if body data validation failed
+    body_data_validation_failed = request.validation_result is False
+    if body_data_validation_failed:
+        return jsonify({
+            "message": "body_data_validation_failed",
+            "data": request.validation_errors
+        }), 400
+
+    # Respond 400 if requested email is in use
     email = request.json["email"]
     requested_email_is_in_use = User.query.filter(
         User.email == email).first()
