@@ -3,6 +3,7 @@
     "addfinalizer",
     "bolthouse",
     "browserslist",
+    "favicon",
     "noqa",
     "pipfile",
     "pytest",
