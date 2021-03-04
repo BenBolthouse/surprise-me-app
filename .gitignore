@@ -142,3 +142,8 @@ cython_debug/
 *.DS_STORE
 *build/
 *coverage/
+
+# Static directory is created as a copy of React build during Dockerfile run.
+# For development purposes, if a static directory is created for testing, it is
+# ignored here.
+/app/static
