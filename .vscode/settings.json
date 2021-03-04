@@ -1,15 +1,15 @@
 {
   "cSpell.words": [
+    "addfinalizer",
     "bolthouse",
     "browserslist",
+    "noqa",
     "pipfile",
+    "pytest",
     "werkzeug"
   ],
-  "python.linting.pylintArgs": [
-    "--load-plugins",
-    "pylint_flask_sqlalchemy",
-    "pylint_flask"
-],
-"python.linting.pylintEnabled": true,
-"python.linting.enabled": true
+  "python.linting.pylintEnabled": false,
+  "python.linting.pycodestyleEnabled": true,
+  "python.linting.enabled": true,
+  "python.pythonPath": "C:\\Users\\AppAcademy\\.virtualenvs\\app-zn4r3ImE\\Scripts\\python.exe"
 }
