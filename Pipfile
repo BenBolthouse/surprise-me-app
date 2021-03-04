@@ -14,6 +14,7 @@ python-dotenv = "*"
 flask-migrate = "*"
 alembic = "*"
 flask-cors = "*"
+cerberus = "*"
 
 [dev-packages]
 psycopg2 = "*"
