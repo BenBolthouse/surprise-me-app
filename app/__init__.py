@@ -1,8 +1,7 @@
-from flask import Flask
+from flask import Flask, session
 from flask_cors import CORS
-from flask_migrate import Migrate
 from flask_login import LoginManager
-
+from flask_migrate import Migrate
 
 from config import Config
 from models import db
@@ -36,3 +35,13 @@ Migrate(app, db)
 
 # Security configuration
 CORS(app)
+
+
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+# Response with frontend
+def react_root(path):
+    print("path", path)
+    if path == 'favicon.ico':
+        return app.send_static_file('favicon.ico')
+    return app.send_static_file('index.html')
