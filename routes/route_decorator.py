@@ -1,8 +1,16 @@
-from functools import wraps
 from flask import request, make_response
+from functools import wraps
 
 
 class RouteDecorator:
+    """ Returns a Flask route decorator.
+
+    Callback function `req` takes parameter `request` to access
+    the request context.
+
+    Callback function `res` takes parameter `response` to access
+    the response. """
+
     def __init__(self, req=None, res=None):
         self._req = req
         self._res = res
