@@ -5,7 +5,6 @@ name = "pypi"
 
 [packages]
 flask = "*"
-flask-cors = "*"
 flask-login = "*"
 flask-sqlalchemy = "*"
 werkzeug = "*"
@@ -14,14 +13,16 @@ itsdangerous = "*"
 python-dotenv = "*"
 flask-migrate = "*"
 alembic = "*"
+flask-cors = "*"
 
 [dev-packages]
 psycopg2 = "*"
 autopep8 = "*"
-pylint = "*"
 psycopg2-binary = "==2.8.6"
-pylint-flask = "*"
-pylint-flask-sqlalchemy = "*"
+pytest = "*"
+pytest-flask-sqlalchemy = "*"
+pycodestyle = "*"
+pytest-postgresql = "*"
 
 [requires]
 python_version = "3.9"
