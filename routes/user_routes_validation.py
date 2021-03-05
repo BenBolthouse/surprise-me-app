@@ -2,7 +2,7 @@ from .route_decorator import RouteDecorator
 from .validator import validator
 
 
-def on_create(request):
+def _on_create(request):
     v_object = {
         "password": request.json["password"],
         "firstName": request.json["firstName"],
@@ -62,4 +62,4 @@ def on_create(request):
     request = validator(request, v_schema, v_object)
 
 
-user_validate_on_create = RouteDecorator(req=on_create)
+user_validate_on_create = RouteDecorator(req=_on_create)
