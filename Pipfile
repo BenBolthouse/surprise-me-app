@@ -17,6 +17,8 @@ itsdangerous = "*"
 python-dotenv = "*"
 sqlalchemy = "*"
 werkzeug = "*"
+awscli = "*"
+boto3 = "*"
 
 [dev-packages]
 autopep8 = "*"
