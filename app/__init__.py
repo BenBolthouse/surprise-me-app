@@ -1,7 +1,8 @@
-from flask import Flask, session
+from flask import Flask, session, request
 from flask_cors import CORS
 from flask_login import LoginManager
 from flask_migrate import Migrate
+from flask_wtf.csrf import validate_csrf
 
 from config import Config
 from models import db
@@ -9,6 +10,7 @@ from models import db
 
 # Route imports
 from routes import user_routes
+from routes import csrf_routes
 
 app = Flask(__name__)
 
@@ -26,8 +28,21 @@ def load_session_user(id):
     pass
 
 
+# Require a valid X-CSRFToken for all state-changing requests
+@app.before_request
+def validate_csrf_token():
+    is_post = request.method == "POST"
+    is_patch = request.method == "PATCH"
+    is_delete = request.method == "DELETE"
+    if is_post or is_patch or is_delete:
+        print("")
+        csrf_token = request.headers.get("X-CSRFToken")
+        validate_csrf(csrf_token)
+
+
 # Route configuration
 app.register_blueprint(user_routes)
+app.register_blueprint(csrf_routes)
 
 # Models and migration configuration
 db.init_app(app)
@@ -37,8 +52,8 @@ Migrate(app, db)
 CORS(app)
 
 
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
+@app.route('/', defaults={'path': ''}, methods=["GET"])
+@app.route('/<path:path>', methods=["GET"])
 # Response with frontend
 def react_root(path):
     print("path", path)
