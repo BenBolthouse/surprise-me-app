@@ -147,3 +147,7 @@ cython_debug/
 # For development purposes, if a static directory is created for testing, it is
 # ignored here.
 /app/static
+
+# .vscode directory does not need to be shared across development environments
+# and so can be ignored.
+.vscode
