@@ -1,8 +1,9 @@
-from flask import Flask, session, request
+from flask import Flask, session, request, redirect
 from flask_cors import CORS
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_wtf.csrf import validate_csrf
+import os
 
 from config import Config
 from models import db
@@ -16,6 +17,7 @@ app = Flask(__name__)
 
 # Environment setup
 app.config.from_object(Config)
+is_production = os.environ.get('FLASK_ENV') == 'production'
 
 # User login configuration
 login = LoginManager(app)
@@ -50,6 +52,16 @@ Migrate(app, db)
 
 # Security configuration
 CORS(app)
+
+
+@app.before_request
+# Redirect to HTTPS if in production
+def https_redirect():
+    if is_production:
+        if request.headers.get('X-Forwarded-Proto') == 'http':
+            url = request.url.replace('http://', 'https://', 1)
+            code = 301
+            return redirect(url, code=code)
 
 
 @app.route('/', defaults={'path': ''}, methods=["GET"])
