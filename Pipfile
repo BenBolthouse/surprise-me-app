@@ -15,6 +15,7 @@ flask-migrate = "*"
 alembic = "*"
 flask-cors = "*"
 cerberus = "*"
+flask-wtf = "*"
 
 [dev-packages]
 psycopg2 = "*"
