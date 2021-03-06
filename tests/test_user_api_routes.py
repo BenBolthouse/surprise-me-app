@@ -358,3 +358,29 @@ def test_patch_user_succeeds(client, headers, database_user_login):  # noqa
         assert response.status_code == 200
         assert response.json["message"] == "success"
         assert response_data[data[0]] == data[1]
+
+
+def test_patch_user_fails_identical_email(client, headers, database_user, database_user_login):  # noqa
+    # Arrange
+    url = "/api/users"
+    data = {
+        "email": "conflict_email@example.com"
+    }
+    conflict_user = deepcopy(user_request_template)
+    conflict_user["email"] = "conflict_email@example.com"
+    client.post(url, data=json.dumps(conflict_user), headers=headers)
+
+    # Act
+    response = client.patch(url, data=json.dumps(data), headers=headers)
+
+    # Expected results
+    status_code = 400
+    message = "requested_email_is_in_use"
+    expected_data = {
+        "details": "The email conflict_email@example.com is already in use."  # noqa
+    }
+
+    # Assert
+    assert response.status_code == status_code
+    assert response.json.get("message") == message
+    assert response.json.get("data") == expected_data

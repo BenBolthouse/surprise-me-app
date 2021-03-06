@@ -70,6 +70,19 @@ def patch_user():
             "data": request.validation_errors
         }), 400
 
+    # Respond 400 if requested email is in use
+    email = request.json.get("email")
+    if email is not None:
+        requested_email_is_in_use = User.query.filter(
+            User.email == email).first()
+        if requested_email_is_in_use:
+            return jsonify({
+                "message": "requested_email_is_in_use",
+                "data": {
+                    "details": f"The email {email} is already in use."
+                }
+            }), 400
+
     # Convert camel to snake and update user object
     user.first_name = request.json.get("firstName") or user.first_name
     user.last_name = request.json.get("lastName") or user.last_name
