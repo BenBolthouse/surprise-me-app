@@ -5,14 +5,22 @@ from ._route_decorator import RouteDecorator
 
 
 def validator(request, v_schema, v_object):
-    """ Loads validation results onto the request object. 
+    """ Loads validation results onto the request object.
 
     Dictionary `v_object` contains values for validation.
 
     Dictionary `v_schema` contains cerberus validation rules. """
 
-    validator = Validator(v_schema)
+    # Scoped for try except block
+    validator = None
 
+    # Raise exception for anything that cerberus can't eat
+    try:
+        validator = Validator(v_schema)
+    except Exception as e:
+        raise Exception("Schema format error")
+
+    # Do the validation and add results to the request
     request.validation_result = validator.validate(v_object)
     request.validation_errors = validator.errors
 
