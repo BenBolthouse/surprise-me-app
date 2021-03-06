@@ -2,73 +2,70 @@ from ._route_decorator import RouteDecorator
 from ._validator import validator
 
 # Validator schemas
-_password = {
+_required = {
     "required": True,
     "nullable": False,
+}
+_password = {
+    "nullable": True,
     "minlength": 8,
     "maxlength": 32,
     "type": "string",
     "regex": "^(?!.*\ )(?=.*\d)(?=.+\W)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,32}$",  # noqa
 }
-_firstName = {
-    "required": True,
-    "nullable": False,
+_first_name = {
+    "nullable": True,
     "minlength": 1,
     "maxlength": 32,
     "regex": "^([A-Za-z'-]+)$",  # noqa
 }
-_lastName = {
-    "required": True,
-    "nullable": False,
+_last_name = {
+    "nullable": True,
     "minlength": 1,
     "maxlength": 32,
     "regex": "^([A-Za-z'-]+)$",  # noqa
 }
 _email = {
-    "required": True,
-    "nullable": False,
+    "nullable": True,
     "minlength": 5,
     "maxlength": 128,
     "type": "string",
     "regex": '^(?:(?:[\w`~!#$%^&*\-=+;:{}\'|,?\/]+(?:(?:\.(?:"(?:\\?[\w`~!#$%^&*\-=+;:{}\'|,?\/\.()<>\[\] @]|\\"|\\\\)*"|[\w`~!#$%^&*\-=+;:{}\'|,?\/]+))*\.[\w`~!#$%^&*\-=+;:{}\'|,?\/]+)?)|(?:"(?:\\?[\w`~!#$%^&*\-=+;:{}\'|,?\/\.()<>\[\] @]|\\"|\\\\)+"))@(?:[a-zA-Z\d\-]+(?:\.[a-zA-Z\d\-]+)*|\[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\])$',  # noqa
 }
-_shareLocation = {
-    "required": True,
-    "nullable": False,
+_share_location = {
+    "nullable": True,
     "type": "boolean"
 }
-_coordLat = {
-    "required": True,
-    "nullable": False,
+_coord_lat = {
+    "nullable": True,
     "type": "string",
     "regex": "^(?=.*[0-9]).{3,3}\.(?=.*[0-9]).{6,6}$",  # noqa
 }
-_coordLong = {
-    "required": True,
-    "nullable": False,
+_coord_long = {
+    "nullable": True,
     "type": "string",
     "regex": "^(?=.*[0-9]).{2,2}\.(?=.*[0-9]).{6,6}$",  # noqa
 }
 
 
-def _on_create(request):
+def _on_post(request):
     v_object = {
-        "password": request.json["password"],
-        "firstName": request.json["firstName"],
-        "lastName": request.json["lastName"],
-        "email": request.json["email"],
-        "shareLocation": request.json["shareLocation"],
-        "coordLat": str(request.json["coordLat"]),
-        "coordLong": str(request.json["coordLong"]),
+        "password": request.json.get("password"),
+        "firstName": request.json.get("firstName"),
+        "lastName": request.json.get("lastName"),
+        "email": request.json.get("email"),
+        "shareLocation": request.json.get("shareLocation"),
+        "coordLat": str(request.json.get("coordLat")),
+        "coordLong": str(request.json.get("coordLong")),
     }
     v_schema = {
-        "password": _password,
-        "firstName": _firstName,
-        "lastName": _lastName,
-        "email": _email,
-        "shareLocation": _shareLocation,
-        "coordLat": _coordLat,
-        "coordLong": _coordLong,
+        "password": {**_password, **_required},
+        "firstName": {**_first_name, **_required},
+        "lastName": {**_last_name, **_required},
+        "email": {**_email, **_required},
+        "shareLocation": {**_share_location, **_required},
+        "coordLat": {**_coord_lat, **_required},
+        "coordLong": {**_coord_long, **_required},
     }
 
     # Pass exception if validation failed and add errors to request
@@ -78,4 +75,30 @@ def _on_create(request):
         pass
 
 
-user_validate_on_create = RouteDecorator(req=_on_create)
+user_validate_on_post = RouteDecorator(req=_on_post)
+
+
+def _on_patch(request):
+    v_object = {
+        "password": request.json.get("password"),
+        "firstName": request.json.get("firstName"),
+        "lastName": request.json.get("lastName"),
+        "email": request.json.get("email"),
+        "shareLocation": request.json.get("shareLocation"),
+    }
+    v_schema = {
+        "password": _password,
+        "firstName": _first_name,
+        "lastName": _last_name,
+        "email": _email,
+        "shareLocation": _share_location,
+    }
+
+    # Pass exception if validation failed and add errors to request
+    try:
+        request = validator(request, v_schema, v_object)
+    except Exception as e:
+        pass
+
+
+user_validate_on_patch = RouteDecorator(req=_on_patch)
