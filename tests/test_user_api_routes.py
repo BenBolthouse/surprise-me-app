@@ -1,6 +1,8 @@
 from copy import deepcopy
 import json
 import pytest
+import flask
+
 
 from models import db, User
 from app import app
@@ -26,23 +28,33 @@ def client(request):
             db.session.commit()
 
 
-def test_post_new_user(client):
+@pytest.fixture(scope="module")
+def headers(client):
+
+    response = client.get("/api/csrf")
+
+    yield {
+        "Content-Type": "application/json",
+        "Allow": "application/json",
+        "X-CSRFToken": response.json["data"]["token"]
+    }
+
+
+user_request_template = {
+    "password": "Du&&?121",
+    "firstName": "Demo",
+    "lastName": "User",
+    "email": "demoUser@email.com",
+    "shareLocation": True,
+    "coordLat": 123.123456,
+    "coordLong": 12.123456
+}
+
+
+def test_post_user_succeeds(client, headers):
     # Arrangement
-    mimetype = "application/json"
-    headers = {
-        "Content-Type": mimetype,
-        "Allow": mimetype,
-    }
     url = "/api/users"
-    data = {
-        "password": "Du&&?121",
-        "firstName": "Demo",
-        "lastName": "User",
-        "email": "demoUser@email.com",
-        "shareLocation": True,
-        "coordLat": 123.123456,
-        "coordLong": 12.123456
-    }
+    data = deepcopy(user_request_template)
 
     # Expected results
     status_code = 201
@@ -66,23 +78,10 @@ def test_post_new_user(client):
     assert response.json["data"] == expected_data
 
 
-def test_post_user_with_identical_email(client):
+def test_post_user_fails_with_identical_email(client, headers):
     # Arrangement
-    mimetype = "application/json"
-    headers = {
-        "Content-Type": mimetype,
-        "Allow": mimetype,
-    }
     url = "/api/users"
-    data = {
-        "password": "Du&&?121",
-        "firstName": "Demo",
-        "lastName": "User",
-        "email": "demoUser@email.com",
-        "shareLocation": True,
-        "coordLat": 123.123456,
-        "coordLong": 12.123456
-    }
+    data = data = deepcopy(user_request_template)
 
     # Expected results
     status_code = 400
@@ -100,34 +99,146 @@ def test_post_user_with_identical_email(client):
     assert response.json["data"] == expected_data
 
 
-def test_post_user_with_invalid_names(client):
+def test_post_user_fails_with_invalid_names(client, headers):
     # Arrangement
-    mimetype = "application/json"
-    headers = {
-        "Content-Type": mimetype,
-        "Allow": mimetype,
-    }
     url = "/api/users"
-    data = {
-        "password": "Du&&?121",
-        "firstName": "Demo",
-        "lastName": "User",
-        "email": "demoUser2@email.com",
-        "shareLocation": True,
-        "coordLat": 123.123456,
-        "coordLong": 12.123456
-    }
+    test_subjects = [
+        "%HASBADCHAR",
+        "HAS&BADCHAR",
+        "HASBADCHAR#",
+        "5HASBADCHAR",
+        "HAS9BADCHAR",
+        "HASBADCHAR5",
+        " HASBADCHAR",
+        "HAS BADCHAR",
+        "HASBADCHAR "
+    ]
 
-    # Action 1
-    test_1 = deepcopy(data)
-    test_1["first_name"] = "%BADNAME%"
-    test_1["last_name"] = "%BADNAME%"
-    response = client.post(url, data=json.dumps(data), headers=headers)
+    # firstName
+    for name in test_subjects:
+        # Arrange
+        data = deepcopy(user_request_template)
+        data["firstName"] = name
 
-    # Assertions
-    assert response.status_code == 400
-    assert response.json["message"] == "valdation_errors"
-    assert response.json["data"] == {
-        "first_name": ["Name contains illegal characters."],
-        "last_name": ["Name contains illegal characters."]
-    }
+        # Act
+        response = client.post(url, data=json.dumps(data), headers=headers)
+
+        # Assert
+        assert response.status_code == 400
+        assert response.json["message"] == "body_data_validation_failed"
+        assert "not match regex" in response.json["data"]["firstName"][0]
+
+    # lastName
+    for name in test_subjects:
+        # Arrange
+        data = deepcopy(user_request_template)
+        data["lastName"] = name
+
+        # Act
+        response = client.post(url, data=json.dumps(data), headers=headers)
+
+        # Assert
+        assert response.status_code == 400
+        assert response.json["message"] == "body_data_validation_failed"
+        assert "not match regex" in response.json["data"]["lastName"][0]
+
+
+def test_post_user_fails_with_invalid_email(client, headers):
+    # Arrangement
+    url = "/api/users"
+    test_subjects = [
+        "BAD EMAIL@EXAMPLE.COM",
+        "BADEMAIL @EXAMPLE.COM",
+        "BADEMAIL@ EXAMPLE.COM",
+        "BADEMAIL@EXAMPLE .COM",
+        "BADEMAIL@EXAMPLE. COM",
+        "BADEMAIL@EXAMPLE.COM ",
+    ]
+
+    for email in test_subjects:
+        # Arrange
+        data = deepcopy(user_request_template)
+        data["email"] = email
+
+        # Act
+        response = client.post(url, data=json.dumps(data), headers=headers)
+
+        # Assert
+        assert response.status_code == 400
+        assert response.json["message"] == "body_data_validation_failed"
+        assert "not match regex" in response.json["data"]["email"][0]
+
+
+def test_post_user_fails_with_invalid_geocoords(client, headers):
+    # Arrangement
+    url = "/api/users"
+    test_subjects = [
+        1234567890123456,
+        1.23456789012345,
+        12.3456789012345,
+        123.456789012345,
+        1234.56789012345,
+        12345.6789012345,
+        123456.789012345,
+        123,
+        1234,
+        12345,
+        123456,
+        1234567,
+        12345678,
+        123456789,
+    ]
+
+    # coordLat
+    for coordLat in test_subjects:
+        # Arrange
+        data = deepcopy(user_request_template)
+        data["coordLat"] = coordLat
+
+        # Act
+        response = client.post(url, data=json.dumps(data), headers=headers)
+
+        # Assert
+        assert response.status_code == 400
+        assert response.json["message"] == "body_data_validation_failed"
+        assert "not match regex" in response.json["data"]["coordLat"][0]
+
+    # coordLong
+    for coordLong in test_subjects:
+        # Arrange
+        data = deepcopy(user_request_template)
+        data["coordLong"] = coordLong
+
+        # Act
+        response = client.post(url, data=json.dumps(data), headers=headers)
+
+        # Assert
+        assert response.status_code == 400
+        assert response.json["message"] == "body_data_validation_failed"
+        assert "not match regex" in response.json["data"]["coordLong"][0]
+
+
+def test_patch_user_succeeds(client, headers):
+    # Arrange
+    url = "/api/users"
+    test_subjects = [
+        ("firstName", "Demo"),
+        ("lastName", "User"),
+        ("email", "demo_user@example.com"),
+        ("shareLocation", True),
+        ("coordLat", 123.123456),
+        ("coordLong", 12.123456),
+    ]
+
+    for new_val in test_subjects:
+        # Arrange
+        data = deepcopy(user_request_template)
+        data[new_val[0]] = new_val[0]
+
+        # Act
+        response = client.patch(url, data=json.dumps(data), headers=headers)
+
+        # Assert
+        assert response.status_code == 400
+        assert response.json["message"] == "body_data_validation_failed"
+        assert "not match regex" in response.json["data"][new_val[0]][0]
