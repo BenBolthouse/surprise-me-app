@@ -23,6 +23,7 @@ ENV SQLALCHEMY_ECHO=True
 # Punch a hole at 8000
 EXPOSE 8000
 
+# Copy app to workdir
 WORKDIR /usr/src/app
 COPY . .
 COPY --from=build-stage /react/build/* app/static/
