@@ -6,12 +6,13 @@ from flask_wtf.csrf import validate_csrf
 import os
 
 from config import Config
-from models import db
+from models import db, User
 
 
 # Route imports
 from routes import csrf_routes
 from routes import s3_routes
+from routes import session_routes
 from routes import user_routes
 
 app = Flask(__name__)
@@ -27,8 +28,7 @@ login.login_view = 'auth.unauthorized'
 
 @login.user_loader
 def load_session_user(id):
-    # TODO add scoped user object to session
-    pass
+    return User.query.get(int(id))
 
 
 # Require a valid X-CSRFToken for all state-changing requests
@@ -46,6 +46,7 @@ def validate_csrf_token():
 # Route configuration
 app.register_blueprint(csrf_routes)
 app.register_blueprint(s3_routes)
+app.register_blueprint(session_routes)
 app.register_blueprint(user_routes)
 
 # Models and migration configuration
