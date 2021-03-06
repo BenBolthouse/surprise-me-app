@@ -1,17 +1,18 @@
 from flask import Blueprint, request, jsonify
+from flask_login import login_required, current_user
 
 
 from models import db, User
 
 
-from .user_routes_validation import user_validate_on_create
+from .user_routes_validation import user_validate_on_post, user_validate_on_patch  # noqa
 
 user_routes = Blueprint("users", __name__, url_prefix="/api/users")
 
 
 @user_routes.route("", methods=["POST"])
-@user_validate_on_create()
-def create_new_user():
+@user_validate_on_post()
+def post_user():
 
     # Respond 400 if body data validation failed
     body_data_validation_failed = request.validation_result is False
@@ -35,13 +36,13 @@ def create_new_user():
 
     # Create the user and commit
     user = User({
-        "password": request.json["password"],
-        "first_name": request.json["firstName"],
-        "last_name": request.json["lastName"],
-        "email": request.json["email"],
-        "share_location": request.json["shareLocation"],
-        "coord_lat": request.json["coordLat"],
-        "coord_long": request.json["coordLong"],
+        "password": request.json.get("password"),
+        "first_name": request.json.get("firstName"),
+        "last_name": request.json.get("lastName"),
+        "email": request.json.get("email"),
+        "share_location": request.json.get("shareLocation"),
+        "coord_lat": request.json.get("coordLat"),
+        "coord_long": request.json.get("coordLong"),
     })
     db.session.add(user)
     db.session.commit()
@@ -51,3 +52,42 @@ def create_new_user():
         "message": "success",
         "data": user.to_json_on_create()
     }), 201
+
+
+@user_routes.route("", methods=["PATCH"])
+@login_required
+@user_validate_on_patch()
+def patch_user():
+
+    # Get session user
+    user = current_user
+
+    # Respond 400 if body data validation failed
+    body_data_validation_failed = request.validation_result is False
+    if body_data_validation_failed:
+        return jsonify({
+            "message": "body_data_validation_failed",
+            "data": request.validation_errors
+        }), 400
+
+    # Convert camel to snake and update user object
+    user.first_name = request.json.get("firstName") or user.first_name
+    user.last_name = request.json.get("lastName") or user.last_name
+    user.email = request.json.get("email") or user.email
+    user.coord_lat = request.json.get("coordLat") or user.coord_lat
+    user.coord_long = request.json.get("coordLong") or user.coord_long
+
+    # Special case for booleans
+    if request.json.get("shareLocation") is True:
+        user.share_location = True
+    if request.json.get("shareLocation") is False:
+        user.share_location = False
+
+    # Commit to the store
+    db.session.commit()
+
+    # Respond 200 if successful
+    return jsonify({
+        "message": "success",
+        "data": user.to_json_on_patch()
+    }), 200
