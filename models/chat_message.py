@@ -2,6 +2,10 @@ from .db import db
 
 
 class ChatMessage(db.Model):
+    def __init__(self, sender_user_id, body):
+        self.sender_user_id = sender_user_id
+        self.body = body
+
     __tablename__ = "chat_messages"
 
     # Properties
