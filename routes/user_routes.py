@@ -54,6 +54,15 @@ def post_user():
     }), 201
 
 
+@user_routes.route("", methods=["GET"])
+@login_required
+def get_session_user():
+    return jsonify({
+        "message": "success",
+        "data": current_user.to_json_on_session_get()
+    }), 200
+
+
 @user_routes.route("", methods=["PATCH"])
 @login_required
 @user_validate_on_patch()

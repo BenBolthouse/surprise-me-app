@@ -106,6 +106,17 @@ class User(db.Model, UserMixin):
             "email": self.email,
         }
 
+    def to_json_on_session_get(self):
+        return {
+            "id": self.id,
+            "firstName": self.first_name,
+            "lastName": self.last_name,
+            "email": self.email,
+            "shareLocation": self.share_location,
+            "coordLat": str(self.coord_lat),
+            "coordLong": str(self.coord_long),
+        }
+
     def to_json_on_patch(self):
         return {
             "password": self.password,

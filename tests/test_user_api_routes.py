@@ -384,3 +384,38 @@ def test_patch_user_fails_identical_email(client, headers, database_user, databa
     assert response.status_code == status_code
     assert response.json.get("message") == message
     assert response.json.get("data") == expected_data
+
+
+def test_get_session_user_succeeds(client, headers, database_user, database_user_login):  # noqa
+    # Arrange
+    url = "/api/users"
+    test_subjects = [
+        ("firstName", "Demo"),
+        ("lastName", "User"),
+        ("email", "demoUser@email.com"),
+        ("shareLocation", True),
+    ]
+    for data in test_subjects:
+        response = client.patch(url, data=json.dumps({data[0]: data[1]}),
+                                headers=headers)
+
+    # Act
+    response = client.get(url, headers=headers)
+
+    # Expected results
+    status_code = 200
+    message = "success"
+    expected_data = {
+        "id": 1,
+        "firstName": "Demo",
+        "lastName": "User",
+        "email": "demoUser@email.com",
+        "shareLocation": True,
+        "coordLat": "123.123456",
+        "coordLong": "12.123456",
+    }
+
+    # Assert
+    assert response.status_code == status_code
+    assert response.json.get("message") == message
+    assert response.json.get("data") == expected_data
