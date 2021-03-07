@@ -2,6 +2,14 @@ from .db import db
 
 
 class UserNotification(db.Model):
+    def __init__(self, user_id,
+                 notification_type,
+                 hook, body):
+        self.user_id = user_id
+        self.notification_type = notification_type
+        self.hook = hook
+        self.body = body
+
     __tablename__ = "user_notifications"
 
     # Properties
