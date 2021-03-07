@@ -37,7 +37,13 @@ class UserConnection(db.Model):
         backref="user_connections",
         cascade="all, delete-orphan")
 
-    # TODO implement association getters and setters
+    @property
+    def messages(self):
+        return self._messages
+
+    @messages.setter
+    def messages(self, message):
+        self._messages.append(message)
 
     def to_json_on_create(self):
         return {
