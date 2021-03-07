@@ -84,7 +84,7 @@ def patch_fulfill_user_connection(user_connection_id):
             user.id,
             "USER_CONN_REQ_EST",
             None,
-            f"{user.first_name} {user.last_name} accepted your friend request.")
+            f"{user.first_name} {user.last_name} accepted your friend request.")  # noqa
         requestor_user.notifications = notification
 
     else:
@@ -96,7 +96,7 @@ def patch_fulfill_user_connection(user_connection_id):
 
     return jsonify({
         "message": "success",
-        "data": connection.to_json_on_create() if establish_connection else "deleted"
+        "data": connection.to_json_on_create() if establish_connection else "deleted"  # noqa
     }), 200
 
 
