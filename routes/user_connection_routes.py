@@ -4,11 +4,14 @@ from flask_login import login_required, current_user
 
 
 from config import Config
-from models import db, User, UserConnection, UserNotification
+from models import db, User, UserConnection
+from models import UserNotification, ChatMessage
 
 
-user_connection_routes = Blueprint("user_connections", __name__,
-                                   url_prefix="/api/user_connections")
+user_connection_routes = Blueprint(
+    "user_connections",
+    __name__,
+    url_prefix="/api/user_connections")
 
 
 @user_connection_routes.route("", methods=["POST"])
@@ -53,8 +56,9 @@ def post_user_connection():
     }), 201
 
 
-@user_connection_routes.route("<user_connection_id>",
-                              methods=["PATCH"])
+@user_connection_routes.route(
+    "<user_connection_id>",
+    methods=["PATCH"])
 @login_required
 def patch_fulfill_user_connection(user_connection_id):
 
@@ -94,3 +98,35 @@ def patch_fulfill_user_connection(user_connection_id):
         "message": "success",
         "data": connection.to_json_on_create() if establish_connection else "deleted"
     }), 200
+
+
+@user_connection_routes.route(
+    "<user_connection_id>/messages",
+    methods=["POST"])
+@login_required
+# TODO validation for user input
+def post_connection_message(user_connection_id):
+
+    # Get session user
+    user = current_user
+
+    # Respond 400 if connection nonexistent
+    connection = UserConnection.query.get(int(user_connection_id))
+    connection_nonexistent = connection is None
+    if connection_nonexistent:
+        return jsonify({
+            "message": "connection_nonexistent",
+        }), 400
+
+    # Create a new chat message
+    message_body = request.json.get("body")
+    message = ChatMessage(user.id, message_body)
+    connection.messages = message
+
+    # Commit changes
+    db.session.commit()
+
+    # Return 201 if successful
+    return jsonify({
+        "message": "success",
+    }), 201
