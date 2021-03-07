@@ -36,4 +36,11 @@ class ChatMessage(db.Model):
 
     # TODO implement association getters and setters
 
-    # TODO implement scopes while creating routes
+    def to_json_on_create(self):
+        return {
+            "id": self.id,
+            "userConnectionId": self.user_connection_id,
+            "senderUserId": self.sender_user_id,
+            "body": self.body,
+            "createdAt": self.created_at,
+        }
