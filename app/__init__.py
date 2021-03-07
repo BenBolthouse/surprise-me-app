@@ -13,6 +13,7 @@ from models import db, User
 from routes import csrf_routes
 from routes import s3_routes
 from routes import session_routes
+from routes import user_connection_routes
 from routes import user_routes
 
 app = Flask(__name__)
@@ -47,6 +48,7 @@ def validate_csrf_token():
 app.register_blueprint(csrf_routes)
 app.register_blueprint(s3_routes)
 app.register_blueprint(session_routes)
+app.register_blueprint(user_connection_routes)
 app.register_blueprint(user_routes)
 
 # Models and migration configuration

@@ -2,6 +2,9 @@ from .db import db
 
 
 class UserConnection(db.Model):
+    def __init__(self, connection_user_id):
+        self.connection_user_id = connection_user_id
+
     __tablename__ = "user_connections"
 
     # Properties
@@ -36,4 +39,7 @@ class UserConnection(db.Model):
 
     # TODO implement association getters and setters
 
-    # TODO implement scopes while creating routes
+    def to_json_on_create(self):
+        return {
+            "id": self.id,
+        }
