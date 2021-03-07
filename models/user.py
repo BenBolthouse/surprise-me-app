@@ -85,7 +85,21 @@ class User(db.Model, UserMixin):
     def password_is_valid(self, password):
         return check_password_hash(self.password, password)
 
-    # TODO implement association getters and setters
+    @property
+    def connections(self):
+        return self._connections
+
+    @connections.setter
+    def connections(self, connection):
+        self._connections.append(connection)
+
+    @property
+    def notifications(self):
+        return self._notifications
+
+    @notifications.setter
+    def notifications(self, notification):
+        self._notifications.append(notification)
 
     def to_json_on_create(self):
         return {
