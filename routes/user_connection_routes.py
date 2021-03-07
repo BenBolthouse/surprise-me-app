@@ -56,22 +56,31 @@ def post_user_connection():
     }), 201
 
 
-@user_connection_routes.route(
-    "<user_connection_id>",
-    methods=["PATCH"])
+@user_connection_routes.route("<user_connection_id>",
+                              methods=["PATCH"])
 @login_required
 def patch_fulfill_user_connection(user_connection_id):
+
+    user_connection_id = int(user_connection_id)
 
     # Get session user
     user = current_user
 
     # Respond 400 if connection nonexistent
-    connection = UserConnection.query.get(int(user_connection_id))
+    connection = [c for c in user.connections if c.id == user_connection_id]
+    connection = connection[0] if len(connection) != 0 else None
     connection_nonexistent = connection is None
     if connection_nonexistent:
         return jsonify({
             "message": "connection_nonexistent",
-        }), 400
+        }), 404
+
+    # Respond 400 if user not associated with connection
+    user_is_associated = connection.connection_user_id == user.id
+    if user_is_associated is False:
+        return jsonify({
+            "message": "connection_nonexistent",
+        }), 404
 
     # Establish or delete connection
     establish_connection = request.json.get("establish")
@@ -100,18 +109,19 @@ def patch_fulfill_user_connection(user_connection_id):
     }), 200
 
 
-@user_connection_routes.route(
-    "<user_connection_id>/messages",
-    methods=["POST"])
+@user_connection_routes.route("<user_connection_id>/messages",
+                              methods=["POST"])
 @login_required
-# TODO validation for user input
 def post_connection_message(user_connection_id):
+
+    user_connection_id = int(user_connection_id)
 
     # Get session user
     user = current_user
 
     # Respond 400 if connection nonexistent
-    connection = UserConnection.query.get(int(user_connection_id))
+    connection = [c for c in user.connections if c.id == user_connection_id]
+    connection = connection[0] if len(connection) != 0 else None
     connection_nonexistent = connection is None
     if connection_nonexistent:
         return jsonify({
@@ -129,4 +139,5 @@ def post_connection_message(user_connection_id):
     # Return 201 if successful
     return jsonify({
         "message": "success",
+        "data": message.to_json_on_create()
     }), 201

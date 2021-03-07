@@ -67,10 +67,15 @@ class User(db.Model, UserMixin):
         "UserPaymentMethod",
         backref="users",
         cascade="all, delete-orphan")
-    _connections = db.relationship(
+    _requested_connections = db.relationship(
+        "UserConnection",
+        backref="_requestor_user",
+        foreign_keys=[UserConnection.requestor_user_id],
+        cascade="all, delete-orphan")
+    _received_connections = db.relationship(
         "UserConnection",
         backref="users",
-        foreign_keys=[UserConnection.requestor_user_id],
+        foreign_keys=[UserConnection.connection_user_id],
         cascade="all, delete-orphan")
 
     # Getters setters
@@ -87,11 +92,16 @@ class User(db.Model, UserMixin):
 
     @property
     def connections(self):
-        return self._connections
+        """
+        Get connections to a list, including all requested and received.
+        """
+        all_connections = [*self._requested_connections,
+                           *self._received_connections]
+        return all_connections
 
     @connections.setter
     def connections(self, connection):
-        self._connections.append(connection)
+        self._requested_connections.append(connection)
 
     @property
     def notifications(self):
