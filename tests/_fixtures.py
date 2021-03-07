@@ -78,7 +78,28 @@ def database_user_b(client, headers):
 
 
 @pytest.fixture(scope="module")
-def database_user_a_login(client, headers, database_user_a):
+def database_user_c(client, headers):
+    """
+    Creates a sample user C in the database, distint from other sample users.
+    Returns the user template data.
+    """
+    url = "/api/users"
+    data = {
+        "password": "Du&&?121",
+        "firstName": "Demo",
+        "lastName": "User",
+        "email": "database_user_c@example.com",
+        "shareLocation": True,
+        "coordLat": 123.123456,
+        "coordLong": 12.123456
+    }
+    client.post(url, data=json.dumps(data), headers=headers)
+    yield data
+
+
+# Database user logins
+
+def database_user_a_login(client, headers):
     """
     Provides a session login cookie for sample user A.
     """
@@ -88,10 +109,10 @@ def database_user_a_login(client, headers, database_user_a):
         "email": "database_user_a@example.com",
     }
     response = client.post(url, data=json.dumps(data), headers=headers)
+    return client
 
 
-@pytest.fixture(scope="module")
-def database_user_b_login(client, headers, database_user_b):
+def database_user_b_login(client, headers):
     """
     Provides a session login cookie for sample user B.
     """
@@ -101,3 +122,17 @@ def database_user_b_login(client, headers, database_user_b):
         "email": "database_user_b@example.com",
     }
     response = client.post(url, data=json.dumps(data), headers=headers)
+    return client
+
+
+def database_user_c_login(client, headers):
+    """
+    Provides a session login cookie for sample user C.
+    """
+    url = "/api/sessions"
+    data = {
+        "password": "Du&&?121",
+        "email": "database_user_c@example.com",
+    }
+    response = client.post(url, data=json.dumps(data), headers=headers)
+    return client

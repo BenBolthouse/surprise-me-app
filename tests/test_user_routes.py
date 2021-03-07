@@ -310,9 +310,10 @@ def test_post_user_session_fails_invalid_password(
 def test_patch_user_succeeds(
         client,
         headers,
-        database_user_a_login):
+        database_user_a):
 
     # Arrange
+    client_login = database_user_a_login(client, headers)
     url = "/api/users"
     test_subjects = [
         ("firstName", "Newfirstname"),
@@ -323,7 +324,7 @@ def test_patch_user_succeeds(
 
     for data in test_subjects:
         # Act
-        response = client.patch(
+        response = client_login.patch(
             url,
             data=json.dumps({data[0]: data[1]}),
             headers=headers)
@@ -342,8 +343,7 @@ def test_patch_user_succeeds(
 def test_patch_user_fails_identical_email(
         client,
         headers,
-        database_user_a,
-        database_user_a_login):
+        database_user_a):
 
     # Arrange
     url = "/api/users"
@@ -355,7 +355,8 @@ def test_patch_user_fails_identical_email(
     client.post(url, data=json.dumps(conflict_user), headers=headers)
 
     # Act
-    response = client.patch(url, data=json.dumps(data), headers=headers)
+    client_login = database_user_a_login(client, headers)
+    response = client_login.patch(url, data=json.dumps(data), headers=headers)
 
     # Expected results
     status_code = 400
@@ -373,9 +374,10 @@ def test_patch_user_fails_identical_email(
 def test_get_session_user_succeeds(
         client,
         headers,
-        database_user_a_login):
+        database_user_a):
 
-    # Arrange
+    # Arrangement
+    client_login = database_user_a_login(client, headers)
     url = "/api/users"
     test_subjects = [
         ("firstName", "Demo"),
@@ -384,11 +386,11 @@ def test_get_session_user_succeeds(
         ("shareLocation", True),
     ]
     for data in test_subjects:
-        response = client.patch(url, data=json.dumps({data[0]: data[1]}),
+        response = client_login.patch(url, data=json.dumps({data[0]: data[1]}),
                                 headers=headers)
 
-    # Act
-    response = client.get(url, headers=headers)
+    # Action
+    response = client_login.get(url, headers=headers)
 
     # Expected results
     status_code = 200
