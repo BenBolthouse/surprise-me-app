@@ -61,8 +61,6 @@ def test_post_connection_succeeds(
 def test_post_connection_fails_nonexistent_user(
         client,
         headers,
-        database_user_a,
-        database_user_b,
         database_user_a_login,
         connection_a_to_b):
 
@@ -87,8 +85,6 @@ def test_post_connection_fails_nonexistent_user(
 def test_patch_connection_accept_succeeds(
         client,
         headers,
-        database_user_a,
-        database_user_b,
         database_user_b_login,
         connection_a_to_b):
 
@@ -117,8 +113,6 @@ def test_patch_connection_accept_succeeds(
 def test_patch_connection_deny_succeeds(
         client,
         headers,
-        database_user_a,
-        database_user_b,
         database_user_b_login,
         connection_a_to_b):
 

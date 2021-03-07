@@ -18,7 +18,7 @@ def test_post_user_fails_with_identical_email(
 
     # Arrangement
     url = "/api/users"
-    data = data = deepcopy(database_user_a)
+    data = deepcopy(database_user_a)
 
     # Expected results
     status_code = 400
@@ -258,8 +258,7 @@ def test_post_user_session_succeeds(
 
 def test_post_user_session_fails_unknown_email(
         client,
-        headers,
-        database_user_a):
+        headers):
 
     # Arrange
     url = "/api/sessions"
@@ -311,7 +310,6 @@ def test_post_user_session_fails_invalid_password(
 def test_patch_user_succeeds(
         client,
         headers,
-        database_user_a,
         database_user_a_login):
 
     # Arrange
@@ -375,7 +373,6 @@ def test_patch_user_fails_identical_email(
 def test_get_session_user_succeeds(
         client,
         headers,
-        database_user_a,
         database_user_a_login):
 
     # Arrange
