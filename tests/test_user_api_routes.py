@@ -12,14 +12,11 @@ from app import app
 def client(request):
 
     # Yield the application context
-    print("Run startup...")
     with app.test_client() as client:
         with app.app_context():
-            db.init_app(app)
             yield client
 
             # Remove all data from all tables and reset auto increment
-            print("Run teardown...")
             meta = db.metadata
             for table in reversed(meta.sorted_tables):
                 print('Clear table %s' % table)
