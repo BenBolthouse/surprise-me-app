@@ -6,6 +6,7 @@ from flask_login import login_required, current_user
 from config import Config
 from models import db, User, UserConnection
 from models import UserNotification, ChatMessage
+from utilities import normalize_to_dictionary
 
 
 user_connection_routes = Blueprint(
@@ -22,69 +23,67 @@ def post_user_connection():
     user = current_user
 
     # Respond 400 if connection user nonexistent
-    connection_user_id = request.json.get("connectionUserId")
-    connection_user = User.query.get(connection_user_id)
-    connection_user_nonexistent = connection_user is None
-    if connection_user_nonexistent:
+    recipient_id = request.json.get("connectionUserId")
+    recipient_user = User.query.get(recipient_id)
+    if recipient_user is None:
         return jsonify({
-            "message": "connection_user_nonexistent",
+            "message": "Recipient user does not exist",
         }), 400
 
     # Define the new connection
-    connection = UserConnection(connection_user.id)
+    new_connection = UserConnection(recipient_id)
 
     # Add connection to the session user
-    user.connections = connection
+    user.connections = new_connection
 
     # Commit changes
     db.session.commit()
 
     # Create notifications for connection user
-    notification = UserNotification(
-        connection_user.id,
+    new_notification = UserNotification(
+        recipient_id,
         "USER_CONN_REQ",
-        f"{Config.HOST_NAME}/api/user_connections/{connection.id}",
+        f"{Config.HOST_NAME}/api/user_connections/{new_connection.id}",
         f"{user.first_name} {user.last_name} sent you a friend request.")
-    connection_user.notifications = notification
+    recipient_user.notifications = new_notification
 
     # Commit changes
     db.session.commit()
 
+    # Respond 201 if successful
     return jsonify({
         "message": "success",
-        "data": connection.to_json_on_create()
+        "data": new_connection.to_json_on_create()
     }), 201
 
 
-@user_connection_routes.route("<user_connection_id>",
-                              methods=["PATCH"])
+@user_connection_routes.route("<id>", methods=["PATCH"])
 @login_required
-def patch_fulfill_user_connection(user_connection_id):
+def patch_fulfill_user_connection(id):
 
-    user_connection_id = int(user_connection_id)
+    connection_id = int(id)
 
     # Get session user
     user = current_user
 
     # Respond 400 if connection nonexistent
-    connection = [c for c in user.connections if c.id == user_connection_id]
+    connection = [c for c in user.connections if c.id == connection_id]
     connection = connection[0] if len(connection) != 0 else None
-    connection_nonexistent = connection is None
-    if connection_nonexistent:
+    if connection is None:
         return jsonify({
-            "message": "connection_nonexistent",
+            "message": "Connection does not exist",
         }), 404
 
     # Respond 400 if user not associated with connection
-    user_is_associated = connection.connection_user_id == user.id
-    if user_is_associated is False:
+    # (prevents requestor from establishing own requested connections)
+    if connection.connection_user_id != user.id:
         return jsonify({
-            "message": "connection_nonexistent",
+            "message": "Connection does not exist",
         }), 404
 
     # Establish or delete connection
-    establish_connection = request.json.get("establish")
-    if establish_connection:
+    establish = request.json.get("establish")
+    if establish:
         connection.established_at = datetime.now()
 
         # Send the requestor a notification
@@ -103,24 +102,24 @@ def patch_fulfill_user_connection(user_connection_id):
     # Commit changes
     db.session.commit()
 
+    # Respond 200 if successful
     return jsonify({
         "message": "success",
-        "data": connection.to_json_on_create() if establish_connection else "deleted"  # noqa
+        "data": connection.to_json_on_create() if establish else "deleted"  # noqa
     }), 200
 
 
-@user_connection_routes.route("<user_connection_id>/messages",
-                              methods=["POST"])
+@user_connection_routes.route("<id>/messages", methods=["POST"])
 @login_required
-def post_connection_message(user_connection_id):
+def post_connection_message(id):
 
-    user_connection_id = int(user_connection_id)
+    connection_id = int(id)
 
     # Get session user
     user = current_user
 
     # Respond 400 if connection nonexistent
-    connection = [c for c in user.connections if c.id == user_connection_id]
+    connection = [c for c in user.connections if c.id == connection_id]
     connection = connection[0] if len(connection) != 0 else None
     connection_nonexistent = connection is None
     if connection_nonexistent:
@@ -141,3 +140,77 @@ def post_connection_message(user_connection_id):
         "message": "success",
         "data": message.to_json_on_create()
     }), 201
+
+
+@user_connection_routes.route("<id>/messages/d", methods=["GET"])
+@login_required
+def get_messages_after_datetime(id):
+
+    connection_id = int(id)
+    filter_date_format = "%Y-%m-%dT%H:%M:%S.%f"
+    filter_date_string = request.args.get("after")
+    filter_date_obj = datetime.strptime(filter_date_string, filter_date_format)
+
+    # Get session user
+    user = current_user
+
+    # Respond 400 if connection nonexistent
+    connection = [c for c in user.connections if c.id == connection_id]
+    connection = connection[0] if len(connection) != 0 else None
+    if connection is None:
+        return jsonify({
+            "message": "connection_nonexistent",
+        }), 400
+
+    # Make a list of filtered messages
+    filtered_message_list = [m.to_json_on_create()
+                             for m in connection.messages
+                             if m.created_at > filter_date_obj]
+
+    # Return 200 if successful
+    return jsonify({
+        "message": "success",
+        "data": {
+            "chat_messages": filtered_message_list
+        }
+    }), 200
+
+
+@user_connection_routes.route("<id>/messages/o", methods=["GET"])
+@login_required
+def get_messages_with_offset(id):
+
+    connection_id = int(id)
+    messages_offset = int(request.args.get("offset"))
+    messages_qty = int(request.args.get("quantity"))
+
+    # Get session user
+    user = current_user
+
+    # Respond 400 if connection nonexistent
+    connection = [c for c in user.connections if c.id == connection_id]
+    connection = connection[0] if len(connection) != 0 else None
+    if connection is None:
+        return jsonify({
+            "message": "connection_nonexistent",
+        }), 400
+
+    # Reverse messages list to make reverse chronological order
+    chat_list = connection.messages.copy()
+    chat_list.reverse()
+
+    # Slice off requested range
+    offset_end = messages_offset + messages_qty
+    chat_list = chat_list[messages_offset:offset_end]
+
+    # Make a list of filtered messages
+    chat_list = [m.to_json_on_create()
+                 for m in chat_list]
+
+    # Respond 200 if successful
+    return jsonify({
+        "message": "success",
+        "data": {
+            "chat_messages": chat_list
+        }
+    }), 200
