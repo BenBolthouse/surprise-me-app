@@ -88,7 +88,7 @@ def test_post_connection_fails_nonexistent_user(
 
     # Expected result
     status_code = 400
-    message = "connection_user_nonexistent"
+    message = "Recipient user does not exist"
 
     # Assert
     assert response.status_code == status_code
@@ -112,7 +112,7 @@ def test_patch_connection_fails_user_not_associated(
 
     # Expected result
     status_code = 404
-    message = "connection_nonexistent"
+    message = "Connection does not exist"
 
     # Assert
     assert response.status_code == status_code
