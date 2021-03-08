@@ -6,11 +6,12 @@ from app import app
 from models import db
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def client():
     """
-    Establishes a client context for sending requests to the API. Teardown removes
-    all records from all database tables and resets primary key sequences to 1.
+    Establishes a client context for sending requests to the API. Teardown
+    removes all records from all database tables and resets primary key
+    sequences to 1.
     """
     with app.test_client() as client:
         with app.app_context():
@@ -23,7 +24,7 @@ def client():
             db.session.commit()
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def headers(client):
     """
     Requests an anti-csrf token from the API and returns a header object for
@@ -37,7 +38,7 @@ def headers(client):
     }
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def database_user_a(client, headers):
     """
     Creates a sample user A in the database, distint from other sample users.
@@ -57,7 +58,7 @@ def database_user_a(client, headers):
     yield data
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def database_user_b(client, headers):
     """
     Creates a sample user B in the database, distint from other sample users.
@@ -77,7 +78,7 @@ def database_user_b(client, headers):
     yield data
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def database_user_c(client, headers):
     """
     Creates a sample user C in the database, distint from other sample users.
@@ -98,8 +99,8 @@ def database_user_c(client, headers):
 
 
 # Database user logins
-
-def database_user_a_login(client, headers):
+@pytest.fixture(scope="function")
+def database_user_a_login(client, headers, database_user_a):
     """
     Provides a session login cookie for sample user A.
     """
@@ -112,7 +113,8 @@ def database_user_a_login(client, headers):
     return client
 
 
-def database_user_b_login(client, headers):
+@pytest.fixture(scope="function")
+def database_user_b_login(client, headers, database_user_b):
     """
     Provides a session login cookie for sample user B.
     """
@@ -125,7 +127,8 @@ def database_user_b_login(client, headers):
     return client
 
 
-def database_user_c_login(client, headers):
+@pytest.fixture(scope="function")
+def database_user_c_login(client, headers, database_user_c):
     """
     Provides a session login cookie for sample user C.
     """
