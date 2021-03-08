@@ -18,7 +18,7 @@ def post_user():
     body_data_validation_failed = request.validation_result is False
     if body_data_validation_failed:
         return jsonify({
-            "message": "body_data_validation_failed",
+            "message": "Data validation failed on user POST",
             "data": request.validation_errors
         }), 400
 
@@ -28,7 +28,7 @@ def post_user():
         User.email == email).first()
     if requested_email_is_in_use:
         return jsonify({
-            "message": "requested_email_is_in_use",
+            "message": "Email conflict",
             "data": {
                 "details": f"The email {email} is already in use."
             }
@@ -75,7 +75,7 @@ def patch_user():
     body_data_validation_failed = request.validation_result is False
     if body_data_validation_failed:
         return jsonify({
-            "message": "body_data_validation_failed",
+            "message": "Data validation failed on user PATCH",
             "data": request.validation_errors
         }), 400
 
@@ -86,7 +86,7 @@ def patch_user():
             User.email == email).first()
         if requested_email_is_in_use:
             return jsonify({
-                "message": "requested_email_is_in_use",
+                "message": "Email conflict",
                 "data": {
                     "details": f"The email {email} is already in use."
                 }
