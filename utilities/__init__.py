@@ -9,6 +9,16 @@ BUCKET_NAME = Config.S3_BUCKET
 PATH_TO_TEMP = os.path.dirname(__file__)
 
 
+def normalize_to_dictionary(input_list):
+    """
+    Converts a list to a dictionary using list member id property as the
+    output dictionary key.
+    """
+
+    output = {a["id"]: a for a in input_list}
+    return output
+
+
 def upload_file(file_name, file_object):
     """
     Upload a file to the S3 file store.
