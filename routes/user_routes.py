@@ -65,7 +65,8 @@ def patch_user():
     user.coord_long = request.json.get("coordLong") or user.coord_long
 
     # Special case for booleans
-    user.share_location = True if request.json.get("shareLocation") is True else False
+    share_location = request.json.get("shareLocation")
+    user.share_location = True if share_location is True else False
 
     # Commit to the store
     db.session.commit()
