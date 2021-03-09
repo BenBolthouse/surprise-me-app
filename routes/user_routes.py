@@ -5,6 +5,7 @@ from flask_login import login_required, current_user
 from models import db, User
 
 
+from .user_routes_validation_password import validate_password_update
 from .user_routes_validation import user_validate_on_post, user_validate_on_patch  # noqa
 
 user_routes = Blueprint("users", __name__, url_prefix="/api/users")
@@ -37,15 +38,6 @@ def post_user():
     }), 201
 
 
-@user_routes.route("", methods=["GET"])
-@login_required
-def get_session_user():
-    return jsonify({
-        "message": "Success",
-        "data": current_user.to_json_on_session_get()
-    }), 200
-
-
 @user_routes.route("", methods=["PATCH"])
 @login_required
 @user_validate_on_patch()
@@ -56,6 +48,16 @@ def patch_user():
 
     # Respond 400 if requested email is in use
     User.check_is_email_unique(request.json.get("email"))
+
+    # Catch requests to update password
+    password = request.json.get("password")
+    if password:
+        validate_password_update(password)
+        user.password = password
+        db.session.commit()
+        return jsonify({
+            "message": "Password updated successfully."
+        }), 200
 
     # Convert camel to snake and update user object
     user.first_name = request.json.get("firstName") or user.first_name
