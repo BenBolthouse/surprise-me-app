@@ -1,5 +1,4 @@
 import { useDispatch, useSelector } from "react-redux";
-import reducer from "./store/reducers/security";
 
 import * as securityActions from "./store/reducers/security";
 
