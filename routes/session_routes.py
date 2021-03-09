@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from flask_login import login_user
+from flask_login import login_user, current_user, login_required
 
 
 from models import User
@@ -22,6 +22,25 @@ def post_session():
 
     # Respond 200 if successful
     return jsonify({
-        "message": "success",
+        "message": "Success",
         "data": user.to_json_on_login()
+    }), 200
+
+
+@session_routes.route("", methods=["GET"])
+@login_required
+def get_session():
+
+    # Respond 200
+    return jsonify({
+        "message": "Success",
+        "data": {
+            "id": current_user["id"],
+            "firstName": current_user["first_name"],
+            "lastName": current_user["last_name"],
+            "email": current_user["email"],
+            "shareLocation": current_user["share_location"],
+            "coordLat": current_user["coord_lat"],
+            "coordLong": current_user["coord_long"],
+        }
     }), 200
