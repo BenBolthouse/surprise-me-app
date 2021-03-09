@@ -110,7 +110,6 @@ def database_user_a_login(client, headers, database_user_a):
         "email": "database_user_a@example.com",
     }
     response = client.post(url, data=json.dumps(data), headers=headers)
-    return client
 
 
 @pytest.fixture(scope="function")
@@ -124,7 +123,6 @@ def database_user_b_login(client, headers, database_user_b):
         "email": "database_user_b@example.com",
     }
     response = client.post(url, data=json.dumps(data), headers=headers)
-    return client
 
 
 @pytest.fixture(scope="function")
@@ -138,4 +136,3 @@ def database_user_c_login(client, headers, database_user_c):
         "email": "database_user_c@example.com",
     }
     response = client.post(url, data=json.dumps(data), headers=headers)
-    return client
