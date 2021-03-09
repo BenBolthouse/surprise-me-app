@@ -23,14 +23,14 @@ export const getXCsrfToken = () => async (dispatch) => {
 
   dispatch(getXCsrfTokenActionCreator(data));
   
-  return data;
+  return res;
 };
 
 // Reducer
 const reducer = (state = { security: securityTemplate }, { type, payload }) => {
   switch (type) {
     case GET_X_CSRF_TOKEN:
-      return { security: { ...state.security, ...payload } };
+      return { ...state.security, ...payload };
 
     default:
       return state;
