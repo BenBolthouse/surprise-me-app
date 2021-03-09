@@ -35,12 +35,12 @@ def get_session():
     return jsonify({
         "message": "Success",
         "data": {
-            "id": current_user["id"],
-            "firstName": current_user["first_name"],
-            "lastName": current_user["last_name"],
-            "email": current_user["email"],
-            "shareLocation": current_user["share_location"],
-            "coordLat": current_user["coord_lat"],
-            "coordLong": current_user["coord_long"],
+            "id": current_user.id,
+            "firstName": current_user.first_name,
+            "lastName": current_user.last_name,
+            "email": current_user.email,
+            "shareLocation": current_user.share_location,
+            "coordLat": str(current_user.coord_lat),
+            "coordLong": str(current_user.coord_long),
         }
     }), 200
