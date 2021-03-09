@@ -83,12 +83,24 @@ def _on_patch(request):
         "email": request.json.get("email"),
         "shareLocation": request.json.get("shareLocation"),
     }
+    if request.json.get("coordLat"):
+        v_object = {
+            **v_object,
+            "coordLat": str(request.json.get("coordLat")),
+        }
+    if request.json.get("coordLong"):
+        v_object = {
+            **v_object,
+            "coordLong": str(request.json.get("coordLong")),
+        }
     v_schema = {
         "password": _password,
         "firstName": _first_name,
         "lastName": _last_name,
         "email": _email,
         "shareLocation": _share_location,
+        "coordLat": _coord_lat,
+        "coordLong": _coord_long,
     }
 
     # Run validation
