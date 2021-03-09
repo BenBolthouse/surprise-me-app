@@ -1,5 +1,5 @@
 from cerberus import Validator
-
+from werkzeug.exceptions import BadRequest
 
 from ._route_decorator import RouteDecorator
 
@@ -21,7 +21,10 @@ def validator(request, v_schema, v_object):
         raise Exception("Schema format error")
 
     # Do the validation and add results to the request
-    request.validation_result = validator.validate(v_object)
-    request.validation_errors = validator.errors
+    if not validator.validate(v_object):
+        raise BadRequest(response={
+            "message": "Data validation failed",
+            "data": validator.errors
+        })
 
     return request
