@@ -59,6 +59,62 @@ def post_user_connection():
     }), 201
 
 
+@user_connection_routes.route("", methods=["GET"])
+@login_required
+def get_all_user_connections():
+
+    # Get user with collections from session user id
+    user = User.get_by_id(current_user.id)
+
+    # Format data for the response
+    response_data = [x.to_json_on_get_all()
+                     for x in user.connections]
+
+    # Respond 200 if successful
+    return jsonify({
+        "message": success,
+        "data": response_data
+    }), 200
+
+
+@user_connection_routes.route("/pending", methods=["GET"])
+@login_required
+def get_pending_user_connections():
+
+    # Get user with collections from session user id
+    user = User.get_by_id(current_user.id)
+
+    # Format data for the response
+    response_data = [x.to_json_on_get_pending()
+                     for x in user.connections
+                     if x.established_at is None]
+
+    # Respond 200 if successful
+    return jsonify({
+        "message": success,
+        "data": response_data
+    }), 200
+
+
+@user_connection_routes.route("/established", methods=["GET"])
+@login_required
+def get_established_user_connections():
+
+    # Get user with collections from session user id
+    user = User.get_by_id(current_user.id)
+
+    # Format data for the response
+    response_data = [x.to_json_on_get_established()
+                     for x in user.connections
+                     if x.established_at is not None]
+
+    # Respond 200 if successful
+    return jsonify({
+        "message": success,
+        "data": response_data
+    }), 200
+
+
 @user_connection_routes.route("<id>", methods=["PATCH"])
 @login_required
 def patch_fulfill_user_connection(id):
