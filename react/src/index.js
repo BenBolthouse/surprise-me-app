@@ -6,7 +6,15 @@ import { Provider } from "react-redux";
 import App from "./App";
 import configureStore from "./store";
 
-const store = configureStore();
+import * as sessionActions from "./store/reducers/session";
+
+export const store = configureStore();
+
+// Make Redux available on window only in development
+if (process.env.NODE_ENV !== 'production') {
+  window.store = store;
+  window.sessionActions = sessionActions;
+}
 
 // React root entry point
 ReactDOM.render(
