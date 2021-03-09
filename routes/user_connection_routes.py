@@ -28,6 +28,9 @@ def post_user_connection():
     # Respond 400 if connection user nonexistent
     recipient_user = User.get_by_id(recipient_id)
 
+    # Check if the users are already connected
+    user.user_by_id_is_a_connection(recipient_id)
+
     # Define the new connection
     new_connection = UserConnection(recipient_id)
 
@@ -84,12 +87,11 @@ def patch_fulfill_user_connection(id):
             f"{user.first_name} {user.last_name} accepted your friend request.")  # noqa
         requestor_user.notifications = notification
 
+        # Commit changes
+        db.session.commit()
     else:
         # Else delete the connection request
         db.session.delete(connection)
-
-    # Commit changes
-    db.session.commit()
 
     # Respond 200 if successful
     return jsonify({
@@ -107,6 +109,9 @@ def post_connection_message(id):
 
     # Get user with collections from session user id
     user = User.get_by_id(current_user.id)
+
+    # Don't allow users to send messages until the connection is established
+    connection.require_establishment()
 
     # Create a new chat message
     message_body = request.json.get("body")
@@ -167,4 +172,45 @@ def get_messages_with_offset(id):
     return jsonify({
         "message": "Success",
         "data": messages
+    }), 200
+
+
+@user_connection_routes.route("<id>/messages", methods=["PATCH"])
+@login_required
+def patch_connection_message(id):
+
+    # Get the connection
+    message = ChatMessage.get_by_id(int(request.json.get("id")))
+
+    # Check to see if the user is the sender
+    message.user_by_id_is_sender(current_user.id)
+
+    # Update the message
+    message.body = request.json.get("body")
+    db.session.commit()
+
+    # Respond 200 if successful
+    return jsonify({
+        "message": "Success",
+        "data": message.to_json_on_patch()
+    }), 200
+
+
+@user_connection_routes.route("<id>/messages/<message_id>", methods=["DELETE"])
+@login_required
+def delete_connection_message(id, message_id):
+
+    # Get the connection
+    message = ChatMessage.get_by_id(int(message_id))
+
+    # Check to see if the user is the sender
+    message.user_by_id_is_sender(current_user.id)
+
+    # Update the message
+    db.session.delete(message)
+    db.session.commit()
+
+    # Respond 200 if successful
+    return jsonify({
+        "message": "Success",
     }), 200
