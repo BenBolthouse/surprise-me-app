@@ -1,9 +1,11 @@
-from flask import Flask, session, request, redirect
+from flask import Flask, session, request, redirect, jsonify
 from flask_cors import CORS
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_wtf.csrf import validate_csrf
+from werkzeug.exceptions import BadRequest, NotFound, InternalServerError
 import os
+import traceback
 
 from config import Config
 from models import db, User
@@ -29,7 +31,7 @@ login.login_view = 'auth.unauthorized'
 
 @login.user_loader
 def load_session_user(id):
-    return User.query.get(int(id))
+    return User.get_by_id_on_session_user_load(int(id))
 
 
 # Require a valid X-CSRFToken for all state-changing requests
@@ -77,3 +79,24 @@ def react_root(path):
     if path == 'favicon.ico':
         return app.send_static_file('favicon.ico')
     return app.send_static_file('index.html')
+
+
+@app.errorhandler(InternalServerError)
+@app.errorhandler(BadRequest)
+@app.errorhandler(NotFound)
+# Sends responses automatically from
+# raised exceptions in http routes
+def handle_werkzeug_exceptions(exception):
+    return jsonify(exception.response), exception.code
+
+
+@app.errorhandler(Exception)
+# Sends responses for all other raise
+# exceptions
+def handle_all_other_exceptions(exception):
+    trace = exception.with_traceback(exception.__traceback__)
+    trace_array = [t for t in trace.args]
+    return jsonify({
+        "message": "There was an unexpected internal server error.",
+        "traceback": trace_array if not is_production else ""
+    }), 500
