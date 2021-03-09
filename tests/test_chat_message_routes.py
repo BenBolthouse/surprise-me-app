@@ -38,8 +38,7 @@ mock_conversation = [
 @pytest.fixture(scope="function")
 def mock_a_b_message_history(
         client,
-        headers,
-        connection_a_to_b_establish):
+        headers):
 
     for message in mock_conversation:
         db_message = ChatMessage(message[0], message[1])
@@ -52,8 +51,12 @@ def mock_a_b_message_history(
 def test_a_1_post_message_succeeds(
         client,
         headers,
-        connection_a_to_b_establish,
-        database_user_a_login):
+        database_user_a,
+        database_user_b,
+        database_user_a_login,
+        connection_a_to_b,
+        database_user_b_login,
+        connection_a_to_b_establish):
 
     # Arrangement
     url = "/api/user_connections/1/messages"
@@ -81,7 +84,7 @@ def test_a_1_post_message_succeeds(
     chat_message = ChatMessage.query.get(1)
     assert chat_message.id == 1
     assert chat_message.user_connection_id == 1
-    assert chat_message.sender_user_id == 1
+    assert chat_message.sender_user_id == 2
     assert chat_message.body == message_1
     assert chat_message.deleted is False
     assert chat_message.updated is False
@@ -91,8 +94,12 @@ def test_a_1_post_message_succeeds(
 def test_a_2_post_message_fails_nonexistent_connection(
         client,
         headers,
-        connection_a_to_b_establish,
-        database_user_a_login):
+        database_user_a,
+        database_user_b,
+        database_user_a_login,
+        connection_a_to_b,
+        database_user_b_login,
+        connection_a_to_b_establish):
 
     # Arrangement
     url = "/api/user_connections/9999/messages"
@@ -111,17 +118,36 @@ def test_a_2_post_message_fails_nonexistent_connection(
 def test_a_3_post_message_fails_connection_not_established(
         client,
         headers,
+        database_user_a,
+        database_user_b,
+        database_user_a_login,
         connection_a_to_b,
-        database_user_a_login):
+        database_user_b_login):
 
-    assert False, "Test not implemented"
+    # Arrangement
+    url = "/api/user_connections/1/messages"
+    data = {
+        "body": "Greetings from outer space!"
+    }
+
+    # Action
+    response = client.post(url, data=json.dumps(data), headers=headers)
+
+    # Assertions
+    assert response.status_code == 400
+    assert response.json.get("message") == "Connection is not yet established."  # noqa
 
 
 def test_b_1_get_messages_after_datetime_success(
         client,
         headers,
-        mock_a_b_message_history,
-        database_user_a_login):
+        database_user_a,
+        database_user_b,
+        database_user_a_login,
+        connection_a_to_b,
+        database_user_b_login,
+        connection_a_to_b_establish,
+        mock_a_b_message_history):
 
     # Arrangement
     url = "/api/user_connections/1/messages/d"
@@ -142,8 +168,13 @@ def test_b_1_get_messages_after_datetime_success(
 def test_b_2_get_messages_with_offset_success(
         client,
         headers,
-        mock_a_b_message_history,
-        database_user_a_login):
+        database_user_a,
+        database_user_b,
+        database_user_a_login,
+        connection_a_to_b,
+        database_user_b_login,
+        connection_a_to_b_establish,
+        mock_a_b_message_history):
 
     # Arrangement
     url = "/api/user_connections/1/messages/o"
@@ -200,8 +231,13 @@ def test_b_2_get_messages_with_offset_success(
 def test_b_3_get_messages_with_offset_fails_out_of_range(
         client,
         headers,
-        mock_a_b_message_history,
-        database_user_a_login):
+        database_user_a,
+        database_user_b,
+        database_user_a_login,
+        connection_a_to_b,
+        database_user_b_login,
+        connection_a_to_b_establish,
+        mock_a_b_message_history):
 
     # Arrangement
     url = "/api/user_connections/1/messages/o?offset=9999&quantity=30"
@@ -217,13 +253,18 @@ def test_b_3_get_messages_with_offset_fails_out_of_range(
 def test_c_1_patch_message_succeeds(
         client,
         headers,
-        mock_a_b_message_history,
-        database_user_a_login):
+        database_user_a,
+        database_user_b,
+        database_user_a_login,
+        connection_a_to_b,
+        database_user_b_login,
+        connection_a_to_b_establish,
+        mock_a_b_message_history):
 
     # Arrangement
     url = "/api/user_connections/1/messages"
     data = {
-        "id": 1,
+        "id": 2,
         "body": "Greetings from the planet Pluto!"
     }
 
@@ -238,8 +279,13 @@ def test_c_1_patch_message_succeeds(
 def test_c_2_patch_message_fails_message_nonexistent(
         client,
         headers,
-        mock_a_b_message_history,
-        database_user_a_login):
+        database_user_a,
+        database_user_b,
+        database_user_a_login,
+        connection_a_to_b,
+        database_user_b_login,
+        connection_a_to_b_establish,
+        mock_a_b_message_history):
 
     # Arrangement
     url = "/api/user_connections/1/messages"
@@ -259,13 +305,18 @@ def test_c_2_patch_message_fails_message_nonexistent(
 def test_c_3_patch_message_fails_user_not_sender(
         client,
         headers,
-        mock_a_b_message_history,
-        database_user_a_login):
+        database_user_a,
+        database_user_b,
+        database_user_a_login,
+        connection_a_to_b,
+        database_user_b_login,
+        connection_a_to_b_establish,
+        mock_a_b_message_history):
 
     # Arrangement
     url = "/api/user_connections/1/messages"
     data = {
-        "id": 2,
+        "id": 1,
         "body": "Greetings from the planet Pluto!"
     }
 
@@ -280,11 +331,16 @@ def test_c_3_patch_message_fails_user_not_sender(
 def test_d_1_delete_message_succeeds(
         client,
         headers,
-        mock_a_b_message_history,
-        database_user_a_login):
+        database_user_a,
+        database_user_b,
+        database_user_a_login,
+        connection_a_to_b,
+        database_user_b_login,
+        connection_a_to_b_establish,
+        mock_a_b_message_history):
 
     # Arrangement
-    url = "/api/user_connections/1/messages/1"
+    url = "/api/user_connections/1/messages/2"
 
     # Action
     response = client.delete(url, headers=headers)
@@ -297,8 +353,13 @@ def test_d_1_delete_message_succeeds(
 def test_d_2_delete_message_fails_message_nonexistent(
         client,
         headers,
-        mock_a_b_message_history,
-        database_user_a_login):
+        database_user_a,
+        database_user_b,
+        database_user_a_login,
+        connection_a_to_b,
+        database_user_b_login,
+        connection_a_to_b_establish,
+        mock_a_b_message_history):
 
     # Arrangement
     url = "/api/user_connections/1/messages/9999"
@@ -314,11 +375,16 @@ def test_d_2_delete_message_fails_message_nonexistent(
 def test_d_3_delete_message_fails_user_not_sender(
         client,
         headers,
-        mock_a_b_message_history,
-        database_user_a_login):
+        database_user_a,
+        database_user_b,
+        database_user_a_login,
+        connection_a_to_b,
+        database_user_b_login,
+        connection_a_to_b_establish,
+        mock_a_b_message_history):
 
     # Arrangement
-    url = "/api/user_connections/1/messages/2"
+    url = "/api/user_connections/1/messages/1"
 
     # Action
     response = client.delete(url, headers=headers)

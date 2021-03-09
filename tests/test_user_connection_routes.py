@@ -15,9 +15,7 @@ from app import app
 @pytest.fixture(scope="function")
 def connection_a_to_b(
         client,
-        headers,
-        database_user_a_login,
-        database_user_b):
+        headers):
 
     url = "api/user_connections"
     data = {
@@ -29,10 +27,7 @@ def connection_a_to_b(
 @pytest.fixture(scope="function")
 def connection_a_to_b_establish(
         client,
-        headers,
-        database_user_a,
-        database_user_b_login,
-        connection_a_to_b):
+        headers):
 
     url = "api/user_connections/1"
     data = {
@@ -44,8 +39,9 @@ def connection_a_to_b_establish(
 def test_a_1_post_connection_succeeds(
         client,
         headers,
-        database_user_a_login,
-        database_user_b):
+        database_user_a,
+        database_user_b,
+        database_user_a_login):
 
     # Arrangement
     url = "api/user_connections"
@@ -75,8 +71,9 @@ def test_a_1_post_connection_succeeds(
 def test_a_2_post_connection_fails_nonexistent_user(
         client,
         headers,
-        database_user_a_login,
-        connection_a_to_b):
+        database_user_a,
+        database_user_b,
+        database_user_a_login):
 
     # Arrange
     url = "api/user_connections"
@@ -95,6 +92,8 @@ def test_a_2_post_connection_fails_nonexistent_user(
 def test_a_3_post_connection_fails_duplicate(
         client,
         headers,
+        database_user_a,
+        database_user_b,
         database_user_a_login,
         connection_a_to_b):
 
@@ -108,7 +107,6 @@ def test_a_3_post_connection_fails_duplicate(
     response = client.post(url, data=json.dumps(data), headers=headers)
 
     # Assert
-    assert False, "Test not implemented"
     assert response.status_code == 400
     assert response.json.get("message") == "Connection request already exists for this user relationship."  # noqa
 
@@ -116,8 +114,11 @@ def test_a_3_post_connection_fails_duplicate(
 def test_b_1_patch_connection_accept_succeeds(
         client,
         headers,
-        database_user_b_login,
-        connection_a_to_b):
+        database_user_a,
+        database_user_b,
+        database_user_a_login,
+        connection_a_to_b,
+        database_user_b_login):
 
     # Arrange
     url = "/api/user_connections/1"
@@ -140,8 +141,11 @@ def test_b_1_patch_connection_accept_succeeds(
 def test_b_2_patch_connection_deny_succeeds(
         client,
         headers,
-        database_user_b_login,
-        connection_a_to_b):
+        database_user_a,
+        database_user_b,
+        database_user_a_login,
+        connection_a_to_b,
+        database_user_b_login):
 
     # Arrange
     url = "/api/user_connections/1"
@@ -164,6 +168,8 @@ def test_b_2_patch_connection_deny_succeeds(
 def test_b_3_patch_connection_fails_user_not_recipient(
         client,
         headers,
+        database_user_a,
+        database_user_b,
         database_user_a_login,
         connection_a_to_b):
 
@@ -178,4 +184,4 @@ def test_b_3_patch_connection_fails_user_not_recipient(
 
     # Assert
     assert response.status_code == 400
-    assert response.json.get("message") == "User is not the recipient for this connection."
+    assert response.json.get("message") == "User is not the recipient for this connection."  # noqa

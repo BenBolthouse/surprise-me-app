@@ -100,7 +100,7 @@ def database_user_c(client, headers):
 
 # Database user logins
 @pytest.fixture(scope="function")
-def database_user_a_login(client, headers, database_user_a):
+def database_user_a_login(client, headers):
     """
     Provides a session login cookie for sample user A.
     """
@@ -113,7 +113,7 @@ def database_user_a_login(client, headers, database_user_a):
 
 
 @pytest.fixture(scope="function")
-def database_user_b_login(client, headers, database_user_b):
+def database_user_b_login(client, headers):
     """
     Provides a session login cookie for sample user B.
     """
@@ -126,7 +126,7 @@ def database_user_b_login(client, headers, database_user_b):
 
 
 @pytest.fixture(scope="function")
-def database_user_c_login(client, headers, database_user_c):
+def database_user_c_login(client, headers):
     """
     Provides a session login cookie for sample user C.
     """
