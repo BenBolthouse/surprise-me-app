@@ -221,8 +221,6 @@ class User(db.Model, UserMixin):
             "lastName": self.last_name,
             "email": self.email,
             "shareLocation": self.share_location,
-            "coordLat": str(self.coord_lat),
-            "coordLong": str(self.coord_long),
         }
 
     def to_json_on_login(self):
@@ -231,6 +229,7 @@ class User(db.Model, UserMixin):
             "firstName": self.first_name,
             "lastName": self.last_name,
             "email": self.email,
+            "shareLocation": self.share_location,
         }
 
     def to_json_on_session_get(self):
@@ -246,9 +245,11 @@ class User(db.Model, UserMixin):
 
     def to_json_on_patch(self):
         return {
-            "password": self.password,
+            "id": self.id,
             "firstName": self.first_name,
             "lastName": self.last_name,
             "email": self.email,
             "shareLocation": self.share_location,
+            "coordLat": str(self.coord_lat),
+            "coordLong": str(self.coord_long),
         }
