@@ -41,8 +41,40 @@ const patchSessionUserActionCreator = (payload) => ({
 });
 
 // Thunks
+export const loginSessionUser = (loginObject) => async (dispatch) => {
+  const res = await fetch("/api/sessions", {
+    method: "POST",
+    body: JSON.stringify(loginObject),
+  });
+  const { data } = res.data;
+  
+  dispatch(loginSessionUserActionCreator(data));
 
-// TODO
+  return res;
+};
+
+export const postSessionUser = (userObject) => async (dispatch) => {
+  const res = await fetch("/api/users", {
+    method: "POST",
+    body: JSON.stringify(userObject),
+  });
+  const { data } = res.data;
+  
+  dispatch(postSessionUserActionCreator(data));
+
+  return res;
+};
+
+export const getSessionUser = () => async (dispatch) => {
+  const res = await fetch("/api/sessions", {
+    method: "GET",
+  });
+  const { data } = res.data;
+  
+  dispatch(getSessionUserActionCreator(data));
+
+  return res;
+};
 
 // Reducer
 const reducer = (state = { user: userTemplate }, { type, payload }) => {
