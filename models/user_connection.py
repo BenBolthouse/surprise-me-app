@@ -49,11 +49,6 @@ class UserConnection(db.Model):
     def messages(self, message):
         self._messages.append(message)
 
-    def to_json_on_create(self):
-        return {
-            "id": self.id,
-        }
-
     # Static methods
     @staticmethod
     def get_by_id(id):
@@ -164,3 +159,32 @@ class UserConnection(db.Model):
                 "message": "Connection is not yet established.",
             })
         return
+
+    # Scopes
+    def to_json_on_create(self):
+        return {
+            "id": self.id,
+            "firstName": self.first_name
+        }
+    
+    def to_json_on_get_all(self):
+        return {
+            "id": self.id,
+            "name": f"{self.first_name} {self.last_name}",
+            "firstName": self.first_name,
+            "establishedAt": self.established_at,
+        }
+    
+    def to_json_on_get_pending(self):
+        return {
+            "id": self.id,
+            "name": f"{self.first_name} {self.last_name}",
+            "firstName": self.first_name,
+        }
+    
+    def to_json_on_get_established(self):
+        return {
+            "id": self.id,
+            "name": f"{self.first_name} {self.last_name}",
+            "firstName": self.first_name,
+        }
