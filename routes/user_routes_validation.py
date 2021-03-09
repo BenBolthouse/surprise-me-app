@@ -68,11 +68,8 @@ def _on_post(request):
         "coordLong": {**_coord_long, **_required},
     }
 
-    # Pass exception if validation failed and add errors to request
-    try:
-        request = validator(request, v_schema, v_object)
-    except Exception as e:
-        pass
+    # Run validation
+    validator(request, v_schema, v_object)
 
 
 user_validate_on_post = RouteDecorator(req=_on_post)
@@ -94,11 +91,8 @@ def _on_patch(request):
         "shareLocation": _share_location,
     }
 
-    # Pass exception if validation failed and add errors to request
-    try:
-        request = validator(request, v_schema, v_object)
-    except Exception as e:
-        pass
+    # Run validation
+    validator(request, v_schema, v_object)
 
 
 user_validate_on_patch = RouteDecorator(req=_on_patch)
