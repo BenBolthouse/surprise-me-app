@@ -12,26 +12,10 @@ session_routes = Blueprint("sessions", __name__, url_prefix="/api/sessions")
 def post_session():
 
     # Find user in data store
-    email = request.json["email"]
-    user = User.query.filter(User.email == email).first()
-
-    # Respond 404 if user not found
-    user_not_found = user is None
-    if user_not_found:
-        return jsonify({
-            "message": "user_not_found",
-            "data": {
-                "details": f"A user does not exist with the email address {email}."  # noqa
-            },
-        }), 404
+    user = User.get_by_email(request.json.get("email"))
 
     # Respond 400 if password is invalid
-    password = request.json["password"]
-    password_is_invalid = user.password_is_valid(password) is False
-    if password_is_invalid:
-        return jsonify({
-            "message": "password_is_invalid",
-        }), 400
+    user.password_is_valid(request.json.get("password"))
 
     # If successful log the user in
     login_user(user)
