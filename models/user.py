@@ -1,5 +1,8 @@
+from flask import jsonify
+from flask_login import UserMixin, current_user
+from sqlalchemy.orm import raiseload
+from werkzeug.exceptions import BadRequest, NotFound, InternalServerError
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import UserMixin
 import sqlalchemy as sa
 
 
@@ -87,14 +90,8 @@ class User(db.Model, UserMixin):
     def password(self, password):
         self.hashed_password = generate_password_hash(password)
 
-    def password_is_valid(self, password):
-        return check_password_hash(self.password, password)
-
     @property
     def connections(self):
-        """
-        Get connections to a list, including all requested and received.
-        """
         all_connections = [*self._requested_connections,
                            *self._received_connections]
         return all_connections
@@ -111,6 +108,103 @@ class User(db.Model, UserMixin):
     def notifications(self, notification):
         self._notifications.append(notification)
 
+    # Static methods
+
+    @staticmethod
+    def check_is_email_unique(email):
+        """
+        Check to see if an email is in use.
+
+        Will raise
+        `werkzeug.exceptions.BadRequest` if the
+        email is not unique.
+
+        param `email` String
+        """
+        user = User.query.filter(User.email == email).first()
+        if user is not None:
+            raise BadRequest(response={
+                "message": "The requested email is in use."
+            })
+        return True
+
+    @staticmethod
+    def get_by_id_on_session_user_load(id):
+        """
+        Special case loader doesn't include
+        collections or purchases in loading
+        utilizing `SQLAlchemy.orm.raiseload` to
+        prevent eager loading potentially huge
+        collections.
+
+        param `id` Integer
+        """
+        user = User.query.options(
+            raiseload("_requested_connections"),
+            raiseload("_received_connections")
+        ).filter(User.id == id).first()
+        if user is None:
+            raise NotFound(response={
+                "message": "A user was not found with the provided id."
+            })
+        return user
+
+    @staticmethod
+    def get_by_id(id):
+        """
+        Get a user by id and refresh the
+        SQLAlchemy session user.
+
+        Will raise `werkzeug.errors.NotFound`
+        if a user isn't found.
+
+        param `id` Integer
+        """
+        user = User.query.filter(User.id == id).first()
+        if user is None:
+            raise NotFound(response={
+                "message": "A user was not found with the provided id."
+            })
+        # Perform refresh to get raiseload collections
+        if not current_user.is_anonymous and current_user.id == user.id:
+            db.session.refresh(user)
+        return user
+
+    @staticmethod
+    def get_by_email(email):
+        """
+        Get a user by email and refresh the
+        SQLAlchemy session user.
+
+        Will raise `werkzeug.errors.NotFound`
+        if a user isn't found.
+
+        param `id` Integer
+        """
+        user = User.query.filter(User.email == email).first()
+        if user is None:
+            raise NotFound(response={
+                "message": "A user was not found with the provided email."
+            })
+        # Perform refresh to get raiseload collections
+        if not current_user.is_anonymous and current_user.id == user.id:
+            db.session.refresh(user)
+        return user
+
+    # Instance methods
+    def password_is_valid(self, password):
+        """
+        Check if a string is a valid password.
+
+        param `password` String
+        """
+        if not check_password_hash(self.password, password):
+            raise BadRequest(response={
+                "message": "Password is incorrect."
+            })
+        return True
+
+    # Scopes
     def to_json_on_create(self):
         return {
             "id": self.id,
