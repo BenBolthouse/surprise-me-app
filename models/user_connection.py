@@ -62,7 +62,7 @@ class UserConnection(db.Model):
 
         Will raise `werkzeug.errors.NotFound`
         exception if SQLAlchemy cannot find the
-        user with the provided ID.
+        connection with the provided ID.
 
         param `id` type Integer
         """
@@ -119,7 +119,7 @@ class UserConnection(db.Model):
         """
         date_time_format = "%Y-%m-%dT%H:%M:%S.%f"
         date_time_obj = datetime.strptime(date_time, date_time_format)
-        message_list = [m.to_json_on_create()
+        message_list = [m.to_json_on_get()
                         for m in self.messages
                         if m.created_at > date_time_obj]
         return message_list
@@ -148,5 +148,19 @@ class UserConnection(db.Model):
             raise NotFound(response={
                 "message": "Message offset out of range and yielded no results."  # noqa
             })
+        return [m.to_json_on_get() for m in message_list]
 
-        return [m.to_json_on_create() for m in message_list]
+    def require_establishment(self):
+        """
+        Assert that the connection is
+        established before carrying out an
+        action.
+
+        Will raise `werkzeug.errors.BadRequest`
+        if the connection is not established.
+        """
+        if self.established_at is None:
+            raise BadRequest(response={
+                "message": "Connection is not yet established.",
+            })
+        return

@@ -204,6 +204,15 @@ class User(db.Model, UserMixin):
             })
         return True
 
+    def user_by_id_is_a_connection(self, id):
+        for i in self.connections:
+            req_user = i.requestor_user_id == id
+            rec_user = i.connection_user_id == id
+            if req_user or rec_user:
+                raise BadRequest(response={
+                    "message": "Connection request already exists for this user relationship."  # noqa
+                })
+
     # Scopes
     def to_json_on_create(self):
         return {
