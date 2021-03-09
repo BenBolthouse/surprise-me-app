@@ -5,11 +5,13 @@ from ._route_decorator import RouteDecorator
 
 
 def validator(request, v_schema, v_object):
-    """ Loads validation results onto the request object.
+    """
+    Loads validation results onto the request object.
 
     Dictionary `v_object` contains values for validation.
 
-    Dictionary `v_schema` contains cerberus validation rules. """
+    Dictionary `v_schema` contains cerberus validation rules.
+    """
 
     # Scoped for try except block
     validator = None
@@ -23,7 +25,7 @@ def validator(request, v_schema, v_object):
     # Do the validation and add results to the request
     if not validator.validate(v_object):
         raise BadRequest(response={
-            "message": "Data validation failed",
+            "message": "Data validation failed.",
             "data": validator.errors
         })
 
