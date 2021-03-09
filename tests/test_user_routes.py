@@ -3,60 +3,251 @@ import json
 import pytest
 
 
-from ._fixtures import client, headers
-from ._fixtures import database_user_a, database_user_a_login
-from ._fixtures import database_user_b, database_user_b_login
+from ._utilities import client, headers
+from ._utilities import database_seed_demo_users, login_client
 
 
 from models import db, User
-from app import app
 
 
-def test_a_1_post_user_succeeds(
-        client,
-        headers,
-        database_user_a):
+# * ===========================================================================
+# * POST
+# * ===========================================================================
 
-    # Arrangement
-    user = User.get_by_id(1)
 
-    # Database assertions
-    assert user.to_json_on_create() == {
-        "id": 1,
-        "firstName": "Demo",
-        "lastName": "User",
-        "email": "database_user_a@example.com",
+def test_user_post_success_yields_user_data(
+        client, headers):
+    """
+    Assert formatted json response for
+    addition of a demo user.
+    """
+    # Arrange
+    url = "/api/users"
+    user_template = {
+        "password": "Password1234$",
+        "firstName": "Frank",
+        "lastName": "Furwick",
+        "email": "database_user_f@example.com",
         "shareLocation": True,
-        "coordLat": "123.123456",
-        "coordLong": "12.123456"
+        "coordLat": 123.123456,
+        "coordLong": 12.123456,
+    }
+    # Act
+    response = client.post(
+        url,
+        data=json.dumps(user_template),
+        headers=headers)
+    response_message = response.json.get("message")
+    response_data = response.json.get("data")
+    # Assert
+    assert response_message == "Success"
+    assert response_data == {
+        "id": 6,
+        "firstName": response_data["firstName"],
+        "lastName": response_data["lastName"],
+        "email": response_data["email"],
+        "shareLocation": response_data["shareLocation"],
     }
 
 
-def test_a_2_post_user_fails_with_identical_email(
-        client,
-        headers,
-        database_user_a):
+def test_user_login_failed_unknown_email(
+        client, headers):
+    """
+    Assert application rejects invalid
+    requests for login.
+    """
+    # Act
+    url = "/api/sessions"
+    login_request_body = {
+        "password": "Password1234$",
+        "email": "database_user_z@example.com",
+    }
+    # Assert
+    response = client.post(
+        url,
+        data=json.dumps(login_request_body),
+        headers=headers)
+    # Assertions
+    assert response.status_code == 404
+    assert response.json.get("message") == "A user was not found with the provided email."  # noqa
 
-    # Arrangement
-    url = "/api/users"
-    data = deepcopy(database_user_a)
 
-    # Action
-    response = client.post(url, data=json.dumps(data), headers=headers)
-
+def test_user_login_failed_invalid_password(
+        client, headers):
+    """
+    Assert application rejects invalid
+    requests for login.
+    """
+    # Act
+    url = "/api/sessions"
+    login_request_body = {
+        "password": "BAD-Password1234$",
+        "email": "database_user_a@example.com",
+    }
+    # Assert
+    response = client.post(
+        url,
+        data=json.dumps(login_request_body),
+        headers=headers)
     # Assertions
     assert response.status_code == 400
-    assert response.json["message"] == "The requested email is in use."
+    assert response.json.get("message") == "Password is incorrect."  # noqa
 
 
-def test_a_3_post_user_fails_with_invalid_email(
-        client,
-        headers,
-        database_user_a):
-
-    # Arrangement
+def test_user_post_failed_email_taken(
+        client, headers, login_client):
+    """
+    Assert non-unique emails are rejected on
+    user POST.
+    """
+    # Arrange
     url = "/api/users"
-    test_subjects = [
+    user_template = {
+        "password": "Password1234$",
+        "firstName": "Emily",
+        "lastName": "Earwhisper",
+        "email": "database_user_e@example.com",
+        "shareLocation": True,
+        "coordLat": 123.123456,
+        "coordLong": 12.123456,
+    }
+    # Act
+    response = client.post(
+        url,
+        data=json.dumps(user_template),
+        headers=headers)
+    response_message = response.json.get("message")
+    # Assert
+    assert response_message == "The requested email is in use."
+
+
+def test_user_post_failed_invalid_password(
+        client, headers, login_client):
+    """
+    Assert invalid first names are rejected
+    on user POST.
+    """
+    # Arrange
+    invalid_passwords = [
+        "no-uppercase$4",
+        "NO-LOWERCASE$4",
+        "NoNumbers$A",
+        "NoSpecCharS4",
+        "Has Spaces5%",
+    ]
+    url = "/api/users"
+    user_template = {
+        "firstName": "Frank",
+        "lastName": "Furwick",
+        "email": "database_user_f@example.com",
+        "shareLocation": True,
+        "coordLat": 123.123456,
+        "coordLong": 12.123456,
+    }
+    for password in invalid_passwords:
+        # Act
+        user_template["password"] = password
+        response = client.post(
+            url,
+            data=json.dumps(user_template),
+            headers=headers)
+        response_message = response.json.get("message")
+        response_data = response.json.get("data")
+        # Assert
+        assert response_message == "Data validation failed."
+        assert "not match regex" in response_data["password"][0]
+
+
+def test_user_post_failed_invalid_first_name(
+        client, headers, login_client):
+    """
+    Assert invalid first names are rejected
+    on user POST.
+    """
+    # Arrange
+    invalid_first_names = [
+        "%HASBADCHAR",
+        "HAS&BADCHAR",
+        "HASBADCHAR#",
+        "5HASBADCHAR",
+        "HAS9BADCHAR",
+        "HASBADCHAR5",
+        " HASBADCHAR",
+        "HAS BADCHAR",
+        "HASBADCHAR "
+    ]
+    url = "/api/users"
+    user_template = {
+        "password": "Password1234$",
+        "lastName": "Furwick",
+        "email": "database_user_f@example.com",
+        "shareLocation": True,
+        "coordLat": 123.123456,
+        "coordLong": 12.123456,
+    }
+    for first_name in invalid_first_names:
+        # Act
+        user_template["firstName"] = first_name
+        response = client.post(
+            url,
+            data=json.dumps(user_template),
+            headers=headers)
+        response_message = response.json.get("message")
+        response_data = response.json.get("data")
+        # Assert
+        assert response_message == "Data validation failed."
+        assert "not match regex" in response_data["firstName"][0]
+
+
+def test_user_post_failed_invalid_last_name(
+        client, headers, login_client):
+    """
+    Assert invalid last names are rejected
+    on user POST.
+    """
+    # Arrange
+    invalid_last_names = [
+        "%HASBADCHAR",
+        "HAS&BADCHAR",
+        "HASBADCHAR#",
+        "5HASBADCHAR",
+        "HAS9BADCHAR",
+        "HASBADCHAR5",
+        " HASBADCHAR",
+        "HAS BADCHAR",
+        "HASBADCHAR "
+    ]
+    url = "/api/users"
+    user_template = {
+        "password": "Password1234$",
+        "firstName": "Frank",
+        "email": "database_user_f@example.com",
+        "shareLocation": True,
+        "coordLat": 123.123456,
+        "coordLong": 12.123456,
+    }
+    for last_name in invalid_last_names:
+        # Act
+        user_template["lastName"] = last_name
+        response = client.post(
+            url,
+            data=json.dumps(user_template),
+            headers=headers)
+        response_message = response.json.get("message")
+        response_data = response.json.get("data")
+        # Assert
+        assert response_message == "Data validation failed."
+        assert "not match regex" in response_data["lastName"][0]
+
+
+def test_user_post_failed_invalid_email(
+        client, headers, login_client):
+    """
+    Assert invalid emails are
+    rejected on user POST.
+    """
+    # Arrange
+    invalid_emails = [
         "BAD EMAIL@EXAMPLE.COM",
         "BADEMAIL @EXAMPLE.COM",
         "BADEMAIL@ EXAMPLE.COM",
@@ -64,85 +255,37 @@ def test_a_3_post_user_fails_with_invalid_email(
         "BADEMAIL@EXAMPLE. COM",
         "BADEMAIL@EXAMPLE.COM ",
     ]
-
-    for email in test_subjects:
-        # Arrange
-        data = deepcopy(database_user_a)
-        data["email"] = email
-
-        # Act
-        response = client.post(url, data=json.dumps(data), headers=headers)
-
-        # Assert
-        assert response.status_code == 400
-        assert response.json["message"] == "Data validation failed"
-        assert "not match regex" in response.json["data"]["email"][0]
-
-
-def test_a_4_post_user_fails_with_invalid_password(
-        client,
-        headers,
-        database_user_a):
-
-    # Arrangement
     url = "/api/users"
-    test_subjects = [
-        "no-uppercase$4",
-        "NO-LOWERCASE$4",
-        "NoNumbers$A",
-        "NoSpecCharS4",
-        "Has Spaces5%",
-    ]
-
-    for password in test_subjects:
-        # Arrange
-        data = deepcopy(database_user_a)
-        data["password"] = password
-
+    user_template = {
+        "password": "Password1234$",
+        "firstName": "Frank",
+        "lastName": "Furwick",
+        "shareLocation": True,
+        "coordLat": 123.123456,
+        "coordLong": 12.123456,
+    }
+    for email in invalid_emails:
         # Act
-        response = client.post(url, data=json.dumps(data), headers=headers)
-
+        user_template["email"] = email
+        response = client.post(
+            url,
+            data=json.dumps(user_template),
+            headers=headers)
+        response_message = response.json.get("message")
+        response_data = response.json.get("data")
         # Assert
-        assert response.status_code == 400
-        assert response.json["message"] == "Data validation failed"
-        assert "not match regex" in response.json["data"]["password"][0]
+        assert response_message == "Data validation failed."
+        assert "not match regex" in response_data["email"][0]
 
-    # Test for short passwords
 
+def test_user_post_failed_invalid_coord_lat(
+        client, headers, login_client):
+    """
+    Assert invalid latitude values are
+    rejected on user POST.
+    """
     # Arrange
-    data = deepcopy(database_user_a)
-    data["password"] = "2short%"
-
-    # Act
-    response = client.post(url, data=json.dumps(data), headers=headers)
-
-    # Assert
-    assert response.status_code == 400
-    assert response.json["message"] == "Data validation failed"
-    assert "min length" in response.json["data"]["password"][0]
-
-    # Test for long passwords
-
-    # Arrange
-    data["password"] = "4%-too-Long-too-Long-too-Long-too-Long"  # noqa
-
-    # Act
-    response = client.post(url, data=json.dumps(data), headers=headers)
-
-    # Assert
-    assert response.status_code == 400
-    assert response.json["message"] == "Data validation failed"
-    assert "max length" in response.json["data"]["password"][0]
-
-
-def test_a_5_post_user_fails_with_invalid_geocoords(
-        client,
-        headers,
-        database_user_a):
-
-    # Arrangement
-    url = "/api/users"
-    test_subjects = [
+    invalid_coord_lats = [
         1234567890123456,
         1.23456789012345,
         12.3456789012345,
@@ -158,204 +301,226 @@ def test_a_5_post_user_fails_with_invalid_geocoords(
         12345678,
         123456789,
     ]
-
-    for coordLat in test_subjects:
-        # Arrange
-        data = deepcopy(database_user_a)
-        data["coordLat"] = coordLat
-        data["coordLong"] = coordLat
-
-        # Act
-        response = client.post(url, data=json.dumps(data), headers=headers)
-
-        # Assert
-        assert response.status_code == 400
-        assert response.json["message"] == "Data validation failed"
-        assert "not match regex" in response.json["data"]["coordLat"][0]
-        assert "not match regex" in response.json["data"]["coordLong"][0]
-
-
-def test_a_6_post_user_fails_with_invalid_names(
-        client,
-        headers,
-        database_user_a):
-
-    # Arrangement
     url = "/api/users"
-    test_subjects = [
-        "%HASBADCHAR",
-        "HAS&BADCHAR",
-        "HASBADCHAR#",
-        "5HASBADCHAR",
-        "HAS9BADCHAR",
-        "HASBADCHAR5",
-        " HASBADCHAR",
-        "HAS BADCHAR",
-        "HASBADCHAR "
-    ]
-
-    for name in test_subjects:
-        # Arrange
-        data = deepcopy(database_user_a)
-        data["firstName"] = name
-        data["lastName"] = name
-
+    user_template = {
+        "password": "Password1234$",
+        "firstName": "Frank",
+        "lastName": "Furwick",
+        "email": "database_user_f@example.com",
+        "shareLocation": True,
+        "coordLong": 12.123456,
+    }
+    for coord_lat in invalid_coord_lats:
         # Act
-        response = client.post(url, data=json.dumps(data), headers=headers)
-
+        user_template["coordLat"] = coord_lat
+        response = client.post(
+            url,
+            data=json.dumps(user_template),
+            headers=headers)
+        response_message = response.json.get("message")
+        response_data = response.json.get("data")
         # Assert
-        assert response.status_code == 400
-        assert response.json["message"] == "Data validation failed"  # noqa
-        assert "not match regex" in response.json["data"]["firstName"][0]
-        assert "not match regex" in response.json["data"]["lastName"][0]
+        assert response_message == "Data validation failed."
+        assert "not match regex" in response_data["coordLat"][0]
 
 
-def test_b_1_patch_user_succeeds(
-        client,
-        headers,
-        database_user_a,
-        database_user_a_login):
+def test_user_post_failed_invalid_coord_long(
+        client, headers, login_client):
+    """
+    Assert invalid longitude values are
+    rejected on user POST.
+    """
+    # Arrange
+    invalid_coord_longs = [
+        1234567890123456,
+        1.23456789012345,
+        12.3456789012345,
+        123.456789012345,
+        1234.56789012345,
+        12345.6789012345,
+        123456.789012345,
+        123,
+        1234,
+        12345,
+        123456,
+        1234567,
+        12345678,
+        123456789,
+    ]
+    url = "/api/users"
+    user_template = {
+        "password": "Password1234$",
+        "firstName": "Frank",
+        "lastName": "Furwick",
+        "email": "database_user_f@example.com",
+        "shareLocation": True,
+        "coordLat": 123.123456,
+    }
+    for coord_long in invalid_coord_longs:
+        # Act
+        user_template["coordLong"] = coord_long
+        response = client.post(
+            url,
+            data=json.dumps(user_template),
+            headers=headers)
+        response_message = response.json.get("message")
+        response_data = response.json.get("data")
+        # Assert
+        assert response_message == "Data validation failed."
+        assert "not match regex" in response_data["coordLong"][0]
 
+
+def test_user_login_success_yields_user_data(
+        login_client, database_seed_demo_users):
+    """
+    Assert formatted json response for each
+    demo user in `users_templates`.
+    """
+    id_iterator = 1
+    # Arrange
+    for user in database_seed_demo_users:
+        # Act
+        response = login_client(user["email"])
+        response_message = response.json.get("message")
+        response_data = response.json.get("data")
+        # Assert
+        assert response_message == "Success"
+        assert response.json.get("data") == {
+            "id": id_iterator,
+            "firstName": user["first_name"],
+            "lastName": user["last_name"],
+            "email": user["email"],
+            "shareLocation": user["share_location"],
+        }
+        id_iterator += 1
+
+
+# * ===========================================================================
+# * GET
+# * ===========================================================================
+
+
+def test_user_get_success_yields_user_data(
+        client, headers, login_client):
+    """
+    Assert formatted json response for
+    authenticated get requests.
+    """
+    # Arrange
+    url = "/api/sessions"
+    # Act
+    login = login_client("database_user_a@example.com")
+    response = client.get(
+        url,
+        headers=headers)
+    # Assert
+    response.status_code == 200
+    response.json.get("message") == "Success"
+    response.json.get("data") == {
+        "id": 1,
+        "firstName": "Angelica",
+        "lastName": "Ashworthy",
+        "email": "database_user_a@example.com",
+        "shareLocation": True,
+        "coordLat": "123.123456",
+        "coordLong": "12.123456",
+    }
+
+
+# * ===========================================================================
+# * PATCH
+# * ===========================================================================
+
+
+def test_user_patch_success_yields_user_data(
+        client, headers, login_client):
+    """
+    Assert formatted json response for
+    updating a user.
+    """
     # Arrange
     url = "/api/users"
-    test_subjects = [
+    patch_properties = [
         ("firstName", "Newfirstname"),
         ("lastName", "Newlastname"),
         ("email", "new_email_address@example.com"),
         ("shareLocation", False),
+        ("coordLat", 321.123123),
+        ("coordLong", 21.123123),
     ]
-
-    for data in test_subjects:
+    for prop in patch_properties:
+        patch_request_body = {prop[0]: prop[1]}
         # Act
+        login = login_client("database_user_a@example.com")
         response = client.patch(
             url,
-            data=json.dumps({data[0]: data[1]}),
+            data=json.dumps(patch_request_body),
             headers=headers)
-
-        # Expected results
-        status_code = 200
-        message = "success"
-
-        # Assert
+        response_message = response.json.get("message")
         response_data = response.json.get("data")
-        assert response.status_code == 200
-        assert response.json["message"] == "Success"
-        assert response_data[data[0]] == data[1]
+        # Assert
+        assert response_message == "Success"
+        assert response_data == {
+            "id": 1,
+            "firstName": response_data["firstName"],
+            "lastName": response_data["lastName"],
+            "email": response_data["email"],
+            "shareLocation": response_data["shareLocation"],
+            "coordLat": response_data["coordLat"],
+            "coordLong": response_data["coordLong"],
+        }
 
 
-def test_c_1_post_user_session_succeeds(
-        client,
-        headers,
-        database_user_a):
-
-    # Arrange
-    url = "/api/sessions"
-    data = {
-        "password": "Du&&?121",
-        "email": database_user_a["email"],
-    }
-
-    # Expected results
-    status_code = 200
-    message = "success"
-    expected_data = {
-        "id": 1,
-        "firstName": "Demo",
-        "lastName": "User",
-        "email": database_user_a["email"],
-    }
-
-    # Act
-    response = client.post(url, data=json.dumps(data), headers=headers)
-
-    # Assert
-    assert response.status_code == status_code
-    assert response.json["message"] == message
-    assert response.json["data"] == expected_data
-
-
-def test_c_2_post_user_session_fails_unknown_email(
-        client,
-        headers,
-        database_user_a):
-
-    # Arrange
-    url = "/api/sessions"
-    data = {
-        "password": "Du&&?121",
-        "email": "wrong_email@email.com",
-    }
-
-    # Act
-    response = client.post(url, data=json.dumps(data), headers=headers)
-
-    # Assert
-    assert response.status_code == 404
-    assert response.json["message"] == "A user was not found with the provided email."  # noqa
-
-
-def test_c_3_post_user_session_fails_invalid_password(
-        client,
-        headers,
-        database_user_a):
-
-    # Arrange
-    url = "/api/sessions"
-    data = {
-        "password": "wrong_password",
-        "email": database_user_a["email"],
-    }
-
-    # Act
-    response = client.post(url, data=json.dumps(data), headers=headers)
-
-    # Assert
-    assert response.status_code == 400
-    assert response.json["message"] == "Password is incorrect."
-
-
-def test_b_2_patch_user_fails_email_conflict(
-        client,
-        headers,
-        database_user_a,
-        database_user_b,
-        database_user_a_login):
-
+def test_user_patch_success_update_password(
+        client, headers, login_client):
+    """
+    Assert formatted json response for
+    updating a user.
+    """
     # Arrange
     url = "/api/users"
-    data = {
-        "email": "database_user_b@example.com"
+    patch_request_body = {
+        "password": "Password1234?"
     }
-
     # Act
-    response = client.patch(url, data=json.dumps(data), headers=headers)
-
+    login = login_client("database_user_a@example.com")
+    response = client.patch(
+        url,
+        data=json.dumps(patch_request_body),
+        headers=headers)
+    response_message = response.json.get("message")
+    response_data = response.json.get("data")
     # Assert
-    assert response.status_code == 400
-    assert response.json.get("message") == "The requested email is in use."
-
-
-def test_d_1_get_session_user_succeeds(
-        client,
-        headers,
-        database_user_a,
-        database_user_a_login):
-
-    # Arrangement
-    url = "/api/users"
-
-    # Action
-    response = client.get(url, headers=headers)
-
-    # Response assertions
     assert response.status_code == 200
-    assert response.json.get("message") == "Success"
-    assert response.json.get("data") == {
-        "id": 1,
-        "firstName": "Demo",
-        "lastName": "User",
-        "email": "database_user_a@example.com",
-        "shareLocation": True,
-        "coordLat": "123.123456",
-        "coordLong": "12.123456"
-    }
+    assert response_message == "Password updated successfully."
+
+
+def test_user_patch_failed_invalid_update_password(
+        client, headers, login_client):
+    """
+    Assert formatted json response for
+    updating a user.
+    """
+    # Arrange
+    invalid_passwords = [
+        "no-uppercase$4",
+        "NO-LOWERCASE$4",
+        "NoNumbers$A",
+        "NoSpecCharS4",
+        "Has Spaces5%",
+    ]
+    url = "/api/users"
+    login = login_client("database_user_a@example.com")
+    for password in invalid_passwords:
+        # Act
+        patch_request_body = {"password": password}
+        response = client.patch(
+            url,
+            data=json.dumps(patch_request_body),
+            headers=headers)
+        response_message = response.json.get("message")
+        response_data = response.json.get("data")
+        # Assert
+        assert response.status_code == 400
+        assert response_message == "Data validation failed."
+        assert "not match regex" in response_data["password"][0]
