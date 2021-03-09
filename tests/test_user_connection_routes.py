@@ -6,6 +6,7 @@ import pytest
 from ._fixtures import client, headers
 from ._fixtures import database_user_a, database_user_a_login
 from ._fixtures import database_user_b, database_user_b_login
+from ._fixtures import database_user_c, database_user_c_login
 
 
 from models import db, User, UserConnection, UserNotification
@@ -128,10 +129,14 @@ def test_b_1_patch_connection_accept_succeeds(
 
     # Act
     response = client.patch(url, data=json.dumps(data), headers=headers)
+    message = response.json.get("message")
+    data = response.json.get("data")
 
     # Response assertions
     assert response.status_code == 200
-    assert response.json.get("message") == "Success"
+    assert message == "Success"
+    assert "id" in data and data["id"] == 1
+    assert "name" in data and data["name"] == "Demo User"
 
     # Database assertions
     db_user_connection = UserConnection.query.get(1)
@@ -161,8 +166,7 @@ def test_b_2_patch_connection_deny_succeeds(
     assert response.json.get("message") == "Success"
 
     # Database assertions
-    db_user_connection = UserConnection.query.get(1)
-    db_user_connection is None
+    assert UserConnection.query.get(1) is None
 
 
 def test_b_3_patch_connection_fails_user_not_recipient(
@@ -176,7 +180,7 @@ def test_b_3_patch_connection_fails_user_not_recipient(
     # Arrange
     url = "/api/user_connections/1"
     data = {
-        "establish": False
+        "establish": True
     }
 
     # Act
@@ -185,3 +189,97 @@ def test_b_3_patch_connection_fails_user_not_recipient(
     # Assert
     assert response.status_code == 400
     assert response.json.get("message") == "User is not the recipient for this connection."  # noqa
+
+
+def test_c_1_get_connections_succeeds(
+        client,
+        headers,
+        database_user_a,
+        database_user_b,
+        database_user_c,
+        database_user_a_login):
+    """
+    Tests for the following:
+
+    A. All connections at route
+    `/api/user_connections` returns
+    established and pending connections.
+
+    B. Pending connections at route
+    `/api/user_connections/pending` returns
+    only pending connections.
+
+    C. Established connections at route
+    `/api/user_connections/established`
+    returns only established connections.
+    """
+
+    # Arrange
+    database_users = [
+        {
+            "id": 2,
+            "established_at": None,
+        },
+        {
+            "id": 3,
+            "established_at": "2020-12-31T11:59:00.000000",
+        },
+    ]
+    for user in database_users:
+        connection = UserConnection(user["id"])
+        connection.requestor_user_id = 1
+        connection.established_at = user["established_at"]
+        db.session.add(connection)
+    db.session.commit()
+
+    # * Case A: All Connections
+    # Act
+    response = client.get("api/user_connections")
+
+    # Assert
+    assert response.status_code == 200
+    assert response.json.get("message") == "Success"
+    assert response.json.get("data") == [
+        {
+            "id": 1,
+            "name": "Demo User",
+            "firstName": "Demo",
+            "establishedAt": None
+        },
+        {
+            "id": 2,
+            "name": "Demo User",
+            "firstName": "Demo",
+            "establishedAt": "2020-12-31T11:59:00.000000"
+        },
+    ]
+
+    # * Case B: Pending Connections
+    # Act
+    response = client.get("api/user_connections/pending")
+
+    # Assert
+    assert response.status_code == 200
+    assert response.json.get("message") == "Success"
+    assert response.json.get("data") == [
+        {
+            "id": 1,
+            "name": "Demo User",
+            "firstName": "Demo",
+        },
+    ]
+
+    # * Case C: Established Connections
+    # Act
+    response = client.get("api/user_connections/established")
+
+    # Assert
+    assert response.status_code == 200
+    assert response.json.get("message") == "Success"
+    assert response.json.get("data") == [
+        {
+            "id": 2,
+            "name": "Demo User",
+            "firstName": "Demo",
+        },
+    ]
