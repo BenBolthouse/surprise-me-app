@@ -41,10 +41,10 @@ class User(db.Model, UserMixin):
         db.Boolean,
         default=False)
     coord_lat = db.Column(
-        sa.types.DECIMAL(precision=9, scale=6),
+        db.String(255),
         nullable=False)
     coord_long = db.Column(
-        sa.types.DECIMAL(precision=8, scale=6),
+        db.String(255),
         nullable=False)
     hashed_password = db.Column(
         db.String(255),
