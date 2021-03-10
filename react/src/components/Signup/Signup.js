@@ -1,18 +1,18 @@
+import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useState } from "react";
 import { validate } from "validate.js";
+
+import { fetch } from "../../services/fetch";
 
 import {
   nameValidation,
   emailValidation,
   passwordValidation,
-  requiredValidation,
   checkboxValidation,
-  confirmPasswordValidation,
 } from "../../validation";
 
 import * as sessionActions from "../../store/reducers/session";
-import { Link } from "react-router-dom";
 
 const Signup = () => {
   // Hooks
@@ -26,6 +26,8 @@ const Signup = () => {
     lastNameErrors: [],
     email: "",
     emailErrors: [],
+    emailIsUnique: true,
+    emailIsInteracting: false,
   });
   const [slide2, setSlide2] = useState({
     shareLocation: false,
@@ -77,6 +79,43 @@ const Signup = () => {
     return true;
   };
 
+  // Does a request to the backend API
+  // and returns 200 if unique, 400 if
+  // in use. Only fetches if the input
+  // is dirty.
+  const checkIsEmailUnique = (evt) => {
+    setSlide1({ ...slide1, emailIsInteracting: true });
+    if (window.checkIsEmailUniqueTimeout) {
+      clearTimeout(window.checkIsEmailUniqueTimeout);
+    }
+    window.checkIsEmailUniqueTimeout = setTimeout(
+      () =>
+        fetch("/api/users/is_email_unique", {
+          method: "POST",
+          body: JSON.stringify({
+            email: evt.target.value,
+          }),
+        })
+          .then(() =>
+            setSlide1({
+              ...slide1,
+              emailIsUnique: true,
+              email: evt.target.value,
+              emailIsInteracting: false,
+            })
+          )
+          .catch(() =>
+            setSlide1({
+              ...slide1,
+              emailIsUnique: false,
+              email: evt.target.value,
+              emailIsInteracting: false,
+            })
+          ),
+      1000
+    );
+  };
+
   // Slide 1 validation
   const validateSlide1 = (evt) => {
     evt.preventDefault();
@@ -90,7 +129,11 @@ const Signup = () => {
       lastName: nameValidation,
       email: emailValidation,
     };
-    if (validateSlide(vObj, schema, slide1, setSlide1)) {
+    if (
+      validateSlide(vObj, schema, slide1, setSlide1) &&
+      slide1.emailIsUnique &&
+      !slide1.emailIsInteracting
+    ) {
       setSlidePosition(1);
     }
   };
@@ -160,7 +203,7 @@ const Signup = () => {
         <p>Set up your profile.</p>
 
         <form onSubmit={validateSlide1}>
-          <div className="form-group">
+          <div className={`form-group${slide1.firstNameErrors.length && " errors"}`}>
             <label htmlFor="signupFirstNameInput">First name</label>
             <input
               type="text"
@@ -171,7 +214,7 @@ const Signup = () => {
               }
             />
             <div className="form-group__errors">
-              {slide1.firstNameErrors && (
+              {slide1.firstNameErrors&& (
                 <ul>
                   {slide1.firstNameErrors.map((err, i) => (
                     <li key={`signup-form-first-name-error-${i}`}>{err}</li>
@@ -180,7 +223,7 @@ const Signup = () => {
               )}
             </div>
           </div>
-          <div className="form-group">
+          <div className={`form-group${slide1.lastNameErrors.length && " errors"}`}>
             <label htmlFor="signupLastNameInput">Last name</label>
             <input
               type="text"
@@ -200,13 +243,15 @@ const Signup = () => {
               )}
             </div>
           </div>
-          <div className="form-group">
+          <div className={`form-group${slide1.emailErrors.length && " errors"}`}>
             <label htmlFor="signupEmailInput">Email</label>
             <input
               type="text"
               id="signupEmailInput"
               disabled={slidePosition !== 0}
-              onChange={(e) => setSlide1({ ...slide1, email: e.target.value })}
+              onChange={(e) => {
+                checkIsEmailUnique(e);
+              }}
             />
             <div className="form-group__errors">
               {slide1.emailErrors && (
@@ -214,6 +259,12 @@ const Signup = () => {
                   {slide1.emailErrors.map((err, i) => (
                     <li key={`signup-form-email-error-${i}`}>{err}</li>
                   ))}
+                  {!slide1.emailIsUnique && (
+                    <li>
+                      Email is already in use. Do you have an account?{" "}
+                      <Link to="/signup">You can sign in here.</Link>
+                    </li>
+                  )}
                 </ul>
               )}
             </div>
@@ -234,7 +285,7 @@ const Signup = () => {
         </p>
 
         <form onSubmit={validateSlide2}>
-          <div className="form-group">
+          <div className={`form-group${slide2.shareLocationErrors.length && " errors"}`}>
             <label htmlFor="signupShareLocationInput">Share my location</label>
             <input
               type="checkbox"
@@ -257,6 +308,12 @@ const Signup = () => {
             <button type="submit" disabled={slidePosition !== 1}>
               Next...
             </button>
+            <button
+              onClick={() => setSlidePosition(0)}
+              disabled={slidePosition !== 1}
+            >
+              Go back
+            </button>
           </div>
         </form>
       </div>
@@ -266,7 +323,7 @@ const Signup = () => {
         <p>Choose a password and confirm.</p>
 
         <form onSubmit={validateSlide3}>
-          <div className="form-group">
+          <div className={`form-group${slide3.passwordErrors.length && " errors"}`}>
             <label htmlFor="signupPasswordInput">Password</label>
             <input
               type="password"
@@ -286,7 +343,7 @@ const Signup = () => {
               )}
             </div>
           </div>
-          <div className="form-group">
+          <div className={`form-group${slide3.confirmPasswordErrors.length && " errors"}`}>
             <label htmlFor="signupPasswordConfirmInput">Confirm</label>
             <input
               type="password"
@@ -300,7 +357,9 @@ const Signup = () => {
               {slide3.confirmPasswordErrors && (
                 <ul>
                   {slide3.confirmPasswordErrors.map((err, i) => (
-                    <li key={`signup-form-confirm-password-error-${i}`}>{err}</li>
+                    <li key={`signup-form-confirm-password-error-${i}`}>
+                      {err}
+                    </li>
                   ))}
                 </ul>
               )}
@@ -309,6 +368,12 @@ const Signup = () => {
           <div className="form-group">
             <button type="submit" disabled={slidePosition !== 2}>
               Finish
+            </button>
+            <button
+              onClick={() => setSlidePosition(1)}
+              disabled={slidePosition !== 2}
+            >
+              Go back
             </button>
           </div>
         </form>
