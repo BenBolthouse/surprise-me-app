@@ -39,12 +39,12 @@ _share_location = {
 _coord_lat = {
     "nullable": True,
     "type": "string",
-    "regex": "^(?=.*[0-9]).{3,3}\.(?=.*[0-9]).{6,6}$",  # noqa
+    "regex": "^(-)?(?=.*[0-9]).{1,3}\.(?=.*[0-9]).{6,64}$",  # noqa
 }
 _coord_long = {
     "nullable": True,
     "type": "string",
-    "regex": "^(?=.*[0-9]).{2,2}\.(?=.*[0-9]).{6,6}$",  # noqa
+    "regex": "^(-)?(?=.*[0-9]).{1,3}\.(?=.*[0-9]).{6,64}$",  # noqa
 }
 
 
