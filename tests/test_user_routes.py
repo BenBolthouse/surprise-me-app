@@ -512,9 +512,49 @@ def test_user_patch_failed_invalid_update_password(
             url,
             data=json.dumps(patch_request_body),
             headers=headers)
-        response_message = response.json.get("message")
-        response_data = response.json.get("data")
         # Assert
         assert response.status_code == 400
-        assert response_message == "Data validation failed."
-        assert "not match regex" in response_data["password"][0]
+        assert response.json.get("message") == "Data validation failed."
+        assert "not match regex" in response.json.get("data")["password"][0]
+
+
+def test_user_get_is_email_unique_success(
+        client, headers, login_client):
+    """
+    Assert application detects no conflict
+    email address and responds 200.
+    """
+    # Arrange
+    url = "/api/users/is_email_unique"
+    post_request_body = {
+        "email": "database_user_z@example.com",
+    }
+    # Act
+    response = client.post(
+        url,
+        data=json.dumps(post_request_body),
+        headers=headers)
+    # Assert
+    assert response.status_code == 200
+    assert response.json.get("message") == "Email is unique."
+
+
+def test_user_get_is_email_unique_failed(
+        client, headers, login_client):
+    """
+    Assert application detects no conflict
+    email address and responds 200.
+    """
+    # Arrange
+    url = "/api/users/is_email_unique"
+    post_request_body = {
+        "email": "database_user_a@example.com",
+    }
+    # Act
+    response = client.post(
+        url,
+        data=json.dumps(post_request_body),
+        headers=headers)
+    # Assert
+    assert response.status_code == 400
+    assert response.json.get("message") == "Email is in use."

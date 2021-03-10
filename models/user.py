@@ -191,6 +191,14 @@ class User(db.Model, UserMixin):
             db.session.refresh(user)
         return user
 
+    @staticmethod
+    def is_email_unique(email):
+        user = User.query.filter(User.email == email).first()
+        if user is not None:
+            raise BadRequest(response={
+                "message": "Email is in use."
+            })
+
     # Instance methods
     def password_is_valid(self, password):
         """

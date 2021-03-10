@@ -78,3 +78,15 @@ def patch_user():
         "message": "Success",
         "data": user.to_json_on_patch()
     }), 200
+
+
+@user_routes.route("/is_email_unique", methods=["POST"])
+def is_email_unique():
+
+    # Check if the email is in use
+    User.is_email_unique(request.json.get("email"))
+
+    # Respond 200 if successful
+    return jsonify({
+        "message": "Email is unique.",
+    }), 200
