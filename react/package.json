@@ -43,7 +43,7 @@
     "redux": "^4.0.5",
     "redux-logger": "^3.0.6",
     "redux-thunk": "^2.3.0",
-    "validate": "^5.1.0"
+    "validate.js": "^0.13.1"
   },
   "devDependencies": {
     "sass": "^1.32.8"
