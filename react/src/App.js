@@ -1,5 +1,7 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { Route, Switch } from "react-router-dom";
+import AuthView from "./components/AuthView/AuthView";
 
 import * as securityActions from "./store/reducers/security";
 import * as sessionActions from "./store/reducers/session";
@@ -19,8 +21,19 @@ export default () => {
 
     // On every render attempt to get
     // the session user.
-    dispatch(sessionActions.getSessionUser())
+    dispatch(sessionActions.getSessionUser());
   }, []);
 
-  return <h1>Hello world</h1>;
+  return (
+    <>
+      <Switch>
+        <Route path="/signup" exact={true}>
+          <AuthView type="Signup" />
+        </Route>
+        <Route path="/login" exact={true}>
+          <AuthView type="Login" />
+        </Route>
+      </Switch>
+    </>
+  );
 };
