@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from flask_login import login_required, current_user
+from flask_login import login_required, current_user, login_user
 
 
 from models import db, User
@@ -30,6 +30,10 @@ def post_user():
     })
     db.session.add(user)
     db.session.commit()
+
+    # Automatically log a user in when they have
+    # successfully registered
+    login_user(user)
 
     # Respond 201 if successful
     return jsonify({
