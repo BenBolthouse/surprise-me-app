@@ -3,7 +3,8 @@ from flask_cors import CORS
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_wtf.csrf import validate_csrf
-from werkzeug.exceptions import BadRequest, NotFound, InternalServerError
+from werkzeug.exceptions import BadRequest, NotFound
+from werkzeug.exceptions import InternalServerError, Unauthorized
 import os
 import traceback
 
@@ -26,7 +27,6 @@ is_production = os.environ.get('FLASK_ENV') == 'production'
 
 # User login configuration
 login = LoginManager(app)
-login.login_view = 'auth.unauthorized'
 
 
 @login.user_loader
@@ -84,6 +84,7 @@ def react_root(path):
 @app.errorhandler(InternalServerError)
 @app.errorhandler(BadRequest)
 @app.errorhandler(NotFound)
+@app.errorhandler(Unauthorized)
 # Sends responses automatically from
 # raised exceptions in http routes
 def handle_werkzeug_exceptions(exception):
