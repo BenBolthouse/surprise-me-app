@@ -44,3 +44,13 @@ def get_session():
             "coordLong": str(current_user.coord_long),
         }
     }), 200
+
+
+@session_routes.route("/unauthorized")
+@login_required
+def unauthorized():
+
+    # Respond 401
+    return jsonify({
+        "message": "Unauthorized",
+    }), 401
