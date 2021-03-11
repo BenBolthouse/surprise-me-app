@@ -1,14 +1,16 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Route, Switch } from "react-router-dom";
-import AuthView from "./components/AuthView/AuthView";
+
+import AuthView from "./components/AuthView/AuthView.jsx";
 
 import * as securityActions from "./store/reducers/security";
 import * as sessionActions from "./store/reducers/session";
 
-export default () => {
+const App = () => {
   // Hooks
   const xCsrfToken = useSelector((s) => s.security.xCsrfToken);
+  const sessionUser = useSelector((s) => s.session.user)
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -22,7 +24,7 @@ export default () => {
     // On every render attempt to get
     // the session user.
     dispatch(sessionActions.getSessionUser());
-  }, []);
+  }, [dispatch, xCsrfToken, sessionUser]);
 
   return (
     <>
@@ -37,3 +39,5 @@ export default () => {
     </>
   );
 };
+
+export default App;

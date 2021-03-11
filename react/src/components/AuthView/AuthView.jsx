@@ -1,5 +1,5 @@
-import Login from "../Login/Login";
-import Signup from "../Signup/Signup";
+import Login from "../Login/Login.jsx";
+import Signup from "../Signup/Signup.jsx";
 
 const AuthView = ({ type }) => {
 
@@ -15,8 +15,8 @@ const AuthView = ({ type }) => {
       {type === "Signup" ? <Signup /> : ""}
       {type === "Login" ? <Login /> : ""}
       <div className="auth-view__demo-panel">
-        <a href="#" onClick={loginAsDemoUserA}>Login as Demo User A</a>
-        <a href="#" onClick={loginAsDemoUserB}>Login as Demo User B</a>
+        <a href="/#" onClick={loginAsDemoUserA}>Login as Demo User A</a>
+        <a href="/#" onClick={loginAsDemoUserB}>Login as Demo User B</a>
       </div>
     </div>
   );
