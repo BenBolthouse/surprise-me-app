@@ -151,3 +151,6 @@ cython_debug/
 # .vscode directory does not need to be shared across development environments
 # and so can be ignored.
 .vscode
+
+# Ignore vscode workspace settings
+*.code-workspace
