@@ -80,19 +80,19 @@ export const getSessionUser = () => async (dispatch) => {
 const reducer = (state = { user: userTemplate }, { type, payload }) => {
   switch (type) {
     case LOGIN_SESSION_USER:
-      return { ...state.user, ...payload };
+      return { user: {...state.user, ...payload} };
 
     case LOGOUT_SESSION_USER:
-      return { ...state.user, ...payload };
+      return { user: {...state.user, ...payload} };
 
     case POST_SESSION_USER:
-      return { ...state.user, ...payload };
+      return { user: {...state.user, ...payload} };
 
     case GET_SESSION_USER:
-      return { ...state.user, ...payload };
+      return { user: {...state.user, ...payload} };
 
     case PATCH_SESSION_USER:
-      return { ...state.user, ...payload };
+      return { user: {...state.user, ...payload} };
 
     default:
       return state;
