@@ -6,8 +6,8 @@ from .db import db
 
 
 class UserConnection(db.Model):
-    def __init__(self, connection_user_id):
-        self.connection_user_id = connection_user_id
+    def __init__(self, recipient_user_id):
+        self.recipient_user_id = recipient_user_id
 
     __tablename__ = "user_connections"
 
@@ -19,7 +19,7 @@ class UserConnection(db.Model):
         db.Integer,
         db.ForeignKey('users.id'),
         nullable=False)
-    connection_user_id = db.Column(
+    recipient_user_id = db.Column(
         db.Integer,
         db.ForeignKey('users.id'),
         nullable=False)
@@ -40,6 +40,14 @@ class UserConnection(db.Model):
         "ChatNotification",
         backref="user_connections",
         cascade="all, delete-orphan")
+    _recipient_user = db.relationship(
+        "User",
+        back_populates="_received_connections",
+        foreign_keys=[recipient_user_id])
+    _requestor_user = db.relationship(
+        "User",
+        back_populates="_requested_connections",
+        foreign_keys=[requestor_user_id])
 
     @property
     def messages(self):
@@ -48,6 +56,14 @@ class UserConnection(db.Model):
     @messages.setter
     def messages(self, message):
         self._messages.append(message)
+
+    @property
+    def recipient(self):
+        return self._recipient_user
+
+    @property
+    def requestor(self):
+        return self._requestor_user
 
     # Static methods
     @staticmethod
@@ -84,6 +100,7 @@ class UserConnection(db.Model):
             raise BadRequest(response={
                 "message": "User is not the requestor for this connection."
             })
+        return True
 
     def user_by_id_is_recipient(self, user_id):
         """
@@ -96,10 +113,11 @@ class UserConnection(db.Model):
 
         param `user_id` type Integer
         """
-        if user_id != self.connection_user_id:
+        if user_id != self.recipient_user_id:
             raise BadRequest(response={
                 "message": "User is not the recipient for this connection."
             })
+        return True
 
     def get_chat_messages_after_datetime(self, date_time):
         """
@@ -161,30 +179,20 @@ class UserConnection(db.Model):
         return
 
     # Scopes
-    def to_json_on_create(self):
+    def to_json(self):
         return {
             "id": self.id,
-            "firstName": self.first_name
+            "recipientUserId": self.recipient_user_id,
+            "recipientFirstName": self.recipient.first_name,
+            "recipientLastName": self.recipient.last_name,
         }
-    
-    def to_json_on_get_all(self):
+
+    def to_json_as_recipient(self):
         return {
             "id": self.id,
-            "name": f"{self.first_name} {self.last_name}",
-            "firstName": self.first_name,
-            "establishedAt": self.established_at,
-        }
-    
-    def to_json_on_get_pending(self):
-        return {
-            "id": self.id,
-            "name": f"{self.first_name} {self.last_name}",
-            "firstName": self.first_name,
-        }
-    
-    def to_json_on_get_established(self):
-        return {
-            "id": self.id,
-            "name": f"{self.first_name} {self.last_name}",
-            "firstName": self.first_name,
+            "requestorUserId": self.requestor_user_id,
+            "requestorFirstName": self.requestor.first_name,
+            "requestorLastName": self.requestor.last_name,
+            "accept": f"/api/connections/{self.id}/accept",
+            "deny": f"/api/connections/{self.id}/deny",
         }

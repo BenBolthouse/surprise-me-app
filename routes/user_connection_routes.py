@@ -10,9 +10,9 @@ from utilities import normalize_to_dictionary
 
 
 user_connection_routes = Blueprint(
-    "user_connections",
+    "connections",
     __name__,
-    url_prefix="/api/user_connections")
+    url_prefix="/api/connections")
 
 
 @user_connection_routes.route("", methods=["POST"])
@@ -20,7 +20,7 @@ user_connection_routes = Blueprint(
 def post_user_connection():
 
     # Data from request
-    recipient_id = request.json.get("connectionUserId")
+    recipient_id = request.json.get("recipientUserId")
 
     # Get user with collections from session user id
     user = User.get_by_id(current_user.id)
@@ -44,7 +44,7 @@ def post_user_connection():
     new_notification = UserNotification(
         recipient_id,
         "USER_CONN_REQ",
-        f"{Config.HOST_NAME}/api/user_connections/{new_connection.id}",
+        f"{Config.HOST_NAME}/api/connections/{new_connection.id}",
         f"{user.first_name} {user.last_name} sent you a friend request.")
 
     recipient_user.notifications = new_notification
@@ -55,69 +55,80 @@ def post_user_connection():
     # Respond 201 if successful
     return jsonify({
         "message": "Success",
-        "data": new_connection.to_json_on_create()
+        "data": new_connection.to_json()
     }), 201
 
 
-@user_connection_routes.route("", methods=["GET"])
+@user_connection_routes.route("/<scope>", methods=["GET"])
 @login_required
-def get_all_user_connections():
+def get_all_user_connections(scope):
 
     # Get user with collections from session user id
     user = User.get_by_id(current_user.id)
 
     # Format data for the response
-    response_data = [x.to_json_on_get_all()
-                     for x in user.connections]
+    response_date = []
+    if scope == "sent":
+        response_data = [
+            x.to_json()
+            for x in user.connections
+            if x.user_by_id_is_requestor(user.id)]
+    elif scope == "received":
+        response_data = [
+            x.to_json_as_recipient()
+            for x in user.connections
+            if x.user_by_id_is_recipient(user.id)]
 
     # Respond 200 if successful
     return jsonify({
-        "message": success,
+        "message": "Success",
         "data": response_data
     }), 200
 
 
-@user_connection_routes.route("/pending", methods=["GET"])
+@user_connection_routes.route("/<scope>_pending", methods=["GET"])
 @login_required
-def get_pending_user_connections():
+def get_pending_user_connections(scope):
 
     # Get user with collections from session user id
     user = User.get_by_id(current_user.id)
 
     # Format data for the response
-    response_data = [x.to_json_on_get_pending()
+    response_data = [x.to_json()
                      for x in user.connections
-                     if x.established_at is None]
+                     if x.established_at is None
+                     and x.user_by_id_is_requestor(user.id)]
 
     # Respond 200 if successful
     return jsonify({
-        "message": success,
+        "message": "Success",
         "data": response_data
     }), 200
 
 
-@user_connection_routes.route("/established", methods=["GET"])
+@user_connection_routes.route("/<scope>_established", methods=["GET"])
 @login_required
-def get_established_user_connections():
+def get_established_user_connections(scope):
 
     # Get user with collections from session user id
     user = User.get_by_id(current_user.id)
 
     # Format data for the response
-    response_data = [x.to_json_on_get_established()
+    response_data = [x.to_json()
                      for x in user.connections
-                     if x.established_at is not None]
+                     if x.established_at is not None
+                     and x.user_by_id_is_requestor(user.id)]
 
     # Respond 200 if successful
     return jsonify({
-        "message": success,
+        "message": "Success",
         "data": response_data
     }), 200
 
 
-@user_connection_routes.route("<id>", methods=["PATCH"])
+@user_connection_routes.route("/<id>/<directive>", methods=["PATCH"])
 @login_required
-def patch_fulfill_user_connection(id):
+def patch_fulfill_user_connection(id, directive):
 
     # Get the connection
     connection = UserConnection.get_by_id(int(id))
@@ -130,7 +141,7 @@ def patch_fulfill_user_connection(id):
     connection.user_by_id_is_recipient(user.id)
 
     # Establish or delete connection
-    establish = request.json.get("establish")
+    establish = directive == "accept"
     if establish:
         connection.established_at = datetime.now()
 
@@ -138,7 +149,7 @@ def patch_fulfill_user_connection(id):
         requestor_user = User.query.get(connection.requestor_user_id)
         notification = UserNotification(
             user.id,
-            "USER_CONN_REQ_EST",
+            "USER_CONN_REQ_ESTABLISHED",
             None,
             f"{user.first_name} {user.last_name} accepted your friend request.")  # noqa
         requestor_user.notifications = notification
@@ -148,11 +159,12 @@ def patch_fulfill_user_connection(id):
     else:
         # Else delete the connection request
         db.session.delete(connection)
+        db.session.commit()
 
     # Respond 200 if successful
     return jsonify({
         "message": "Success",
-        "data": connection.to_json_on_create() if establish else "deleted"  # noqa
+        "data": connection.to_json() if establish else "deleted"  # noqa
     }), 200
 
 
