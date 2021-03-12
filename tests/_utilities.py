@@ -1,9 +1,10 @@
+from datetime import datetime
 import json
 import pytest
 
 
 from app import app
-from models import db, User
+from models import db, User, UserConnection
 
 
 @pytest.fixture(scope="function")
@@ -92,6 +93,33 @@ def database_seed_demo_users(client, headers):
             "coord_lat": 123.123456,
             "coord_long": 12.123456,
         },
+        {
+            "password": "Password1234$",
+            "first_name": "Frank",
+            "last_name": "Farquad",
+            "email": "database_user_f@example.com",
+            "share_location": True,
+            "coord_lat": 123.123456,
+            "coord_long": 12.123456,
+        },
+        {
+            "password": "Password1234$",
+            "first_name": "Gregory",
+            "last_name": "Gearhead",
+            "email": "database_user_g@example.com",
+            "share_location": True,
+            "coord_lat": 123.123456,
+            "coord_long": 12.123456,
+        },
+        {
+            "password": "Password1234$",
+            "first_name": "Harriet",
+            "last_name": "Halibut",
+            "email": "database_user_h@example.com",
+            "share_location": True,
+            "coord_lat": 123.123456,
+            "coord_long": 12.123456,
+        },
     ]
 
     for user_template in user_templates:
@@ -101,6 +129,31 @@ def database_seed_demo_users(client, headers):
 
     # Yield users data for testing purposes
     yield user_templates
+
+
+@pytest.fixture(scope="function")
+def database_seed_demo_connections_from_user_a(
+        client, headers, database_seed_demo_users):
+    """
+    Creates a series of connections between demo users.
+    """
+    connection_templates = [2, 3, 4, 5, 6, 7]
+
+    for connection_template in connection_templates:
+        conn = UserConnection(connection_template)
+        conn.requestor_user_id = 1
+
+        if connection_template > 4:
+            conn.established_at = datetime.now()
+
+        db.session.add(conn)
+    db.session.commit()
+
+    # Yield users data for testing purposes
+    yield connection_templates
+
+
+
 
 
 @pytest.fixture(scope="function")
