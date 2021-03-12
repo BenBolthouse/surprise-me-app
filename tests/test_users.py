@@ -25,9 +25,9 @@ def test_user_post_success_yields_user_data(
     url = "/api/users"
     user_template = {
         "password": "Password1234$",
-        "firstName": "Frank",
-        "lastName": "Furwick",
-        "email": "database_user_f@example.com",
+        "firstName": "Ida",
+        "lastName": "Iratemouth",
+        "email": "database_user_i@example.com",
         "shareLocation": True,
         "coordLat": 123.123456,
         "coordLong": 12.123456,
@@ -42,7 +42,7 @@ def test_user_post_success_yields_user_data(
     # Assert
     assert response_message == "Success"
     assert response_data == {
-        "id": 6,
+        "id": 9,
         "firstName": response_data["firstName"],
         "lastName": response_data["lastName"],
         "email": response_data["email"],
