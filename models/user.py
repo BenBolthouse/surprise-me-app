@@ -72,13 +72,13 @@ class User(db.Model, UserMixin):
         cascade="all, delete-orphan")
     _requested_connections = db.relationship(
         "UserConnection",
-        backref="_requestor_user",
+        back_populates="_requestor_user",
         foreign_keys=[UserConnection.requestor_user_id],
         cascade="all, delete-orphan")
     _received_connections = db.relationship(
         "UserConnection",
-        backref="users",
-        foreign_keys=[UserConnection.connection_user_id],
+        back_populates="_recipient_user",
+        foreign_keys=[UserConnection.recipient_user_id],
         cascade="all, delete-orphan")
 
     # Getters setters
@@ -215,7 +215,7 @@ class User(db.Model, UserMixin):
     def user_by_id_is_a_connection(self, id):
         for i in self.connections:
             req_user = i.requestor_user_id == id
-            rec_user = i.connection_user_id == id
+            rec_user = i.recipient_user_id == id
             if req_user or rec_user:
                 raise BadRequest(response={
                     "message": "Connection request already exists for this user relationship."  # noqa
