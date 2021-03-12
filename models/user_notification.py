@@ -29,18 +29,28 @@ class UserNotification(db.Model):
     body = db.Column(
         db.String,
         nullable=False)
-    active = db.Column(
-        db.Boolean,
-        nullable=False,
-        default=True)
-    deleted = db.Column(
-        db.Boolean,
-        nullable=False,
-        default=False)
+    read_at = db.Column(
+        db.DateTime,
+        nullable=True,
+        default=None)
+    dismissed_at = db.Column(
+        db.DateTime,
+        nullable=True,
+        default=None)
     created_at = db.Column(
         db.DateTime,
         server_default=db.func.now())
 
     # TODO implement association getters and setters
 
-    # TODO implement scopes while creating routes
+    def to_json_on_get(self):
+        return {
+            "id": self.id,
+            "userId": self.user_id,
+            "notificationType": self.notification_type,
+            "hook": self.hook,
+            "body": self.body,
+            "readAt": self.read_at,
+            "dismissedAt": self.dismissed_at,
+            "createdAt": self.created_at
+        }
