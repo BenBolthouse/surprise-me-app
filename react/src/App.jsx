@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Route, Switch } from "react-router-dom";
 
 import AuthView from "./components/AuthView/AuthView.jsx";
+import HeartbeatApiAccess from "./components/HeartbeatApiAccess/HeartbeatApiAccess.jsx";
 import UnauthSplash from "./components/UnauthSplash/UnauthSplash.jsx";
 
 import * as securityActions from "./store/reducers/security";
@@ -37,9 +38,12 @@ const App = () => {
         <Route path="/" exact={true}>
           {mounted ?
             sessionUser.id ?
-              "Logged In!" :
-              <UnauthSplash />
-            : ""
+              <>
+                <HeartbeatApiAccess>
+                  "Logged In!
+                </HeartbeatApiAccess>
+              </> :
+              <UnauthSplash /> : ""
           }
         </Route>
         <Route path="/signup" exact={true}>
