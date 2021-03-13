@@ -5,16 +5,11 @@ from .db import db
 
 
 class ChatMessage(db.Model):
-    def __init__(self, user_connection_id, sender_user_id, body):
-        # Do a check on init if the body is empty.
-        # Send BadRequest response
-        if not body or body == "":
-            raise BadRequest(response={
-                "message": "The message body cannot be empty."
-            })
-        self.user_connection_id = user_connection_id
-        self.sender_user_id = sender_user_id
-        self.body = body
+    def __init__(self, config_object):
+        self.user_connection_id = config_object["user_connection_id"]
+        self.sender_user_id = config_object["sender_user_id"]
+        self.recipient_user_id = config_object["recipient_user_id"]
+        self.body = config_object["body"]
 
     __tablename__ = "chat_messages"
 
@@ -27,6 +22,10 @@ class ChatMessage(db.Model):
         db.ForeignKey('user_connections.id'),
         nullable=False)
     sender_user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id'),
+        nullable=False)
+    recipient_user_id = db.Column(
         db.Integer,
         db.ForeignKey('users.id'),
         nullable=False)
@@ -74,6 +73,13 @@ class ChatMessage(db.Model):
                 "message": "A message was not found with the provided id."
             })
         return message
+    
+    @staticmethod
+    def require_body_text_not_empty_or_none(body):
+        if body == "" or body is None:
+            raise BadRequest(response={
+                "message": "The message body cannot be empty or null."
+            })
 
     # Instance methods
     def user_by_id_is_sender(self, user_id):
