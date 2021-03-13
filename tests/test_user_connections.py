@@ -158,6 +158,56 @@ def test_user_connection_patch_success_deny_deletes_request(
     assert db_user_notification is None
 
 
+def test_user_connection_patch_fails_user_not_associated_with_connection(
+        client, headers, login_client):
+    """
+    Assert user B can accept user A's request to connect and
+    creates a notification for user A.
+    """
+    # Arrange
+    url = "/api/connections"
+    request_body = {
+        "recipientUserId": 2,
+    }
+    login = login_client("database_user_a@example.com")
+    client.post(
+        url,
+        data=json.dumps(request_body),
+        headers=headers)
+    # Act
+    url = "/api/connections/1/accept"
+    login = login_client("database_user_c@example.com")
+    response = client.patch(url, headers=headers)
+    # Assertions
+    assert response.status_code == 403
+    assert response.json.get("message") == "User is not the recipient for this connection."
+
+
+def test_user_connection_patch_fails_requestor_attempts_establishment(
+        client, headers, login_client):
+    """
+    Assert user B can accept user A's request to connect and
+    creates a notification for user A.
+    """
+    # Arrange
+    url = "/api/connections"
+    request_body = {
+        "recipientUserId": 2,
+    }
+    login = login_client("database_user_a@example.com")
+    client.post(
+        url,
+        data=json.dumps(request_body),
+        headers=headers)
+    # Act
+    url = "/api/connections/1/accept"
+    login = login_client("database_user_a@example.com")
+    response = client.patch(url, headers=headers)
+    # Assertions
+    assert response.status_code == 403
+    assert response.json.get("message") == "User is not the recipient for this connection."
+
+
 # * ===========================================================================
 # * GET
 # * ===========================================================================

@@ -4,7 +4,7 @@ import pytest
 
 
 from app import app
-from models import db, User, UserConnection
+from models import db, User, UserConnection, ChatMessage
 
 
 @pytest.fixture(scope="function")
@@ -153,7 +153,35 @@ def database_seed_demo_connections_from_user_a(
     yield connection_templates
 
 
+@pytest.fixture(scope="function")
+def database_seed_demo_message_user_a_and_b(
+        client, headers, database_seed_demo_users,
+        database_seed_demo_connections_from_user_a):
+    """
+    Creates a series of messages between demo users A and B.
+    """
+    message_templates = [
+        (1, "Hola", "2020-11-27T12:00:10.000000"),
+        (2, "Como estas?", "2020-11-27T12:00:20.000000"),
+        (1, "We don't know Spanish!", "2020-11-27T12:30:00.000000"),
+        (2, "Lol certainly we don't", "2021-11-27T12:00:10.000000"),
+        (1, "Could you spare 1mil dollars?", "2021-11-27T12:00:20.000000"),
+        (2, "Yeah...goodbye.", "2021-11-27T12:30:00.000000"),
+    ]
 
+    conn = UserConnection(4)
+    conn.requestor_user_id = 1
+    conn.recipient_user_id = 5
+
+    for message_template in message_templates:
+        msg = ChatMessage(1, message_template[0], message_template[1])
+        msg.user_connection_id = 1
+        msg.created_at = message_template[2]
+        db.session.add(msg)
+    db.session.commit()
+
+    # Yield users data for testing purposes
+    yield message_templates
 
 
 @pytest.fixture(scope="function")
