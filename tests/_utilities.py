@@ -140,8 +140,10 @@ def database_seed_demo_connections_from_user_a(
     connection_templates = [2, 3, 4, 5, 6, 7]
 
     for connection_template in connection_templates:
-        conn = UserConnection(connection_template)
-        conn.requestor_user_id = 1
+        conn = UserConnection({
+            "requestor_user_id": 1,
+            "recipient_user_id": connection_template, 
+        })
 
         if connection_template > 4:
             conn.established_at = datetime.now()
@@ -161,22 +163,22 @@ def database_seed_demo_message_user_a_and_b(
     Creates a series of messages between demo users A and B.
     """
     message_templates = [
-        (1, "Hola", "2020-11-27T12:00:10.000000"),
-        (2, "Como estas?", "2020-11-27T12:00:20.000000"),
-        (1, "We don't know Spanish!", "2020-11-27T12:30:00.000000"),
-        (2, "Lol certainly we don't", "2021-11-27T12:00:10.000000"),
-        (1, "Could you spare 1mil dollars?", "2021-11-27T12:00:20.000000"),
-        (2, "Yeah...goodbye.", "2021-11-27T12:30:00.000000"),
+        (1, 5, "Hola", "2020-11-27T12:00:10.000000"),
+        (5, 1, "Como estas?", "2020-11-27T12:00:20.000000"),
+        (1, 5, "We don't know Spanish!", "2020-11-27T12:30:00.000000"),
+        (5, 1, "Lol certainly we don't", "2021-11-27T12:00:10.000000"),
+        (1, 5, "Could you spare 1mil dollars?", "2021-11-27T12:00:20.000000"),
+        (5, 1, "Yeah...goodbye.", "2021-11-27T12:30:00.000000"),
     ]
 
-    conn = UserConnection(4)
-    conn.requestor_user_id = 1
-    conn.recipient_user_id = 5
-
     for message_template in message_templates:
-        msg = ChatMessage(1, message_template[0], message_template[1])
-        msg.user_connection_id = 1
-        msg.created_at = message_template[2]
+        msg = ChatMessage({
+            "user_connection_id": 4,
+            "sender_user_id": message_template[0],
+            "recipient_user_id": message_template[1],
+            "body": message_template[2],
+        })
+        msg.created_at = message_template[3]
         db.session.add(msg)
     db.session.commit()
 
