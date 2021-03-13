@@ -3,7 +3,7 @@ from flask_cors import CORS
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_wtf.csrf import validate_csrf
-from werkzeug.exceptions import BadRequest, NotFound
+from werkzeug.exceptions import BadRequest, NotFound, Forbidden
 from werkzeug.exceptions import InternalServerError, Unauthorized
 import os
 import traceback
@@ -13,6 +13,7 @@ from models import db, User
 
 
 # Route imports
+from routes import chat_message_routes
 from routes import csrf_routes
 from routes import s3_routes
 from routes import session_routes
@@ -47,6 +48,7 @@ def validate_csrf_token():
 
 
 # Route configuration
+app.register_blueprint(chat_message_routes)
 app.register_blueprint(csrf_routes)
 app.register_blueprint(s3_routes)
 app.register_blueprint(session_routes)
@@ -84,6 +86,7 @@ def react_root(path):
 @app.errorhandler(InternalServerError)
 @app.errorhandler(BadRequest)
 @app.errorhandler(NotFound)
+@app.errorhandler(Forbidden)
 @app.errorhandler(Unauthorized)
 # Sends responses automatically from
 # raised exceptions in http routes
