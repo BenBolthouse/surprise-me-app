@@ -73,7 +73,7 @@ class ChatMessage(db.Model):
                 "message": "A message was not found with the provided id."
             })
         return message
-    
+
     @staticmethod
     def require_body_text_not_empty_or_none(body):
         if body == "" or body is None:
