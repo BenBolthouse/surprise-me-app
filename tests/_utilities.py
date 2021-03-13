@@ -1,6 +1,7 @@
 from datetime import datetime
 import json
 import pytest
+import os
 
 
 from app import app
@@ -15,6 +16,7 @@ def client():
     all records from all database tables and
     resets primary key sequences to 1.
     """
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DATABASE_URL"].replace("surprise_me_dev", "surprise_me_test")
     with app.test_client() as client:
         with app.app_context():
             yield client
