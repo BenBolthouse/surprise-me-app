@@ -3,6 +3,7 @@ from flask_cors import CORS
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_wtf.csrf import validate_csrf
+from seed import seed_commands
 from werkzeug.exceptions import BadRequest, NotFound, Forbidden
 from werkzeug.exceptions import InternalServerError, Unauthorized
 import os
@@ -33,6 +34,10 @@ login = LoginManager(app)
 @login.user_loader
 def load_session_user(id):
     return User.get_by_id_on_session_user_load(int(id))
+
+
+# Provide a command to seed the database
+app.cli.add_command(seed_commands)
 
 
 # Require a valid X-CSRFToken for all state-changing requests
