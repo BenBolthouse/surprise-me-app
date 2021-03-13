@@ -359,3 +359,17 @@ def test_user_connection_get_all_received(
             "deny": "/api/connections/1/deny",
         },
     ]
+
+
+def test_user_delete_cascade_deletes_connections(
+        client, headers, login_client,
+        database_seed_demo_connections_from_user_a):
+    # Arrange
+    user_a = User.query.get(1)
+    # Assert connection exists
+    UserConnection.query.get(1) is not None
+    # Act
+    db.session.delete(user_a)
+    db.session.commit()
+    # Assert connection destroyed
+    UserConnection.query.get(1) is None
