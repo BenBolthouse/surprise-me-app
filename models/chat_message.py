@@ -1,11 +1,18 @@
-from werkzeug.exceptions import NotFound, BadRequest
+from werkzeug.exceptions import NotFound, BadRequest, Forbidden
 
 
 from .db import db
 
 
 class ChatMessage(db.Model):
-    def __init__(self, sender_user_id, body):
+    def __init__(self, user_connection_id, sender_user_id, body):
+        # Do a check on init if the body is empty.
+        # Send BadRequest response
+        if not body or body == "":
+            raise BadRequest(response={
+                "message": "The message body cannot be empty."
+            })
+        self.user_connection_id = user_connection_id
         self.sender_user_id = sender_user_id
         self.body = body
 
@@ -21,6 +28,7 @@ class ChatMessage(db.Model):
         nullable=False)
     sender_user_id = db.Column(
         db.Integer,
+        db.ForeignKey('users.id'),
         nullable=False)
     body = db.Column(
         db.String,
@@ -36,6 +44,17 @@ class ChatMessage(db.Model):
     created_at = db.Column(
         db.DateTime,
         server_default=db.func.now())
+
+    # Associations
+    _sender_user = db.relationship(
+        "User",
+        back_populates="_chat_messages",
+        foreign_keys=[sender_user_id])
+
+    # Getters setters
+    @property
+    def sender(self):
+        return self._sender_user
 
     # Static methods
     @staticmethod
@@ -62,43 +81,24 @@ class ChatMessage(db.Model):
         Check if the user id provided is the
         user id of the sender.
 
-        Will raise `werkzeug.errors.BadRequest`
+        Will raise `werkzeug.errors.Forbidden`
         exception if the provided id is not the
         requestor id.
 
         param `user_id` type Integer
         """
         if user_id != self.sender_user_id:
-            raise BadRequest(response={
+            raise Forbidden(response={
                 "message": "User is not the sender of this message."
             })
 
     # Scopes
-    def to_json_on_create(self):
+    def to_json(self):
         return {
             "id": self.id,
             "userConnectionId": self.user_connection_id,
             "senderUserId": self.sender_user_id,
+            "senderUserFirstName": self.sender.first_name,
+            "senderUserLastName": self.sender.last_name,
             "body": self.body,
-            "createdAt": self.created_at,
-        }
-
-    def to_json_on_get(self):
-        return {
-            "id": self.id,
-            "userConnectionId": self.user_connection_id,
-            "senderUserId": self.sender_user_id,
-            "body": self.body,
-            "updated": self.updated,
-            "createdAt": self.created_at,
-        }
-
-    def to_json_on_patch(self):
-        return {
-            "id": self.id,
-            "userConnectionId": self.user_connection_id,
-            "senderUserId": self.sender_user_id,
-            "body": self.body,
-            "updated": self.updated,
-            "createdAt": self.created_at,
         }

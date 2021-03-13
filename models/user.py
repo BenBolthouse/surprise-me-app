@@ -9,6 +9,7 @@ import sqlalchemy as sa
 from .db import db
 from .purchase import Purchase
 from .user_connection import UserConnection
+from .chat_message import ChatMessage
 
 
 class User(db.Model, UserMixin):
@@ -79,6 +80,11 @@ class User(db.Model, UserMixin):
         "UserConnection",
         back_populates="_recipient_user",
         foreign_keys=[UserConnection.recipient_user_id],
+        cascade="all, delete-orphan")
+    _chat_messages = db.relationship(
+        "ChatMessage",
+        back_populates="_sender_user",
+        foreign_keys=[ChatMessage.sender_user_id],
         cascade="all, delete-orphan")
 
     # Getters setters

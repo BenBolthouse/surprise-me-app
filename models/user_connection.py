@@ -1,5 +1,5 @@
 from datetime import datetime
-from werkzeug.exceptions import BadRequest, NotFound
+from werkzeug.exceptions import BadRequest, NotFound, Forbidden
 
 
 from .db import db
@@ -32,7 +32,7 @@ class UserConnection(db.Model):
         default=None)
 
     # Associations
-    _messages = db.relationship(
+    _chat_messages = db.relationship(
         "ChatMessage",
         backref="user_connections",
         cascade="all, delete-orphan")
@@ -49,13 +49,14 @@ class UserConnection(db.Model):
         back_populates="_requested_connections",
         foreign_keys=[requestor_user_id])
 
+    # Getter setter properties
     @property
     def messages(self):
-        return self._messages
+        return self._chat_messages
 
     @messages.setter
     def messages(self, message):
-        self._messages.append(message)
+        self._chat_messages.append(message)
 
     @property
     def recipient(self):
@@ -85,6 +86,24 @@ class UserConnection(db.Model):
         return con
 
     # Instance methods
+    def user_by_id_is_associated(self, user_id):
+        """
+        Check if the user id provided is assigned to a user
+        associated with this connection.
+
+        Will raise `werkzeug.errors.Forbidden` exception if the
+        provided id is not associated.
+
+        param `user_id` type Integer
+        """
+        user_is_requestor = user_id == self.requestor_user_id
+        user_is_recipient = user_id == self.recipient_user_id
+        if not user_is_requestor and not user_is_recipient:
+            raise Forbidden(response={
+                "message": "User is not associated with this connection."
+            })
+            return True
+
     def user_by_id_is_requestor(self, user_id):
         """
         Check if the user id provided is the
@@ -97,7 +116,7 @@ class UserConnection(db.Model):
         param `user_id` type Integer
         """
         if user_id != self.requestor_user_id:
-            raise BadRequest(response={
+            raise Forbidden(response={
                 "message": "User is not the requestor for this connection."
             })
         return True
@@ -114,7 +133,7 @@ class UserConnection(db.Model):
         param `user_id` type Integer
         """
         if user_id != self.recipient_user_id:
-            raise BadRequest(response={
+            raise Forbidden(response={
                 "message": "User is not the recipient for this connection."
             })
         return True
@@ -132,8 +151,7 @@ class UserConnection(db.Model):
         """
         date_time_format = "%Y-%m-%dT%H:%M:%S.%f"
         date_time_obj = datetime.strptime(date_time, date_time_format)
-        message_list = [m.to_json_on_get()
-                        for m in self.messages
+        message_list = [m for m in self.messages
                         if m.created_at > date_time_obj]
         return message_list
 
@@ -155,13 +173,14 @@ class UserConnection(db.Model):
         """
         offset_quantity = offset + quantity
         message_list = self.messages.copy()
+        message_list.reverse()
         message_list = message_list[offset:offset_quantity]
 
         if not message_list:
             raise NotFound(response={
-                "message": "Message offset out of range and yielded no results."  # noqa
+                "message": "No messages were found."  # noqa
             })
-        return [m.to_json_on_get() for m in message_list]
+        return message_list
 
     def require_establishment(self):
         """
@@ -176,7 +195,7 @@ class UserConnection(db.Model):
             raise BadRequest(response={
                 "message": "Connection is not yet established.",
             })
-        return
+        return True
 
     # Scopes
     def to_json(self):
