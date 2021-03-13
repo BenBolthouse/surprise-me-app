@@ -3,6 +3,9 @@ import json
 import pytest
 
 
+from models import ChatMessage
+
+
 from ._utilities import client, headers
 from ._utilities import database_seed_demo_users, login_client
 from ._utilities import database_seed_demo_connections_from_user_a
@@ -76,7 +79,7 @@ def test_message_post_fails_message_body_empty(
         headers=headers)
     # Response assertions
     assert response.status_code == 400
-    assert response.json.get("message") == "The message body cannot be empty."
+    assert response.json.get("message") == "The message body cannot be empty or null."
 
 
 # * ===========================================================================
@@ -88,7 +91,7 @@ def test_get_messages_after_date_success_1(
         client, headers, login_client,
         database_seed_demo_message_user_a_and_b):
     # Arrange
-    url = "/api/user_connections/1/messages/datetime?after=2020-11-27T12:00:00.000000"  # noqa
+    url = "/api/user_connections/4/messages/datetime?after=2020-11-27T12:00:00.000000"  # noqa
     # Act
     login = login_client("database_user_a@example.com")
     response = client.get(url)
@@ -102,7 +105,7 @@ def test_get_messages_after_date_success_2(
         client, headers, login_client,
         database_seed_demo_message_user_a_and_b):
     # Arrange
-    url = "/api/user_connections/1/messages/datetime?after=2021-11-27T12:00:00.000000"  # noqa
+    url = "/api/user_connections/4/messages/datetime?after=2021-11-27T12:00:00.000000"  # noqa
     # Act
     login = login_client("database_user_a@example.com")
     response = client.get(url)
@@ -129,9 +132,9 @@ def test_get_messages_get_by_quantity_with_offset_success_1(
         client, headers, login_client,
         database_seed_demo_message_user_a_and_b):
     # Arrange
-    url = "/api/user_connections/1/messages/range?offset=0&quantity=3"
+    url = "/api/user_connections/4/messages/range?offset=0&quantity=3"
     # Act
-    login = login_client("database_user_b@example.com")
+    login = login_client("database_user_e@example.com")
     response = client.get(url)
     # Response assertions
     assert response.status_code == 200
@@ -143,20 +146,14 @@ def test_get_messages_get_by_quantity_with_offset_success_2(
         client, headers, login_client,
         database_seed_demo_message_user_a_and_b):
     # Arrange
-    url = "/api/user_connections/1/messages/range?offset=3&quantity=3"
+    url = "/api/user_connections/4/messages/range?offset=3&quantity=3"
     # Act
-    login = login_client("database_user_b@example.com")
+    login = login_client("database_user_e@example.com")
     response = client.get(url)
     # Response assertions
     assert response.status_code == 200
     assert response.json.get("message") == "Success"
     assert response.json.get("data")[0]["id"] == 3
-
-
-def test_get_last_success(
-        client, headers, login_client,
-        database_seed_demo_message_user_a_and_b):
-    assert False, "Not implemented"
 
 
 def test_get_last_fails_no_messages(
@@ -165,7 +162,7 @@ def test_get_last_fails_no_messages(
     # Arrange
     url = "/api/user_connections/1/messages/range?offset=3&quantity=3"
     # Act
-    login = login_client("database_user_b@example.com")
+    login_client("database_user_a@example.com")
     response = client.get(url)
     # Response assertions
     assert response.status_code == 404
@@ -180,19 +177,77 @@ def test_get_last_fails_no_messages(
 def test_patch_message_success(
         client, headers, login_client,
         database_seed_demo_message_user_a_and_b):
-    assert False, "Not implemented"
+    # Arrange
+    url = "/api/user_connections/4/messages"
+    request_body = {
+        "id": 6,
+        "body": "Woops! Didn't mean to send that!",
+    }
+    # Assert message original
+    original_message = ChatMessage.query.get(6)
+    assert original_message.body == "Yeah...goodbye."
+    assert original_message.updated is False
+    # Act
+    login_client("database_user_e@example.com")
+    response = client.patch(
+        url,
+        data=json.dumps(request_body),
+        headers=headers)
+    # Assert response
+    assert response.status_code == 200
+    assert response.json.get("message") == "Success"
+    assert response.json.get("data") == {
+        "id": 6,
+        "userConnectionId": 4,
+        "senderUserId": 5,
+        "senderUserFirstName": "Emily",
+        "senderUserLastName": "Earwhisper",
+        "body": "Woops! Didn't mean to send that!",
+    }
+    # Assert database message result
+    original_message = ChatMessage.query.get(6)
+    assert original_message.body == "Woops! Didn't mean to send that!"
+    assert original_message.updated is True
 
 
 def test_patch_message_fails_not_found(
         client, headers, login_client,
         database_seed_demo_message_user_a_and_b):
-    assert False, "Not implemented"
+    # Arrange
+    url = "/api/user_connections/4/messages"
+    request_body = {
+        "id": 9999,
+        "body": "Woops! Didn't mean to send that!",
+    }
+    # Act
+    login_client("database_user_a@example.com")
+    response = client.patch(
+        url,
+        data=json.dumps(request_body),
+        headers=headers)
+    # Assert
+    assert response.status_code == 404
+    assert response.json.get("message") == "A message was not found with the provided id."
 
 
 def test_patch_message_fails_user_not_sender(
         client, headers, login_client,
         database_seed_demo_message_user_a_and_b):
-    assert False, "Not implemented"
+    # Arrange
+    url = "/api/user_connections/4/messages"
+    request_body = {
+        "id": 6,
+        "body": "Woops! Didn't mean to send that!",
+    }
+    # Act
+    login_client("database_user_b@example.com")
+    response = client.patch(
+        url,
+        data=json.dumps(request_body),
+        headers=headers)
+    # Assert
+    assert response.status_code == 403
+    assert response.json.get("message") == "User is not the sender of this message."
 
 
 def test_patch_delete_message_success(
