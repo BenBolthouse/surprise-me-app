@@ -18,7 +18,7 @@ const App = () => {
   // State
   const [mounted, setMounted] = useState(false)
 
-  useEffect(async () => {
+  useEffect(() => {
     // On every render check if the
     // X-CsrfToken exists. If null then
     // retrieve one.
@@ -28,8 +28,8 @@ const App = () => {
 
     // On every render attempt to get
     // the session user.
-    await dispatch(sessionActions.getSessionUser());
-    setMounted(true)
+    dispatch(sessionActions.getSessionUser())
+      .then(() => setMounted(true));
   }, [dispatch]);
 
   return (
@@ -43,7 +43,8 @@ const App = () => {
                   "Logged In!
                 </HeartbeatApiAccess>
               </> :
-              <UnauthSplash /> : ""
+              <UnauthSplash />
+            : ""
           }
         </Route>
         <Route path="/signup" exact={true}>

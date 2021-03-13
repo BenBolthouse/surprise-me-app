@@ -2,13 +2,11 @@ from .db import db
 
 
 class UserNotification(db.Model):
-    def __init__(self, user_id,
-                 notification_type,
-                 hook, body):
-        self.user_id = user_id
-        self.notification_type = notification_type
-        self.hook = hook
-        self.body = body
+    def __init__(self, config_object):
+        self.user_id = config_object["user_id"]
+        self.notification_type = config_object["notification_type"]
+        self.hook = config_object["hook"]
+        self.body = config_object["body"]
 
     __tablename__ = "user_notifications"
 
@@ -43,7 +41,7 @@ class UserNotification(db.Model):
 
     # TODO implement association getters and setters
 
-    def to_json_on_get(self):
+    def to_json(self):
         return {
             "id": self.id,
             "userId": self.user_id,

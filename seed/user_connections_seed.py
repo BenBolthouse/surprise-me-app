@@ -7,6 +7,9 @@ from models import db, UserConnection
 
 
 seed = [
+    (30, 1, None),
+    (31, 1, None),
+    (32, 1, None),
     (1, 2, None),
     (1, 3, None),
     (1, 4, datetime.now()),

@@ -120,7 +120,7 @@ def test_user_connection_patch_success_accept_creates_notification(
     assert db_user_connection.established_at is not None
     assert db_user_notification.id == 2
     assert db_user_notification.user_id == 1
-    assert db_user_notification.notification_type == "USER_CONN_REQ_ESTABLISHED"
+    assert db_user_notification.notification_type == "USER_CONN_ESTABLISHED"
     assert db_user_notification.hook == ""
     assert db_user_notification.body == "Benny Broomtaker accepted your friend request."
     assert db_user_notification.read_at is None
