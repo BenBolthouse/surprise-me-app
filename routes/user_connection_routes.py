@@ -31,7 +31,10 @@ def post_user_connection():
     user.user_by_id_is_a_connection(recipient_id)
 
     # Define the new connection
-    new_connection = UserConnection(recipient_id)
+    new_connection = UserConnection({
+        "requestor_user_id": user.id,
+        "recipient_user_id": recipient_id,
+    })
 
     # Add connection to the session user
     user.connections = new_connection

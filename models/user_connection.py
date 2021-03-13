@@ -6,8 +6,9 @@ from .db import db
 
 
 class UserConnection(db.Model):
-    def __init__(self, recipient_user_id):
-        self.recipient_user_id = recipient_user_id
+    def __init__(self, config_object):
+        self.requestor_user_id = config_object["requestor_user_id"]
+        self.recipient_user_id = config_object["recipient_user_id"]
 
     __tablename__ = "user_connections"
 
@@ -35,11 +36,11 @@ class UserConnection(db.Model):
     _chat_messages = db.relationship(
         "ChatMessage",
         backref="user_connections",
-        cascade="all, delete-orphan")
+        cascade="all, delete")
     _notifications = db.relationship(
         "ChatNotification",
         backref="user_connections",
-        cascade="all, delete-orphan")
+        cascade="all, delete")
     _recipient_user = db.relationship(
         "User",
         back_populates="_received_connections",
@@ -102,7 +103,7 @@ class UserConnection(db.Model):
             raise Forbidden(response={
                 "message": "User is not associated with this connection."
             })
-            return True
+        return self.requestor_user_id if user_is_recipient else self.recipient_user_id  # noqa
 
     def user_by_id_is_requestor(self, user_id):
         """

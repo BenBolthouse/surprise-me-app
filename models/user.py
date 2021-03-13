@@ -13,14 +13,14 @@ from .chat_message import ChatMessage
 
 
 class User(db.Model, UserMixin):
-    def __init__(self, user_object):
-        self.password = user_object["password"]
-        self.first_name = user_object["first_name"]
-        self.last_name = user_object["last_name"]
-        self.email = user_object["email"]
-        self.share_location = user_object["share_location"]
-        self.coord_lat = user_object["coord_lat"]
-        self.coord_long = user_object["coord_long"]
+    def __init__(self, config_object):
+        self.password = config_object["password"]
+        self.first_name = config_object["first_name"]
+        self.last_name = config_object["last_name"]
+        self.email = config_object["email"]
+        self.share_location = config_object["share_location"]
+        self.coord_lat = config_object["coord_lat"]
+        self.coord_long = config_object["coord_long"]
 
     __tablename__ = "users"
 
@@ -62,30 +62,30 @@ class User(db.Model, UserMixin):
         "Purchase",
         backref="users",
         foreign_keys=[Purchase.sender_user_id],
-        cascade="all, delete-orphan")
+        cascade="all, delete")
     _notifications = db.relationship(
         "UserNotification",
         backref="users",
-        cascade="all, delete-orphan")
+        cascade="all, delete")
     _payment_methods = db.relationship(
         "UserPaymentMethod",
         backref="users",
-        cascade="all, delete-orphan")
+        cascade="all, delete")
     _requested_connections = db.relationship(
         "UserConnection",
         back_populates="_requestor_user",
         foreign_keys=[UserConnection.requestor_user_id],
-        cascade="all, delete-orphan")
+        cascade="all, delete")
     _received_connections = db.relationship(
         "UserConnection",
         back_populates="_recipient_user",
         foreign_keys=[UserConnection.recipient_user_id],
-        cascade="all, delete-orphan")
+        cascade="all, delete")
     _chat_messages = db.relationship(
         "ChatMessage",
         back_populates="_sender_user",
         foreign_keys=[ChatMessage.sender_user_id],
-        cascade="all, delete-orphan")
+        cascade="all, delete")
 
     # Getters setters
     @property

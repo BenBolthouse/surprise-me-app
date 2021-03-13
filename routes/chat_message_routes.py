@@ -20,21 +20,31 @@ chat_message_routes = Blueprint(
 @login_required
 def post_connection_message(connection_id):
 
-    # Get the connection
-    connection = UserConnection.get_by_id(int(connection_id))
-
     # Get user with collections from session user id
     user = User.get_by_id(current_user.id)
+
+    # Get request body properties
+    message_body = request.json.get("body")
+
+    # Get the connection
+    connection = UserConnection.get_by_id(int(connection_id))
 
     # Don't allow users to send messages until the connection is established
     connection.require_establishment()
 
     # Don't allow unassociated users ability to post messages
-    connection.user_by_id_is_associated(user.id)
+    other_user = connection.user_by_id_is_associated(user.id)
+
+    # Don't allow empty messages
+    ChatMessage.require_body_text_not_empty_or_none(message_body)
 
     # Create a new chat message
-    message_body = request.json.get("body")
-    message = ChatMessage(connection.id, user.id, message_body)
+    message = ChatMessage({
+        "user_connection_id": connection.id,
+        "sender_user_id": user.id,
+        "recipient_user_id": other_user,
+        "body": request.json.get("body"),
+    })
 
     # Add and commit changes
     db.session.add(message)
@@ -118,12 +128,13 @@ def patch_connection_message(id):
 
     # Update the message
     message.body = request.json.get("body")
+    message.updated = True
     db.session.commit()
 
     # Respond 200 if successful
     return jsonify({
         "message": "Success",
-        "data": message.to_json_on_patch()
+        "data": message.to_json()
     }), 200
 
 
