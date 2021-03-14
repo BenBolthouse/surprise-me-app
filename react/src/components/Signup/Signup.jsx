@@ -72,7 +72,7 @@ const Signup = () => {
     if (window.checkIsEmailUniqueTimeout) {
       clearTimeout(window.checkIsEmailUniqueTimeout);
     }
-    if (evt.target.value == "") {
+    if (evt.target.value === "") {
       setEmail({
         ...email,
         errors: [],
