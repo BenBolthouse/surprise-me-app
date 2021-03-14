@@ -61,9 +61,9 @@ def post_user_connection():
     }), 201
 
 
-@user_connection_routes.route("/<scope>", methods=["GET"])
+@user_connection_routes.route("/", methods=["GET"])
 @login_required
-def get_all_user_connections(scope):
+def get_all_user_connections():
 
     # Get user with collections from session user id
     user = User.get_by_id(current_user.id)
@@ -88,9 +88,9 @@ def get_all_user_connections(scope):
     }), 200
 
 
-@user_connection_routes.route("/<scope>_pending", methods=["GET"])
+@user_connection_routes.route("/pending", methods=["GET"])
 @login_required
-def get_pending_user_connections(scope):
+def get_pending_user_connections():
 
     # Get user with collections from session user id
     user = User.get_by_id(current_user.id)
@@ -108,23 +108,55 @@ def get_pending_user_connections(scope):
     }), 200
 
 
-@user_connection_routes.route("/<scope>_established", methods=["GET"])
+@user_connection_routes.route("/established", methods=["GET"])
 @login_required
-def get_established_user_connections(scope):
+def get_established_user_connections():
 
     # Get user with collections from session user id
     user = User.get_by_id(current_user.id)
 
     # Format data for the response
-    response_data = [x.to_json()
+    response_data = [x.to_json_on_get_in_consumer_context(user.id)
                      for x in user.connections
                      if x.established_at is not None
-                     and x.user_by_id_is_requestor(user.id)]
+                     and x.user_by_id_is_associated(user.id)]
 
     # Respond 200 if successful
     return jsonify({
         "message": "Success",
-        "data": response_data
+        "data": {
+            "datestamp": str(datetime.now()),
+            "connections": response_data,
+        },
+    }), 200
+
+
+@user_connection_routes.route("/established", methods=["POST"])
+@login_required
+def update_established_user_connections():
+
+    # Get user with collections from session user id
+    user = User.get_by_id(current_user.id)
+
+    response_data = []
+
+    datestamp = request.json.get("datestamp")
+
+    client_connections = request.json.get("connections")
+
+    for client_connection in client_connections:
+        connection = UserConnection.query.get(client_connection["id"])
+        if len(connection.messages) > client_connection["messagesCount"]:
+
+            # Add the connection to the response data
+            response_data.append(connection.to_json_on_get_in_consumer_context(user.id))
+
+    return jsonify({
+        "message": "Success",
+        "data": {
+            "datestamp": str(datetime.now()),
+            "connections": response_data,
+        }
     }), 200
 
 
