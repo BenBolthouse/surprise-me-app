@@ -88,16 +88,14 @@ export const stateValidation = async (
   event
 ) => {
   // If event present then use the event target value
-  const value = event ? event.target.value : stateObject.value
+  const value = event ? event.target.value : stateObject.value;
   // Run validation
-  const result = validate({[stateObject.name]: value}, constraints);
+  const result = validate({ [stateObject.name]: value }, constraints);
   // If validation fails...
   if (result) {
     // Get all errors to a single array
     let errors = [];
-    Object.keys(result).map((key) => {
-      errors = [...errors, ...result[key]];
-    });
+    errors = Object.keys(result).map((key) => [...errors, ...result[key]]);
     // Update state
     setStateObject({ ...stateObject, errors });
 
