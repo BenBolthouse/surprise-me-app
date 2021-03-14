@@ -2,10 +2,14 @@ import { createStore, combineReducers } from "redux";
 
 import enhancer from "./enhancer";
 
+import connections from './reducers/connections';
+import notifications from './reducers/notifications';
 import security from './reducers/security';
 import session from './reducers/session';
 
 const rootReducer = combineReducers({
+  connections,
+  notifications,
   security,
   session,
 });
