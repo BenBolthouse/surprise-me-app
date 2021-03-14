@@ -3,6 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { Route, Switch } from "react-router-dom";
 
 import AuthView from "./components/AuthView/AuthView.jsx";
+import Chat from "./components/Chat/Chat.jsx";
+import ChatThread from "./components/ChatThread/ChatThread.jsx";
 import HeartbeatApiAccess from "./components/HeartbeatApiAccess/HeartbeatApiAccess.jsx";
 import UnauthSplash from "./components/UnauthSplash/UnauthSplash.jsx";
 
@@ -31,32 +33,36 @@ const App = () => {
     dispatch(sessionActions.getSessionUser())
       .then(() => setMounted(true))
       .catch(() => setMounted(true));
-}, [dispatch]);
+  }, [dispatch]);
 
-return (
-  <>
-    <Switch>
-      <Route path="/" exact={true}>
-        {mounted ?
-          sessionUser.id ?
-            <>
-              <HeartbeatApiAccess>
-                "Logged In!
+  return (
+    <>
+      <Switch>
+        <Route path="/">
+          {mounted ?
+            sessionUser.id ?
+              <>
+                <HeartbeatApiAccess>
+                  <Route path="/messages/:slug">
+                    <Chat>
+                      <ChatThread />
+                    </Chat>
+                  </Route>
                 </HeartbeatApiAccess>
-            </> :
-            <UnauthSplash />
-          : ""
-        }
-      </Route>
-      <Route path="/signup" exact={true}>
-        <AuthView type="Signup" />
-      </Route>
-      <Route path="/login" exact={true}>
-        <AuthView type="Login" />
-      </Route>
-    </Switch>
-  </>
-);
+              </> :
+              <UnauthSplash />
+            : ""
+          }
+        </Route>
+        <Route path="/signup" exact={true}>
+          <AuthView type="Signup" />
+        </Route>
+        <Route path="/login" exact={true}>
+          <AuthView type="Login" />
+        </Route>
+      </Switch>
+    </>
+  );
 };
 
 export default App;
