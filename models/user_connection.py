@@ -205,7 +205,28 @@ class UserConnection(db.Model):
             "recipientUserId": self.recipient_user_id,
             "recipientFirstName": self.recipient.first_name,
             "recipientLastName": self.recipient.last_name,
+            "messages": [m.to_json() for m in self.messages],
         }
+
+    def to_json_on_get_in_consumer_context(self, consumer_user_id):
+        if consumer_user_id == self.requestor_user_id:
+            return {
+                "id": self.id,
+                "connectionId": self.id,
+                "connectionUserId": self.recipient_user_id,
+                "connectionFirstName": self.recipient.first_name,
+                "connectionLastName": self.recipient.last_name,
+                "messages": [m.to_json() for m in self.messages],
+            }
+        elif consumer_user_id == self.recipient_user_id:
+            return {
+                "id": self.id,
+                "connectionId": self.id,
+                "connectionUserId": self.requestor_user_id,
+                "connectionFirstName": self.requestor.first_name,
+                "connectionLastName": self.requestor.last_name,
+                "messages": [m.to_json() for m in self.messages],
+            }
 
     def to_json_as_recipient(self):
         return {
