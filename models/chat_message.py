@@ -107,4 +107,5 @@ class ChatMessage(db.Model):
             "senderUserFirstName": self.sender.first_name,
             "senderUserLastName": self.sender.last_name,
             "body": self.body,
+            "createdAt": str(self.created_at),
         }
