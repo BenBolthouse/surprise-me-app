@@ -29,33 +29,34 @@ const App = () => {
     // On every render attempt to get
     // the session user.
     dispatch(sessionActions.getSessionUser())
-      .then(() => setMounted(true));
-  }, [dispatch]);
+      .then(() => setMounted(true))
+      .catch(() => setMounted(true));
+}, [dispatch]);
 
-  return (
-    <>
-      <Switch>
-        <Route path="/" exact={true}>
-          {mounted ?
-            sessionUser.id ?
-              <>
-                <HeartbeatApiAccess>
-                  "Logged In!
+return (
+  <>
+    <Switch>
+      <Route path="/" exact={true}>
+        {mounted ?
+          sessionUser.id ?
+            <>
+              <HeartbeatApiAccess>
+                "Logged In!
                 </HeartbeatApiAccess>
-              </> :
-              <UnauthSplash />
-            : ""
-          }
-        </Route>
-        <Route path="/signup" exact={true}>
-          <AuthView type="Signup" />
-        </Route>
-        <Route path="/login" exact={true}>
-          <AuthView type="Login" />
-        </Route>
-      </Switch>
-    </>
-  );
+            </> :
+            <UnauthSplash />
+          : ""
+        }
+      </Route>
+      <Route path="/signup" exact={true}>
+        <AuthView type="Signup" />
+      </Route>
+      <Route path="/login" exact={true}>
+        <AuthView type="Login" />
+      </Route>
+    </Switch>
+  </>
+);
 };
 
 export default App;
