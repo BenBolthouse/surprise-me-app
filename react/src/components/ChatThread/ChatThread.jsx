@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 
@@ -10,10 +10,10 @@ const ChatThread = () => {
   const dispatch = useDispatch();
   const sessionUser = useSelector(s => s.session.user);
   const connections = useSelector(s => s.connections)
-  
+
   // Component state
   const [thread, setThread] = useState(null)
-  
+
   // Get the connection id from the URL
   const { slug } = useParams();
   const connectionId = parseInt(slug)
@@ -32,6 +32,14 @@ const ChatThread = () => {
       dispatch(notificationsActions.deleteChatNotification(connectionId))
     };
   }, [slug, connections])
+
+  // Refs
+  const scrollIntoViewRef = useRef(null)
+  const composeFormRef = useRef(null)
+
+  useEffect(() => {
+    if (scrollIntoViewRef.current) scrollIntoViewRef.current.scrollIntoView();
+  });
 
   // Handle send message
   const submitComposeMessage = (evt) => {
@@ -61,14 +69,16 @@ const ChatThread = () => {
                 message={message}
                 key={`chat-frame-conn-${thread.id}-msg-${message.id}`} />
             ))}
+            <div ref={scrollIntoViewRef} id="chatThreadScrollIntoView"></div>
           </div>
 
           <div className="chat-thread__compose">
-            <form onSubmit={submitComposeMessage}>
-              <textarea
+            <form ref={composeFormRef} onSubmit={submitComposeMessage}>
+              <input
+                type="text"
                 id="chatThreadComposeText"
                 value={composeText}
-                onChange={(e) => setComposeText(e.target.value)} />
+                onChange={(evt) => setComposeText(evt.target.value)} />
               <button type="submit">Send</button>
             </form>
           </div>

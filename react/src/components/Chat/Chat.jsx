@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
+import { IconContext, IoMdMailUnread } from "react-icons/io";
+
+import "./Chat.css";
 
 const Chat = ({ children }) => {
 
@@ -46,17 +49,22 @@ const Chat = ({ children }) => {
   return (
     <>
       {mount ?
-        <div className="chat">
+        <div className="view chat-view">
           <div className="chat__sidebar">
             <ul className="chat__threads-available">
               {activeChats.map(persona => (
-                <Link
+                <NavLink
+                  activeClassName="active"
                   key={`chat-persona-${persona.id}`}
                   to={`/messages/${persona.connectionId}`}>
-                  <li className={`chat__persona-on-${persona.read}`}>
+                  <li className={`chat__on-${persona.read}`}>
+                    <img alt="Profile picture" src={`/f/profile_${persona.connectionUserId}_64p.jpg`} />
                     <p>{`${persona.connectionFirstName} ${persona.connectionLastName}`}</p>
+                    <div className="unread-icon">
+                      <IoMdMailUnread color="#f2075a" />
+                    </div>
                   </li>
-                </Link>
+                </NavLink>
               ))}
             </ul>
           </div>

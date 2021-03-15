@@ -11,6 +11,9 @@ import UnauthSplash from "./components/UnauthSplash/UnauthSplash.jsx";
 import * as securityActions from "./store/reducers/security";
 import * as sessionActions from "./store/reducers/session";
 
+import "./reset.css";
+import "./App.css";
+
 const App = () => {
   // Hooks
   const xCsrfToken = useSelector((s) => s.security.xCsrfToken);
@@ -36,7 +39,7 @@ const App = () => {
   }, [dispatch]);
 
   return (
-    <>
+    <div className="view-container">
       <Switch>
         <Route exact path="/signup">
           {sessionUser.id ?
@@ -55,10 +58,15 @@ const App = () => {
             sessionUser.id ?
               <>
                 <HeartbeatApiAccess>
-                  <Route path="/messages/:slug">
-                    <Chat>
-                      <ChatThread />
-                    </Chat>
+                  <Route path="/messages">
+                    {sessionUser.id ?
+                      <Chat>
+                        <Route path="/messages/:slug">
+                          <ChatThread />
+                        </Route>
+                      </Chat> :
+                      <Redirect to="/" />
+                    }
                   </Route>
                 </HeartbeatApiAccess>
               </> :
@@ -67,7 +75,7 @@ const App = () => {
           }
         </Route>
       </Switch>
-    </>
+    </div>
   );
 };
 
