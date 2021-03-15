@@ -1,5 +1,6 @@
 // State template
 const notificationsTemplate = {
+  datestamp: null,
   chat: {},
 };
 
@@ -68,6 +69,7 @@ const reducer = (state = notificationsTemplate, { type, payload }) => {
       }
       return {
         ...state,
+        datestamp: new Date().toISOString(),
         chat: locStateObj.chat,
       };
 

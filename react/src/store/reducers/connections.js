@@ -1,11 +1,14 @@
+import _ from "lodash";
+
 import { fetch } from "../../services/fetch";
 import { normalize } from "../../services/normalize";
 
-import { store } from '../../index'
+import { store } from "../../index";
 import * as notificationsActions from "./notifications";
 
 // State template
 const stateTemplate = {
+  datestamp: null,
   established: {
     datestamp: null,
     connections: {},
@@ -41,7 +44,7 @@ const UPDATE_ESTABLISHED_CONNECTIONS = "connections/updateEst...Connections";
  * client and webserver states synchronous.
  */
 export const updateEstConnections = () => async (dispatch) => {
-  const estConnCopy = {...store.getState().connections.established};
+  const estConnCopy = { ...store.getState().connections.established };
   const deNormConn = Object.values(estConnCopy.connections);
   const request_body = {
     datestamp: estConnCopy.datestamp,
@@ -75,14 +78,39 @@ export const updateEstConnections = () => async (dispatch) => {
   return res;
 };
 
+const POST_CONNECTION_MESSAGE = "connections/postConnectionMessage";
+
+export const postConnectionMessage = ({
+  connectionId,
+  body,
+}) => async (dispatch) => {
+  const request_body = {
+    body,
+  };
+  const res = await fetch(`/api/connections/${connectionId}/messages`, {
+    method: "POST",
+    body: JSON.stringify(request_body),
+  });
+  const { data } = res.data;
+  dispatch(
+    ((payload) => ({
+      type: POST_CONNECTION_MESSAGE,
+      payload,
+    }))(data)
+  );
+  return data;
+};
+
 // ** «««««««««««««««««««««««« Reducer »»»»»»»»»»»»»»»»»»»»»»»» **
 
 const reducer = (state = stateTemplate, { type, payload }) => {
+  let stateCopy;
 
   switch (type) {
     case GET_ESTABLISHED_CONNECTIONS:
       return {
         ...state,
+        datestamp: new Date(),
         established: {
           datestamp: payload.datestamp,
           connections: payload.connections,
@@ -90,16 +118,25 @@ const reducer = (state = stateTemplate, { type, payload }) => {
       };
 
     case UPDATE_ESTABLISHED_CONNECTIONS:
-      return {
-        ...state,
-        established: {
-          datestamp: payload.datestamp,
-          connections: {
-            ...state.established.connections,
-            ...payload.connections,
+      if(!_.isEmpty(payload.connections)) {
+        return {
+          ...state,
+          established: {
+            connections: {
+              ...state.established.connections,
+              ...payload.connections,
+            },
           },
-        },
-      };
+        };
+      }
+      else return state;
+
+    case POST_CONNECTION_MESSAGE:
+      stateCopy = { ...state };
+      stateCopy.established.connections[payload.userConnectionId].messages.push(
+        payload
+      );
+      return stateCopy;
 
     default:
       return state;
