@@ -1,0 +1,46 @@
+@use "./global" as g;
+
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;500;700;900&display=swap");
+
+// ** «««««««««««««««««««««««« Layout »»»»»»»»»»»»»»»»»»»»»»»» **
+
+body,
+#root {
+    height: 100vh;
+}
+.view-container {
+    // margin-top: 3rem;
+}
+.view {
+    display: block;
+    overflow: hidden;
+    position: relative;
+    height: 100%;
+    width: 100%;
+}
+a {
+    color: g.$interactive-muted;
+    &:hover,
+    &:focus {
+        color: g.$interactive;
+    }
+}
+button {
+    cursor: pointer;
+    border: none;
+    border-radius: 0.25rem;
+    background-color: g.$interactive-muted;
+    color: white;
+    line-height: 1rem;
+    padding: 1rem 2rem;
+    &:hover,
+    &:focus {
+        background-color: g.$interactive;
+    }
+}
+
+// ** «««««««««««««««««««««««« Typography »»»»»»»»»»»»»»»»»»»»»»»» **
+
+* {
+    font-family: "Noto Sans", Arial, sans-serif;
+}
