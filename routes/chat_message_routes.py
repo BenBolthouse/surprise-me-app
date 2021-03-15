@@ -11,7 +11,7 @@ from models import ChatMessage
 chat_message_routes = Blueprint(
     "chat_messages",
     __name__,
-    url_prefix="/api/user_connections")
+    url_prefix="/api/connections")
 
 
 @chat_message_routes.route(
