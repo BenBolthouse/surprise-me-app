@@ -28,7 +28,7 @@ const HeartbeatApiAccess = ({ children }) => {
       // over a setInterval implementation so that any
       // hanging requests pause the beat.
       sendPulse()
-    }, 5000)
+    }, 1000)
   }
 
   useEffect(() => {
