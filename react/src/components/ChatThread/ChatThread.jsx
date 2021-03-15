@@ -1,19 +1,52 @@
+import _ from "lodash";
+
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
+
+import * as connectionsActions from "../../store/reducers/connections"
+import * as notificationsActions from "../../store/reducers/notifications"
 
 const ChatThread = () => {
   // Hooks
+  const dispatch = useDispatch();
+  const sessionUser = useSelector(s => s.session.user);
+  const connections = useSelector(s => s.connections)
+  
+  // Component state
+  const [thread, setThread] = useState(null)
+  
+  // Get the connection id from the URL
   const { slug } = useParams();
-  const thread = useSelector(s => s.connections.established.connections[parseInt(slug)])
+  const connectionId = parseInt(slug)
 
   // Component state
   const [mount, setMount] = useState(false);
+  const [composeText, setComposeText] = useState("");
 
-  // Handle mounting
+  // Side effect get the thread from the connection ID found
+  // in the URL path. Delete notifications about unread
+  // messages for this thread, which are now unneeded.
   useEffect(() => {
-    if (thread) setMount(true);
-  }, [thread])
+    if (connections.established.datestamp) {
+      setMount(true);
+      setThread(connections.established.connections[connectionId])
+      dispatch(notificationsActions.deleteChatNotification(connectionId))
+    };
+  }, [slug])
+
+  // Handle send message
+  const submitComposeMessage = (evt) => {
+    evt.preventDefault();
+    dispatch(connectionsActions.postConnectionMessage({
+      connectionId,
+      senderUserId: sessionUser.id,
+      senderUserFirstName: sessionUser.firstName,
+      senderUserLastName: sessionUser.lastName,
+      body: composeText,
+    }))
+    setComposeText("")
+  }
 
   return (
     <>
@@ -32,8 +65,19 @@ const ChatThread = () => {
             ))}
           </div>
 
+          <div className="chat-thread__compose">
+            <form onSubmit={submitComposeMessage}>
+              <textarea
+                id="chatThreadComposeText"
+                value={composeText}
+                onChange={(e) => setComposeText(e.target.value)} />
+              <button type="submit">Send</button>
+            </form>
+          </div>
+
         </div> : ""}
-    </>);
+    </>
+  );
 }
 
 const ChatFrame = ({ message }) => {
@@ -44,11 +88,10 @@ const ChatFrame = ({ message }) => {
   const { senderUserFirstName, senderUserLastName,
     senderUserId, body, createdAt, } = message
 
-  // Convert datetime
-  let sentAt = Date.parse(createdAt)
-  sentAt = new Date().toDateString(sentAt)
+  // Convert datetime to a readable format
+  const sentAt = new Date(createdAt).toDateString();
 
-  // Style according to sender versus recipient
+  // For use in styling according to who sent the message
   const type = sessionUser.id === senderUserId
     ? "sent"
     : "received"
