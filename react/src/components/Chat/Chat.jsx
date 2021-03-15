@@ -1,5 +1,3 @@
-import _ from "lodash";
-
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
@@ -7,7 +5,6 @@ import { Link } from "react-router-dom";
 const Chat = ({ children }) => {
 
   // Hooks
-  const sessionUser = useSelector(s => s.session.user);
   const connections = useSelector(s => s.connections);
   const notifications = useSelector(s => s.notifications);
 
@@ -22,19 +19,19 @@ const Chat = ({ children }) => {
       // Get only the connections with messages to an active
       // chats array
       const active = [];
-      const estConnections = connections.established.connections;
-      for (const i in estConnections) {
-        if (estConnections[i].messages.length) {
+      const established = connections.established;
+      for (const i in established) {
+        if (established[i].messages.length) {
           if (notifications.chat[i]) {
             active.push({
-              ...estConnections[i],
+              ...established[i],
               messages: null,
               read: "unread",
             })
           }
           else {
             active.push({
-              ...estConnections[i],
+              ...established[i],
               messages: null,
               read: "read",
             })

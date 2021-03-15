@@ -1,5 +1,3 @@
-import _ from "lodash";
-
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
@@ -28,12 +26,12 @@ const ChatThread = () => {
   // in the URL path. Delete notifications about unread
   // messages for this thread, which are now unneeded.
   useEffect(() => {
-    if (connections.established.datestamp) {
+    if (connections.datestamp) {
       setMount(true);
-      setThread(connections.established.connections[connectionId])
+      setThread(connections.established[connectionId])
       dispatch(notificationsActions.deleteChatNotification(connectionId))
     };
-  }, [slug])
+  }, [slug, connections])
 
   // Handle send message
   const submitComposeMessage = (evt) => {
@@ -61,7 +59,7 @@ const ChatThread = () => {
             {thread.messages.map((message, i) => (
               <ChatFrame
                 message={message}
-                key={`chat-frame-conn-${thread.id}-msg-${i}`} />
+                key={`chat-frame-conn-${thread.id}-msg-${message.id}`} />
             ))}
           </div>
 
