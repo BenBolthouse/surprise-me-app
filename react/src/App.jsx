@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Route, Switch } from "react-router-dom";
+import { Redirect, Route, Switch } from "react-router-dom";
 
 import AuthView from "./components/AuthView/AuthView.jsx";
 import Chat from "./components/Chat/Chat.jsx";
@@ -38,6 +38,18 @@ const App = () => {
   return (
     <>
       <Switch>
+        <Route exact path="/signup">
+          {sessionUser.id ?
+            <Redirect to="/" /> :
+            <AuthView type="Signup" />
+          }
+        </Route>
+        <Route exact path="/login">
+          {sessionUser.id ?
+            <Redirect to="/" /> :
+            <AuthView type="Login" />
+          }
+        </Route>
         <Route path="/">
           {mounted ?
             sessionUser.id ?
@@ -53,12 +65,6 @@ const App = () => {
               <UnauthSplash />
             : ""
           }
-        </Route>
-        <Route path="/signup" exact={true}>
-          <AuthView type="Signup" />
-        </Route>
-        <Route path="/login" exact={true}>
-          <AuthView type="Login" />
         </Route>
       </Switch>
     </>
