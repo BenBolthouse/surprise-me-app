@@ -120,6 +120,11 @@ def get_established_user_connections():
                      for x in user.connections
                      if x.established_at is not None
                      and x.user_by_id_is_associated(user.id)]
+    for connection in response_data:
+        connection["messages"] = sorted(
+                connection["messages"],
+                key=lambda e: e["createdAt"],
+                reverse=False)
 
     # Respond 200 if successful
     return jsonify({
@@ -149,7 +154,12 @@ def update_established_user_connections():
         if len(connection.messages) > client_connection["messagesCount"]:
 
             # Add the connection to the response data
-            response_data.append(connection.to_json_on_get_in_consumer_context(user.id))
+            resp_conn = connection.to_json_on_get_in_consumer_context(user.id)
+            resp_conn["messages"] = sorted(
+                resp_conn["messages"],
+                key=lambda e: e["createdAt"],
+                reverse=False)
+            response_data.append(resp_conn)
 
     return jsonify({
         "message": "Success",
