@@ -1,4 +1,3 @@
-from datetime import datetime
 from werkzeug.exceptions import BadRequest, NotFound, Forbidden
 
 
@@ -10,9 +9,10 @@ class UserConnection(db.Model):
         self.requestor_user_id = config_object["requestor_user_id"]
         self.recipient_user_id = config_object["recipient_user_id"]
 
+    # ** «««««««««««««««« Mapped Properties »»»»»»»»»»»»»»»» **
+
     __tablename__ = "user_connections"
 
-    # Properties
     id = db.Column(
         db.Integer,
         primary_key=True)
@@ -32,12 +32,39 @@ class UserConnection(db.Model):
         nullable=True,
         default=None)
 
-    # Associations
+    # ** «««««««««««««««« Scopes »»»»»»»»»»»»»»»» **
+
+    def to_json(self, user_id):
+        user_is_requestor = self.requestor_user_id == user_id
+        return {
+            "id": self.id,
+            "createdAt": self.created_at,
+            "establishedAt": self.established_at,
+            "otherUser": (self.recipient.to_json_without_coordinates()
+                          if user_is_requestor
+                          else self.requestor.to_json_without_coordinates()),
+        }
+
+    def to_dict(self):
+        user_is_requestor = self.requestor_user_id == user_id
+        return {
+            "id": self.id,
+            "created_at": self.created_at,
+            "established_at": self.established_at,
+            "otherUser": (self.recipient.to_dict()
+                          if user_is_requestor
+                          else self.requestor.to_dict()),
+            "messages": [x.to_dict() for x in self.messages],
+            "notifications": [x.to_dict() for x in self.notifications],
+        }
+
+    # ** «««««««««««««««« Associations »»»»»»»»»»»»»»»» **
+
     _chat_messages = db.relationship(
         "ChatMessage",
         backref="user_connections",
         cascade="all, delete")
-    _notifications = db.relationship(
+    _chat_notifications = db.relationship(
         "ChatNotification",
         backref="user_connections",
         cascade="all, delete")
@@ -50,111 +77,84 @@ class UserConnection(db.Model):
         back_populates="_requested_connections",
         foreign_keys=[requestor_user_id])
 
-    # Getter setter properties
+    # ** «««««««««««««««« Getters and Setters »»»»»»»»»»»»»»»» **
+
+    # «««««««« Chat Messages »»»»»»»»
+
     @property
     def messages(self):
         return self._chat_messages
 
     @messages.setter
-    def messages(self, message):
-        self._chat_messages.append(message)
+    def messages(self, messages):
+        self._chat_messages = messages
+
+    # «««««««« Chat Notifications »»»»»»»»
 
     @property
-    def recipient(self):
-        return self._recipient_user
+    def notifications(self):
+        return self._chat_notifications
+
+    @notifications.setter
+    def notifications(self, notifications):
+        self._chat_notifications = notifications
+
+    # «««««««« Requestor User »»»»»»»»
 
     @property
     def requestor(self):
         return self._requestor_user
 
-    # Static methods
+    # «««««««« Recipient User »»»»»»»»
+
+    @property
+    def recipient(self):
+        return self._recipient_user
+
+    # ** «««««««««««««««« Static Class Methods »»»»»»»»»»»»»»»» **
+
     @staticmethod
     def get_by_id(id):
-        """
-        Get a user connection by id.
-
-        Will raise `werkzeug.errors.NotFound`
-        exception if SQLAlchemy cannot find the
-        connection with the provided ID.
-
-        param `id` type Integer
-        """
-        con = UserConnection.query.filter(UserConnection.id == id).first()
+        con = UserConnection.query.get(id)
         if con is None:
             raise NotFound(response={
                 "message": "A connection was not found with the provided id."
             })
         return con
 
-    # Instance methods
-    def user_by_id_is_associated(self, user_id):
-        """
-        Check if the user id provided is assigned to a user
-        associated with this connection.
+    # ** «««««««««««««««« Instance Methods »»»»»»»»»»»»»»»» **
 
-        Will raise `werkzeug.errors.Forbidden` exception if the
-        provided id is not associated.
-
-        param `user_id` type Integer
-        """
-        user_is_requestor = user_id == self.requestor_user_id
-        user_is_recipient = user_id == self.recipient_user_id
-        if not user_is_requestor and not user_is_recipient:
+    def user_is_associated(self, user_id):
+        req_user = user_id == self.requestor_user_id
+        rec_user = user_id == self.recipient_user_id
+        if not req_user and not rec_user:
             raise Forbidden(response={
-                "message": "User is not associated with this connection."
+                "message": "User is not associated with this connection.",  # noqa
             })
-        return self.requestor_user_id if user_is_recipient else self.recipient_user_id  # noqa
+        return (self.requestor_user_id
+                if rec_user
+                else self.recipient_user_id)
 
-    def user_by_id_is_requestor(self, user_id):
-        """
-        Check if the user id provided is the
-        user id of the requestor.
-
-        Will raise `werkzeug.errors.BadRequest`
-        exception if the provided id is not the
-        requestor id.
-
-        param `user_id` type Integer
-        """
+    def user_is_requestor(self, user_id):
         if user_id != self.requestor_user_id:
             raise Forbidden(response={
-                "message": "User is not the requestor for this connection."
+                "message": "User is not the requestor for this connection.",  # noqa
             })
         return True
 
-    def user_by_id_is_recipient(self, user_id):
-        """
-        Check if the user id provided is the
-        user id of the recipient.
-
-        Will raise `werkzeug.errors.BadRequest`
-        exception if the provided id is not the
-        recipient id.
-
-        param `user_id` type Integer
-        """
+    def user_is_recipient(self, user_id):
         if user_id != self.recipient_user_id:
             raise Forbidden(response={
-                "message": "User is not the recipient for this connection."
+                "message": "User is not the recipient for this connection.",  # noqa
             })
         return True
 
-    def get_chat_messages_after_datetime(self, date_time):
-        """
-        Get all chat messages for this
-        connection after the provided datetime
-        string.
-
-        param `date_time` type String formatted
-        as
-        [YYYY]-[mm]-[dd]T[HH]:[MM]:[SS].[ffffff],
-        e.g. 2020-03-09T05:36:14.549101
-        """
-        date_time_format = "%Y-%m-%dT%H:%M:%S.%f"
-        date_time_obj = datetime.strptime(date_time, date_time_format)
-        message_list = [m for m in self.messages
-                        if m.created_at > date_time_obj]
-        return message_list
+    def require_establishment(self):
+        if self.established_at is None:
+            raise Forbidden(response={
+                "message": "Connection is not yet established.",  # noqa
+            })
+        return True
 
     def get_chat_messages_by_offset(self, offset, quantity):
         """
@@ -179,61 +179,6 @@ class UserConnection(db.Model):
 
         if not message_list:
             raise NotFound(response={
-                "message": "No messages were found."  # noqa
+                "message": "No messages were found in the provided range."  # noqa
             })
         return message_list
-
-    def require_establishment(self):
-        """
-        Assert that the connection is
-        established before carrying out an
-        action.
-
-        Will raise `werkzeug.errors.BadRequest`
-        if the connection is not established.
-        """
-        if self.established_at is None:
-            raise BadRequest(response={
-                "message": "Connection is not yet established.",
-            })
-        return True
-
-    # Scopes
-    def to_json(self):
-        return {
-            "id": self.id,
-            "recipientUserId": self.recipient_user_id,
-            "recipientFirstName": self.recipient.first_name,
-            "recipientLastName": self.recipient.last_name,
-            "messages": [m.to_json() for m in self.messages],
-        }
-
-    def to_json_on_get_in_consumer_context(self, consumer_user_id):
-        if consumer_user_id == self.requestor_user_id:
-            return {
-                "id": self.id,
-                "connectionId": self.id,
-                "connectionUserId": self.recipient_user_id,
-                "connectionFirstName": self.recipient.first_name,
-                "connectionLastName": self.recipient.last_name,
-                "messages": [m.to_json() for m in self.messages],
-            }
-        elif consumer_user_id == self.recipient_user_id:
-            return {
-                "id": self.id,
-                "connectionId": self.id,
-                "connectionUserId": self.requestor_user_id,
-                "connectionFirstName": self.requestor.first_name,
-                "connectionLastName": self.requestor.last_name,
-                "messages": [m.to_json() for m in self.messages],
-            }
-
-    def to_json_as_recipient(self):
-        return {
-            "id": self.id,
-            "requestorUserId": self.requestor_user_id,
-            "requestorFirstName": self.requestor.first_name,
-            "requestorLastName": self.requestor.last_name,
-            "accept": f"/api/connections/{self.id}/accept",
-            "deny": f"/api/connections/{self.id}/deny",
-        }

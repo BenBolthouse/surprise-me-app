@@ -8,9 +8,10 @@ class UserNotification(db.Model):
         self.hook = config_object["hook"]
         self.body = config_object["body"]
 
+    # ** «««««««««««««««« Mapped Properties »»»»»»»»»»»»»»»» **
+
     __tablename__ = "user_notifications"
 
-    # Properties
     id = db.Column(
         db.Integer,
         primary_key=True)
@@ -39,16 +40,15 @@ class UserNotification(db.Model):
         db.DateTime,
         server_default=db.func.now())
 
-    # TODO implement association getters and setters
+    # ** «««««««««««««««« Scopes »»»»»»»»»»»»»»»» **
 
     def to_json(self):
         return {
             "id": self.id,
-            "userId": self.user_id,
-            "notificationType": self.notification_type,
+            "type": self.notification_type,
             "hook": self.hook,
             "body": self.body,
             "readAt": self.read_at,
             "dismissedAt": self.dismissed_at,
-            "createdAt": self.created_at
+            "createdAt": self.created_at,
         }

@@ -11,6 +11,8 @@ class ChatMessage(db.Model):
         self.recipient_user_id = config_object["recipient_user_id"]
         self.body = config_object["body"]
 
+    # ** «««««««««««««««« Mapped Properties »»»»»»»»»»»»»»»» **
+
     __tablename__ = "chat_messages"
 
     # Properties
@@ -44,30 +46,51 @@ class ChatMessage(db.Model):
         db.DateTime,
         server_default=db.func.now())
 
-    # Associations
+    # ** «««««««««««««««« Scopes »»»»»»»»»»»»»»»» **
+
+    def to_json(self):
+        return {
+            "id": self.id,
+            "userConnectionId": self.user_connection_id,
+            "sender": self.sender.to_json_without_coordinates(),
+            "body": self.body if not self.deleted else None,
+            "deleted": self.deleted,
+            "updated": self.updated,
+            "createdAt": self.created_at,
+        }
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "user_connection_id": self.user_connection_id,
+            "sender": self.sender.to_dict(),
+            "recipient_user_id": self.recipient_user_id,
+            "body": self.body,
+            "deleted": self.deleted,
+            "updated": self.updated,
+            "created_at": self.created_at,
+        }
+
+    # ** «««««««««««««««« Associations »»»»»»»»»»»»»»»» **
+
     _sender_user = db.relationship(
         "User",
         back_populates="_chat_messages",
         foreign_keys=[sender_user_id])
 
-    # Getters setters
+    # ** «««««««««««««««« Getters and Setters »»»»»»»»»»»»»»»» **
+
+    # «««««««« Sender User »»»»»»»»
+    
     @property
     def sender(self):
         return self._sender_user
 
-    # Static methods
+    # ** «««««««««««««««« Static Class Methods »»»»»»»»»»»»»»»» **
+
     @staticmethod
-    def get_by_id(id):
-        """
-        Get a chat message by id.
-
-        Will raise `werkzeug.errors.NotFound`
-        exception if SQLAlchemy cannot find the
-        message with the provided ID.
-
-        param `id` type Integer
-        """
-        message = ChatMessage.query.filter(ChatMessage.id == id).first()
+    def exists(id):
+        message = ChatMessage.query.get(id)
         if message is None:
             raise NotFound(response={
                 "message": "A message was not found with the provided id."
@@ -75,37 +98,18 @@ class ChatMessage(db.Model):
         return message
 
     @staticmethod
-    def require_body_text_not_empty_or_none(body):
+    def require_body_text(body):
         if body == "" or body is None:
             raise BadRequest(response={
                 "message": "The message body cannot be empty or null."
             })
+        return True
 
-    # Instance methods
-    def user_by_id_is_sender(self, user_id):
-        """
-        Check if the user id provided is the
-        user id of the sender.
+    # ** «««««««««««««««« Instance Methods »»»»»»»»»»»»»»»» **
 
-        Will raise `werkzeug.errors.Forbidden`
-        exception if the provided id is not the
-        requestor id.
-
-        param `user_id` type Integer
-        """
+    def user_is_sender(self, user_id):
         if user_id != self.sender_user_id:
             raise Forbidden(response={
                 "message": "User is not the sender of this message."
             })
-
-    # Scopes
-    def to_json(self):
-        return {
-            "id": self.id,
-            "userConnectionId": self.user_connection_id,
-            "senderUserId": self.sender_user_id,
-            "senderUserFirstName": self.sender.first_name,
-            "senderUserLastName": self.sender.last_name,
-            "body": self.body,
-            "createdAt": str(self.created_at),
-        }
+        return True
