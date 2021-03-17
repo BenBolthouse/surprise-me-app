@@ -33,7 +33,7 @@ login = LoginManager(app)
 
 @login.user_loader
 def load_session_user(id):
-    return User.get_by_id_on_session_user_load(int(id))
+    return User.query.get(int(id))
 
 
 # Provide a command to seed the database
