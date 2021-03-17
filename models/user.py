@@ -1,9 +1,7 @@
 from flask import jsonify
 from flask_login import UserMixin, current_user
-from sqlalchemy.orm import raiseload
-from werkzeug.exceptions import BadRequest, NotFound, InternalServerError
+from werkzeug.exceptions import BadRequest, NotFound
 from werkzeug.security import generate_password_hash, check_password_hash
-import sqlalchemy as sa
 
 
 from .db import db
@@ -22,9 +20,10 @@ class User(db.Model, UserMixin):
         self.coord_lat = config_object["coord_lat"]
         self.coord_long = config_object["coord_long"]
 
+    # ** «««««««««««««««« Mapped Properties »»»»»»»»»»»»»»»» **
+
     __tablename__ = "users"
 
-    # Properties
     id = db.Column(
         db.Integer,
         primary_key=True)
@@ -57,7 +56,52 @@ class User(db.Model, UserMixin):
         db.DateTime,
         server_default=db.func.now())
 
-    # Associations
+    # ** «««««««««««««««« Scopes »»»»»»»»»»»»»»»» **
+
+    def to_json(self):
+        return {
+            "id": self.id,
+            "firstName": self.first_name,
+            "lastName": self.last_name,
+            "email": self.email,
+            "shareLocation": self.share_location,
+            "coordLat": self.coord_lat,
+            "coordLong": self.coord_long,
+            "notifications": [x.to_json() for x in self.notifications],
+            "createdAt": self.created_at,
+            "updatedAt": self.updated_at,
+        }
+
+    def to_json_connections(self):
+        return {
+            "connections": [x.to_json() for x in self.connections],
+        }
+
+    def to_json_without_coordinates(self):
+        return {
+            "id": self.id,
+            "firstName": self.first_name,
+            "lastName": self.last_name,
+            "email": self.email,
+            "createdAt": self.created_at,
+            "updatedAt": self.updated_at,
+        }
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "email": self.email,
+            "share_location": self.share_location,
+            "coord_lat": self.coord_lat,
+            "coord_long": self.coord_long,
+            "created_at": self.created_at,
+            "updated_at": self.updated_at,
+        }
+
+    # ** «««««««««««««««« Associations »»»»»»»»»»»»»»»» **
+
     _purchases = db.relationship(
         "Purchase",
         backref="users",
@@ -87,7 +131,10 @@ class User(db.Model, UserMixin):
         foreign_keys=[ChatMessage.sender_user_id],
         cascade="all, delete")
 
-    # Getters setters
+    # ** «««««««««««««««« Getters and Setters »»»»»»»»»»»»»»»» **
+
+    # «««««««« Password »»»»»»»»
+
     @property
     def password(self):
         return self.hashed_password
@@ -95,6 +142,8 @@ class User(db.Model, UserMixin):
     @password.setter
     def password(self, password):
         self.hashed_password = generate_password_hash(password)
+
+    # «««««««« Connections »»»»»»»»
 
     @property
     def connections(self):
@@ -106,6 +155,8 @@ class User(db.Model, UserMixin):
     def connections(self, connection):
         self._requested_connections.append(connection)
 
+    # «««««««« Notifications »»»»»»»»
+
     @property
     def notifications(self):
         return self._notifications
@@ -114,156 +165,81 @@ class User(db.Model, UserMixin):
     def notifications(self, notification):
         self._notifications.append(notification)
 
-    # Static methods
+    # ** «««««««««««««««« Static Class Methods »»»»»»»»»»»»»»»» **
 
     @staticmethod
-    def check_is_email_unique(email):
-        """
-        Check to see if an email is in use.
-
-        Will raise
-        `werkzeug.exceptions.BadRequest` if the
-        email is not unique.
-
-        param `email` String
-        """
+    def email_address_is_unique(email):
         user = User.query.filter(User.email == email).first()
         if user is not None:
             raise BadRequest(response={
-                "message": "The requested email is in use."
-            })
-        return True
-
-    @staticmethod
-    def get_by_id_on_session_user_load(id):
-        """
-        Special case loader doesn't include
-        collections or purchases in loading
-        utilizing `SQLAlchemy.orm.raiseload` to
-        prevent eager loading potentially huge
-        collections.
-
-        param `id` Integer
-        """
-        user = User.query.options(
-            raiseload("_requested_connections"),
-            raiseload("_received_connections")
-        ).filter(User.id == id).first()
-        if user is None:
-            raise NotFound(response={
-                "message": "A user was not found with the provided id."
+                "message": "The requested email is already in use.",  # noqa
             })
         return user
 
     @staticmethod
     def get_by_id(id):
-        """
-        Get a user by id and refresh the
-        SQLAlchemy session user.
-
-        Will raise `werkzeug.errors.NotFound`
-        if a user isn't found.
-
-        param `id` Integer
-        """
         user = User.query.filter(User.id == id).first()
         if user is None:
             raise NotFound(response={
-                "message": "A user was not found with the provided id."
+                "message": "A user was not found with the provided id.",  # noqa
             })
-        # Perform refresh to get raiseload collections
-        if not current_user.is_anonymous and current_user.id == user.id:
-            db.session.refresh(user)
         return user
 
     @staticmethod
-    def get_by_email(email):
-        """
-        Get a user by email and refresh the
-        SQLAlchemy session user.
-
-        Will raise `werkzeug.errors.NotFound`
-        if a user isn't found.
-
-        param `id` Integer
-        """
+    def find_one_by_email(email):
         user = User.query.filter(User.email == email).first()
         if user is None:
             raise NotFound(response={
-                "message": "A user was not found with the provided email."
+                "message": "A user was not found with the provided email.",  # noqa
             })
-        # Perform refresh to get raiseload collections
-        if not current_user.is_anonymous and current_user.id == user.id:
-            db.session.refresh(user)
         return user
 
-    @staticmethod
-    def is_email_unique(email):
-        user = User.query.filter(User.email == email).first()
-        if user is not None:
-            raise BadRequest(response={
-                "message": "Email is in use."
-            })
+    # ** «««««««««««««««« Instance Methods »»»»»»»»»»»»»»»» **
 
-    # Instance methods
+    def update(self, config_object):
+        self.email_address_is_unique(config_object["email"])
+        self.first_name = config_object("firstName") or self.first_name
+        self.last_name = config_object("lastName") or self.last_name
+        self.email = config_object("email") or self.email
+        self.coord_lat = config_object("coordLat") or self.coord_lat
+        self.coord_long = config_object("coordLong") or self.coord_long
+        self.share_location = (True
+                               if config_object("shareLocation") is True
+                               else False)
+
+        return True
+
     def password_is_valid(self, password):
-        """
-        Check if a string is a valid password.
-
-        param `password` String
-        """
         if not check_password_hash(self.password, password):
             raise BadRequest(response={
                 "message": "Password is incorrect."
             })
         return True
 
-    def user_by_id_is_a_connection(self, id):
+    def other_user_is_a_connection(self, other_user_id):
         for i in self.connections:
-            req_user = i.requestor_user_id == id
-            rec_user = i.recipient_user_id == id
+            req_user = i.requestor_user_id == other_user_id
+            rec_user = i.recipient_user_id == other_user_id
+            if req_user or rec_user:
+                return i
+        raise BadRequest(response={
+            "message": "Other user is not connected to session user.",  # noqa
+        })
+
+    def other_user_is_not_a_connection(self, other_user_id):
+        for i in self.connections:
+            req_user = i.requestor_user_id == other_user_id
+            rec_user = i.recipient_user_id == other_user_id
             if req_user or rec_user:
                 raise BadRequest(response={
-                    "message": "Connection request already exists for this user relationship."  # noqa
+                    "message": "Other user is already connected to session user.",  # noqa
                 })
+        return True
 
-    # Scopes
-    def to_json_on_create(self):
-        return {
-            "id": self.id,
-            "firstName": self.first_name,
-            "lastName": self.last_name,
-            "email": self.email,
-            "shareLocation": self.share_location,
-        }
+    def add_connection(self, connection):
+        self._requested_connections.append(connection)
+        return True
 
-    def to_json_on_login(self):
-        return {
-            "id": self.id,
-            "firstName": self.first_name,
-            "lastName": self.last_name,
-            "email": self.email,
-            "shareLocation": self.share_location,
-        }
-
-    def to_json_on_session_get(self):
-        return {
-            "id": self.id,
-            "firstName": self.first_name,
-            "lastName": self.last_name,
-            "email": self.email,
-            "shareLocation": self.share_location,
-            "coordLat": str(self.coord_lat),
-            "coordLong": str(self.coord_long),
-        }
-
-    def to_json_on_patch(self):
-        return {
-            "id": self.id,
-            "firstName": self.first_name,
-            "lastName": self.last_name,
-            "email": self.email,
-            "shareLocation": self.share_location,
-            "coordLat": str(self.coord_lat),
-            "coordLong": str(self.coord_long),
-        }
+    def add_notification(self, notification):
+        self._notification.append(notification)
+        return True
