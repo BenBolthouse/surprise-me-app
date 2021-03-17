@@ -1,7 +1,10 @@
 from ._route_decorator import RouteDecorator
 from ._validator import validator
 
-# Validator schemas
+
+# ** «««««««««««««««« Rules »»»»»»»»»»»»»»»» **
+
+
 _required = {
     "required": True,
     "nullable": False,
@@ -48,8 +51,11 @@ _coord_long = {
 }
 
 
+# ** «««««««««««««««« Validations »»»»»»»»»»»»»»»» **
+
+
 def _on_post(request):
-    v_object = {
+    doc = {
         "password": request.json.get("password"),
         "firstName": request.json.get("firstName"),
         "lastName": request.json.get("lastName"),
@@ -58,7 +64,7 @@ def _on_post(request):
         "coordLat": str(request.json.get("coordLat")),
         "coordLong": str(request.json.get("coordLong")),
     }
-    v_schema = {
+    schema = {
         "password": {**_password, **_required},
         "firstName": {**_first_name, **_required},
         "lastName": {**_last_name, **_required},
@@ -69,14 +75,14 @@ def _on_post(request):
     }
 
     # Run validation
-    validator(request, v_schema, v_object)
+    validator(request, schema, doc)
 
 
 user_validate_on_post = RouteDecorator(req=_on_post)
 
 
 def _on_patch(request):
-    v_object = {
+    doc = {
         "password": request.json.get("password"),
         "firstName": request.json.get("firstName"),
         "lastName": request.json.get("lastName"),
@@ -84,16 +90,16 @@ def _on_patch(request):
         "shareLocation": request.json.get("shareLocation"),
     }
     if request.json.get("coordLat"):
-        v_object = {
-            **v_object,
+        doc = {
+            **doc,
             "coordLat": str(request.json.get("coordLat")),
         }
     if request.json.get("coordLong"):
-        v_object = {
-            **v_object,
+        doc = {
+            **doc,
             "coordLong": str(request.json.get("coordLong")),
         }
-    v_schema = {
+    schema = {
         "password": _password,
         "firstName": _first_name,
         "lastName": _last_name,
@@ -104,7 +110,7 @@ def _on_patch(request):
     }
 
     # Run validation
-    validator(request, v_schema, v_object)
+    validator(request, schema, doc)
 
 
 user_validate_on_patch = RouteDecorator(req=_on_patch)

@@ -12,12 +12,12 @@ def validate_password_update(password):
         "required": True,
         "nullable": False,
     }
-    v_object = {
+    doc = {
         "password": password
     }
-    v_schema = {
+    schema = {
         "password": _password_update
     }
 
     # Run validation
-    validator(request, v_schema, v_object)
+    validator(request, schema, doc)
