@@ -4,6 +4,7 @@ from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_wtf.csrf import validate_csrf
 from seed import seed_commands
+from flask_socketio import SocketIO
 from werkzeug.exceptions import BadRequest, NotFound, Forbidden
 from werkzeug.exceptions import InternalServerError, Unauthorized
 import os
@@ -11,7 +12,6 @@ import traceback
 
 from config import Config
 from models import db, User
-
 
 # Route imports
 from routes import chat_message_routes
@@ -21,7 +21,15 @@ from routes import session_routes
 from routes import user_connection_routes
 from routes import user_routes
 
+# Needed to run eventlet server
+
 app = Flask(__name__)
+
+# Configure websockets
+socketio = SocketIO(app,
+                    logger=True,
+                    engineio_logger=True,
+                    cors_allowed_origins="*")
 
 # Environment setup
 app.config.from_object(Config)
@@ -109,3 +117,8 @@ def handle_all_other_exceptions(exception):
         "message": "There was an unexpected internal server error.",
         "traceback": trace_array if not is_production else ""
     }), 500
+
+
+@socketio.on("connect")
+def socketio_on_client_connect():
+    emit('connect', {'data': 'Client connected successfully'})
