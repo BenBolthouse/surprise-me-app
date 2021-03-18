@@ -2,6 +2,7 @@ import os
 
 
 class Config:
+    GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY')
     HOST_NAME = os.environ.get('HOST_NAME')
     S3_BUCKET = os.environ.get('S3_BUCKET')
     SECRET_KEY = os.environ.get('SECRET_KEY')
