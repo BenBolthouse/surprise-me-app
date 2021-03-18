@@ -48,9 +48,9 @@ def post_user_connection():
     # Create notifications for connection user
     notification = UserNotification({
         "user_id": recipient_user_id,
-        "notification_type", "Connection Request",
-        "hook", f"{Config.HOST_NAME}/api/connections/{connection.id}",
-        "body", f"{session_user.first_name} {session_user.last_name} sent you a friend request.",  # noqa
+        "notification_type": "Connection Request",
+        "hook": f"{Config.HOST_NAME}/api/connections/{connection.id}",
+        "body": f"{session_user.first_name} {session_user.last_name} sent you a friend request.",  # noqa
     })
 
     # Get recipient user
@@ -109,9 +109,9 @@ def patch_accept_user_connection_request(id):
     connection.established_at = datetime.now()
     notification = UserNotification({
         "user_id": connection.requestor_user_id,
-        "notification_type", "Connection Request Accepted",
-        "hook", f"{Config.HOST_NAME}/users/{session_user.id}",
-        "body", f"{connection.recipient.first_name} {connection.recipient.last_name} accepted your friend request.",  # noqa
+        "notification_type": "Connection Request Accepted",
+        "hook": f"{Config.HOST_NAME}/users/{session_user.id}",
+        "body": f"{connection.recipient.first_name} {connection.recipient.last_name} accepted your friend request.",  # noqa
     })
     connection.requestor.add_notification(notification)
     db.session.commit()
