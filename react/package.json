@@ -35,6 +35,7 @@
   },
   "proxy": "http://localhost:5000",
   "dependencies": {
+    "@react-google-maps/api": "^2.1.1",
     "http-proxy-middleware": "^1.0.6",
     "lodash": "^4.17.21",
     "react": "^17.0.1",
