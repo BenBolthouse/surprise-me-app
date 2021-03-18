@@ -1,7 +1,7 @@
 import { fetch } from "../../services/fetch";
 
 // Action constants
-const GET_X_CSRF_TOKEN = "session/getXCsrfToken";
+const GET_X_CSRF_TOKEN = "security/getXCsrfToken";
 
 // State template
 const securityTemplate = {
