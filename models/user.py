@@ -186,7 +186,7 @@ class User(db.Model, UserMixin):
         return user
 
     @staticmethod
-    def find_one_by_email(email):
+    def get_by_email(email):
         user = User.query.filter(User.email == email).first()
         if user is None:
             raise NotFound(response={
