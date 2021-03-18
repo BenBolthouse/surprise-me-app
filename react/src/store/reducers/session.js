@@ -1,5 +1,7 @@
 import { fetch } from "../../services/fetch";
 
+import * as securityActions from './security'
+
 // State template
 const userTemplate = {
   id: null,
@@ -40,9 +42,20 @@ const LOGOUT_SESSION_USER = "session/logoutSessionUser";
 /**
  * Remove the session for the user and clear Redux state.
  */
-export const logoutSessionUser = () => ({
-  type: LOGOUT_SESSION_USER,
-});
+export const logoutSessionUser = () => async (dispatch) => {
+  const res = await fetch("/api/sessions", {
+    method: "DELETE",
+  });
+  const { data } = res.data;
+  dispatch(
+    ((payload) => ({
+      type: LOGOUT_SESSION_USER,
+      payload,
+    }))(data)
+  );
+  dispatch(securityActions.getXCsrfToken())
+  return res;
+};
 
 const POST_SESSION_USER = "session/postSessionUser";
 /**
