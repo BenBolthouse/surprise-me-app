@@ -27,6 +27,9 @@ Jinja2 = "==2.11.3"
 Mako = "==1.1.4"
 MarkupSafe = "==1.1.1"
 WTForms = "==2.3.3"
+flask-socketio = "*"
+eventlet = "*"
+gevent = "*"
 
 [dev-packages]
 autopep8 = "==1.5.5"
