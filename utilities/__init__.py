@@ -6,7 +6,6 @@ from config import Config
 
 
 BUCKET_NAME = Config.S3_BUCKET
-PATH_TO_TEMP = os.path.dirname(__file__)
 
 
 def normalize_to_dictionary(input_list):
