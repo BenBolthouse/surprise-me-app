@@ -1,0 +1,25 @@
+@use '../../global' as g;
+
+@media screen and (min-width: g.$screen-size-sm) {
+    .modal {
+        background-color: rgba(0, 0, 0, 0.5);
+        grid-template: 2rem auto 2rem / 2rem auto 2rem;
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        .modal__center {
+            align-self: start;
+            grid-column: 2 / 3;
+            grid-row: 2 / 3;
+            pointer-events: visible;
+        }
+    }
+}
+
+@media screen and (min-width: g.$screen-size-md) {
+    .modal {
+        grid-template: 6rem auto 6rem / auto 24rem auto;
+    }
+}

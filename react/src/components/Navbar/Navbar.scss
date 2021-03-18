@@ -1,0 +1,164 @@
+@use '../../global' as g;
+
+@media screen and (min-width: g.$screen-size-sm) {
+    .navbar-viewport-container {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 400;
+        .navbar {
+            background-color: g.$color-off-white;
+            box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.3);
+            display: block;
+            height: 3.5rem;
+            padding: 0.25rem 0.5rem 0;
+            .navbar__page-width {
+                display: grid;
+                grid-template-columns: auto auto;
+                margin: 0 auto;
+                max-width: g.$screen-size-dt;
+            }
+            .navbar__brand {
+                grid-column: 1 / 2;
+                justify-self: start;
+                background-color: g.$blk-90;
+                border-radius: 50%;
+                height: 3rem;
+                width: 3rem;
+            }
+            .navbar__links {
+                grid-template-columns: auto 3rem 3rem 3.5rem 3rem;
+                grid-column: 3 / 4;
+                a {
+                    display: block;
+                }
+                a.active {
+                    border-bottom: 3px solid g.$color-interact;
+                    * {
+                        color: g.$color-interact;
+                    }
+                }
+                a.browse {
+                    grid-column: 2 / 3;
+                    padding: 0.5rem;
+                    margin: 0.25rem 0 0;
+                    height: 3rem;
+                    width: 2.5rem;
+                }
+                a.search {
+                    grid-column: 3 / 4;
+                    padding: 0.5rem;
+                    margin: 0.25rem 0 0;
+                    height: 3rem;
+                    width: 2.5rem;
+                }
+                a.chat {
+                    grid-column: 4 / 5;
+                    padding: 0.5rem;
+                    margin: 0.25rem 0 0;
+                    height: 3rem;
+                    width: 2.5rem;
+                }
+                a.profile {
+                    grid-column: 5 / 6;
+                    padding: 0.25rem;
+                    padding: 0.25rem;
+                    height: 3.25rem;
+                    width: 3rem;
+                }
+                svg {
+                    color: g.$blk-60;
+                    height: 1.5rem;
+                    width: 1.5rem;
+                    &:hover {
+                        color: g.$blk-50;
+                    }
+                }
+                img {
+                    border: 2px solid white;
+                    box-shadow: 0 1px 2px 0 g.$blk-60;
+                    border-radius: 50%;
+                    object-fit: cover;
+                    height: 2.5rem;
+                    width: 2.5rem;
+                    &:hover {
+                        box-shadow: 0 3px 3px 0 g.$blk-70;
+                    }
+                }
+            }
+            .user-menu {
+                background-color: white;
+                border-radius: 0.5rem;
+                overflow: hidden;
+                align-content: start;
+                position: relative;
+                .close {
+                    cursor: pointer;
+                    fill: #ffffff;
+                    position: absolute;
+                    height: 1.5rem;
+                    width: 1.5rem;
+                    opacity: 0.8;
+                    top: 1rem;
+                    right: 1rem;
+                    z-index: 902;
+                    &:hover {
+                        opacity: 1;
+                    }
+                }
+            }
+            .user-menu__header {
+                grid-template: 10rem 2rem 2rem / 1fr;
+                background-color: rgb(140, 47, 79);
+                color: white;
+                padding: 1.5rem 0 1rem;
+                img {
+                    background-color: white;
+                    border: 2px solid white;
+                    align-self: center;
+                    justify-self: center;
+                    border-radius: 50%;
+                    object-fit: cover;
+                    height: 128px;
+                    width: 128px;
+                }
+                p {
+                    text-align: center;
+                    &.name {
+                        line-height: 2rem;
+                        font-size: (20rem / 16);
+                    }
+                    &.email {
+                        line-height: 2rem;
+                        font-size: (14rem / 16);
+                        font-weight: bold;
+                        opacity: 0.6;
+                    }
+                }
+            }
+            .user-menu__menu {
+                display: grid;
+                grid-template-rows: repeat(5, 2.5rem);
+                padding: 1rem 0 1.5rem;
+                text-align: center;
+                li {
+                    height: 2.5rem;
+                    line-height: 2.5rem;
+                    a {
+                        display: grid;
+                        grid-template-columns: 1.5rem auto;
+                        justify-content: center;
+                        svg {
+                            margin: 0.75rem 0;
+                        }
+                    }
+                }
+                li.logout {
+                    grid-row: -2 / span 1;
+                }
+            }
+        }
+    }
+}

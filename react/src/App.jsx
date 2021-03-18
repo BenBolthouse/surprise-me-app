@@ -5,7 +5,7 @@ import { Redirect, Route, Switch } from "react-router-dom";
 import AuthView from "./components/AuthView/AuthView.jsx";
 import Chat from "./components/Chat/Chat.jsx";
 import ChatThread from "./components/ChatThread/ChatThread.jsx";
-import HeartbeatApiAccess from "./components/HeartbeatApiAccess/HeartbeatApiAccess.jsx";
+import Navbar from "./components/Navbar/Navbar.jsx";
 import UnauthSplash from "./components/UnauthSplash/UnauthSplash.jsx";
 
 import * as securityActions from "./store/reducers/security";
@@ -20,7 +20,7 @@ const App = () => {
   const sessionUser = useSelector((s) => s.session.user)
   const dispatch = useDispatch();
 
-  // State
+  // Component state
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -54,25 +54,29 @@ const App = () => {
           }
         </Route>
         <Route path="/">
-          {mounted ?
-            sessionUser.id ?
+          <>
+            {mounted ?
               <>
-                <HeartbeatApiAccess>
-                  <Route path="/messages">
-                    {sessionUser.id ?
-                      <Chat>
-                        <Route path="/messages/:slug">
-                          <ChatThread />
-                        </Route>
-                      </Chat> :
-                      <Redirect to="/" />
-                    }
-                  </Route>
-                </HeartbeatApiAccess>
-              </> :
-              <UnauthSplash />
-            : ""
-          }
+                {sessionUser.id ?
+                  <>
+                    <Navbar />
+                    <>
+                      <Route path="/messages">
+                        <Chat>
+                          <Route path="/messages/:slug">
+                            <ChatThread />
+                          </Route>
+                        </Chat>
+                      </Route>
+                      <Route to="*">
+                        404!!!
+                    </Route>
+                    </>
+                  </> : <UnauthSplash />
+                }
+              </> : <Redirect push to="/" />
+            }
+          </>
         </Route>
       </Switch>
     </div>

@@ -8,9 +8,6 @@ body,
 #root {
     height: 100vh;
 }
-.view-container {
-    // margin-top: 3rem;
-}
 .view {
     display: block;
     overflow: hidden;
@@ -19,24 +16,20 @@ body,
     width: 100%;
 }
 a {
-    color: g.$interactive-muted;
-    &:hover,
-    &:focus {
-        color: g.$interactive;
+    color: g.$color-interact;
+    opacity: 0.8;
+    &.active, &:hover {
+        opacity: 1;
     }
 }
 button {
     cursor: pointer;
     border: none;
     border-radius: 0.25rem;
-    background-color: g.$interactive-muted;
+    background-color: g.$color-interact;
     color: white;
     line-height: 1rem;
     padding: 1rem 2rem;
-    &:hover,
-    &:focus {
-        background-color: g.$interactive;
-    }
 }
 
 // ** «««««««««««««««««««««««« Typography »»»»»»»»»»»»»»»»»»»»»»»» **
