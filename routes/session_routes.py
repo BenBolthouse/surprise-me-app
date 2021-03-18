@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, make_response
 from flask_login import login_user, current_user, login_required
 
 
@@ -6,6 +6,9 @@ from models import User
 
 
 session_routes = Blueprint("sessions", __name__, url_prefix="/api/sessions")
+
+
+# ** «««««««««««««««« POST Routes »»»»»»»»»»»»»»»» **
 
 
 @session_routes.route("", methods=["POST"])
@@ -23,8 +26,11 @@ def post_session():
     # Respond 200 if successful
     return jsonify({
         "message": "Success",
-        "data": user.to_json_on_login()
+        "data": user.to_json()
     }), 200
+
+
+# ** «««««««««««««««« GET Routes »»»»»»»»»»»»»»»» **
 
 
 @session_routes.route("", methods=["GET"])
@@ -34,23 +40,22 @@ def get_session():
     # Respond 200
     return jsonify({
         "message": "Success",
-        "data": {
-            "id": current_user.id,
-            "firstName": current_user.first_name,
-            "lastName": current_user.last_name,
-            "email": current_user.email,
-            "shareLocation": current_user.share_location,
-            "coordLat": str(current_user.coord_lat),
-            "coordLong": str(current_user.coord_long),
-        }
+        "data": current_user.to_json()
     }), 200
 
 
-@session_routes.route("/unauthorized")
-@login_required
-def unauthorized():
+# ** «««««««««««««««« DELETE Routes »»»»»»»»»»»»»»»» **
 
-    # Respond 401
-    return jsonify({
-        "message": "Unauthorized",
-    }), 401
+
+@session_routes.route("", methods=["DELETE"])
+@login_required
+def delete_session():
+
+    # Delete cookie in response
+    response = make_response({
+        "message": "Success",
+    })
+    response.delete_cookie("session")
+
+    # Respond 200
+    return response
