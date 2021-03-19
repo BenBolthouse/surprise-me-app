@@ -1,5 +1,6 @@
 import { fetch } from "../../services/fetch";
 
+import * as connectionsActions from "./connections";
 import * as securityActions from "./security";
 
 // State template
@@ -54,6 +55,7 @@ export const getSessionUser = () => async (dispatch) => {
       payload,
     }))(data)
   );
+  dispatch(connectionsActions.getConnections());
   return res;
 };
 
