@@ -177,7 +177,7 @@ const Signup = () => {
     const confirmPasswordIsValid = password.value === confirmPassword.value
     if (passwordIsValid && confirmPasswordIsValid) {
       await dispatch(
-        sessionActions.postSessionUser({
+        sessionActions.createNewUser({
           password: password.value,
           firstName: firstName.value,
           lastName: lastName.value,
