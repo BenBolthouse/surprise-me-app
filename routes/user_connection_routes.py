@@ -72,7 +72,7 @@ def post_user_connection():
 # ** «««««««««««««««« GET Routes »»»»»»»»»»»»»»»» **
 
 
-@user_connection_routes.route("/", methods=["GET"])
+@user_connection_routes.route("", methods=["GET"])
 @login_required
 def get_all_user_connections():
 
@@ -85,7 +85,7 @@ def get_all_user_connections():
     # Respond 200 if successful
     return jsonify({
         "message": "Success",
-        "data": json_response["connections"]
+        "data": json_response["connections"],
     }), 200
 
 
