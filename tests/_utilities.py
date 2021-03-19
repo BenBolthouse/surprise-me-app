@@ -144,7 +144,7 @@ def database_seed_demo_connections_from_user_a(
     for connection_template in connection_templates:
         conn = UserConnection({
             "requestor_user_id": 1,
-            "recipient_user_id": connection_template, 
+            "recipient_user_id": connection_template,
         })
 
         if connection_template > 4:

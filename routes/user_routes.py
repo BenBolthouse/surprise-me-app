@@ -53,7 +53,7 @@ def post_user():
 def is_email_unique():
 
     # Respond 400 if requested email is already in use
-    User.email_address_is_unique(config_object["email"])
+    User.email_address_is_unique(request.json.get("email"))
 
     # Respond 200 if successful
     return jsonify({

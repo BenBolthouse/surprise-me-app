@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { NavLink } from "react-router-dom";
-import { IconContext, IoMdMailUnread } from "react-icons/io";
+import { IoMdMailUnread } from "react-icons/io";
 
 import "./Chat.css";
 

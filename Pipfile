@@ -60,6 +60,7 @@ MarkupSafe = "==1.1.1"
 SQLAlchemy = "==1.3.23"
 Werkzeug = "==1.0.1"
 pytest-dotenv = "*"
+pyopenssl = "*"
 
 [requires]
 python_version = "3.9"

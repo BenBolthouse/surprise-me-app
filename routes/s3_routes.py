@@ -1,4 +1,5 @@
 from flask import Blueprint, request, send_file
+from werkzeug.exceptions import NotFound
 import os
 
 
@@ -34,4 +35,11 @@ def upload_a_file():
 def download_a_file(file_name):
     response = download_file(file_name)
 
+    # Catch 404
+    if response is False:
+        raise NotFound(response={
+            "message": "File not found",
+        })
+
+    # Send file in response
     return response

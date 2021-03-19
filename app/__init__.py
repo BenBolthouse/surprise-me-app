@@ -4,7 +4,7 @@ from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_wtf.csrf import validate_csrf
 from seed import seed_commands
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, emit
 from werkzeug.exceptions import BadRequest, NotFound, Forbidden
 from werkzeug.exceptions import InternalServerError, Unauthorized
 import os
@@ -23,7 +23,7 @@ from routes import user_routes
 
 # Needed to run eventlet server
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="static/", static_url_path="/")
 
 # Configure websockets
 socketio = SocketIO(app,
@@ -87,10 +87,8 @@ def https_redirect():
 
 
 @app.route('/', defaults={'path': ''}, methods=["GET"])
-@app.route('/<path:path>', methods=["GET"])
 # Response with frontend
 def react_root(path):
-    print("path", path)
     if path == 'favicon.ico':
         return app.send_static_file('favicon.ico')
     return app.send_static_file('index.html')
@@ -122,3 +120,11 @@ def handle_all_other_exceptions(exception):
 @socketio.on("connect")
 def socketio_on_client_connect():
     emit('connect', {'data': 'Client connected successfully'})
+
+
+if __name__ == '__main__':
+    socketio.run(
+        app,
+        host='0.0.0.0',
+        port=os.environ.get('PORT'),
+        debug=False)

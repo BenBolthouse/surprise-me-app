@@ -1,0 +1,11 @@
+.signup {
+    grid-template-columns: repeat(4, 24rem);
+    margin-left: 0;
+    transition: margin .5s;
+    -o-transition: margin .5s;
+    -moz-transition: margin .5s;
+    -webkit-transition: margin .5s;
+}
+.signup > div {
+    padding: 1rem;
+}

@@ -7,12 +7,15 @@ import Chat from "./components/Chat/Chat.jsx";
 import ChatThread from "./components/ChatThread/ChatThread.jsx";
 import Navbar from "./components/Navbar/Navbar.jsx";
 import UnauthSplash from "./components/UnauthSplash/UnauthSplash.jsx";
+import SocketioRoom from "./components/SocketIOClient/SocketIOClient.jsx";
 
 import * as securityActions from "./store/reducers/security";
 import * as sessionActions from "./store/reducers/session";
 
 import "./reset.css";
 import "./App.css";
+
+console.log(process.env)
 
 const App = () => {
   // Hooks
@@ -58,25 +61,26 @@ const App = () => {
             {mounted ?
               <>
                 {sessionUser.id ?
-                  <>
+                  <SocketioRoom>
                     <Navbar />
-                    <>
+                    <Switch>
+                      <Route exact path="/">
+                        HOME
+                      </Route>
                       <Route path="/messages">
                         <Chat>
-                          <Route path="/messages/:slug">
-                            <ChatThread />
-                          </Route>
+                          <ChatThread />
                         </Chat>
                       </Route>
-                      <Route to="*">
-                        404!!!
-                    </Route>
-                    </>
-                  </> : <UnauthSplash />
+                    </Switch>
+                  </SocketioRoom> : <UnauthSplash />
                 }
               </> : <Redirect push to="/" />
             }
           </>
+        </Route>
+        <Route to="*">
+          404!!!
         </Route>
       </Switch>
     </div>

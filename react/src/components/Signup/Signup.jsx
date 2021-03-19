@@ -1,9 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BsExclamationSquare, BsX } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useState } from "react";
-import Loader from "react-loading";
 
 import { fetch } from "../../services/fetch";
 
@@ -16,6 +15,8 @@ import {
 } from "../../validation";
 
 import * as sessionActions from "../../store/reducers/session";
+
+import "./Signup.css";
 
 const Signup = () => {
   // Hooks
@@ -62,6 +63,11 @@ const Signup = () => {
     value: "",
   });
   const [position, setPosition] = useState(0);
+  const [signupLeftMargin, setSignupLeftMargin] = useState("0%");
+
+  useEffect(() => {
+    setSignupLeftMargin(`-${position * 25}%`);
+  }, [position])
 
   /**
    * Send a request to the API to assert the user's chosen
@@ -214,10 +220,10 @@ const Signup = () => {
   };
 
   return (
-    <div className="signup">
+    <div className="signup" style={{ "marginLeft": signupLeftMargin }}>
 
       <div className="signup__basic-info">
-        <h1>Get your gift on</h1>
+        <h1>Create An Account</h1>
         <p>Set up your profile.</p>
         <form onSubmit={submitBasicInfo}>
 
@@ -288,7 +294,8 @@ const Signup = () => {
               onChange={(e) => checkIsEmailUnique(e)} />
             <div className="form-group__email-fetching">
               {email.fetching ?
-                <Loader type="bars" color="#000000" /> : ""
+                // <Loader type="bars" color="#000000" /> : ""
+                "" : ""
               }
             </div>
             <div className="form-group__email-uniqueness">

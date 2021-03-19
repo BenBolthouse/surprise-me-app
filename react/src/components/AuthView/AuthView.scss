@@ -1,0 +1,26 @@
+@use "../../global" as g;
+
+@media screen and (min-width: g.$screen-size-sm) {
+    .auth-view {
+        background-color: g.$blk-95;
+        grid-template: 2rem 32rem auto / auto 24rem auto;
+        .auth-view__center {
+            grid-template-rows: auto 8rem;
+            grid-column: 2 / 3;
+            grid-row: 2 / 3;
+            background-color: white;
+            height: 100%;
+            align-self: start;
+            pointer-events: visible;
+            overflow: hidden;
+        }
+        .auth-view__demo-panel {
+            padding: 1rem;
+            grid-template-rows: 3rem 3rem;
+            width: 24rem;
+        }
+        .auth-view__demo-panel a {
+            display: inline-block;
+        }
+    }
+}

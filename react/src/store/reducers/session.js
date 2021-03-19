@@ -1,17 +1,22 @@
+import { io } from "socket.io-client";
+
 import { fetch } from "../../services/fetch";
 
 import * as connectionsActions from "./connections";
 import * as securityActions from "./security";
 
 // State template
-const userTemplate = {
-  id: null,
-  firstName: null,
-  lastName: null,
-  email: null,
-  shareLocation: null,
-  coordLat: null,
-  coordLong: null,
+const sessionTemplate = {
+  user: {
+    id: null,
+    firstName: null,
+    lastName: null,
+    email: null,
+    shareLocation: null,
+    coordLat: null,
+    coordLong: null,
+  },
+  socketClient: null,
 };
 
 // ** «««««««««««««««««««««««« Actions »»»»»»»»»»»»»»»»»»»»»»»» **
@@ -55,6 +60,7 @@ export const getSessionUser = () => async (dispatch) => {
       payload,
     }))(data)
   );
+  dispatch(postSessionGeolocation());
   dispatch(connectionsActions.getConnections());
   return res;
 };
@@ -101,9 +107,11 @@ export const createNewUser = (userObject) => async (dispatch) => {
 };
 
 const POST_SESSION_GEOLOCATION = "session/postSessionGeolocation";
-
+/**
+ * Retrieve the client location from the browser and update
+ * Redux and backend state.
+ */
 export const postSessionGeolocation = () => async (dispatch) => {
-  let geolocation;
   navigator.geolocation.getCurrentPosition(
     async ({ coords }) => {
       await fetch("/api/users", {
@@ -115,7 +123,7 @@ export const postSessionGeolocation = () => async (dispatch) => {
       });
       dispatch(
         ((payload) => ({
-          type: POST_USER,
+          type: POST_SESSION_GEOLOCATION,
           payload,
         }))({
           coordLat: coords.latitude,
@@ -127,23 +135,45 @@ export const postSessionGeolocation = () => async (dispatch) => {
   );
 };
 
+const CONNECT_SOCKET_CLIENT = "session/connectSocketClient";
+/**
+ * Connect a websocket connection with the server with a
+ * specific room name.
+ * 
+ * @param {*} clientRoomId Required; usually
+ * `session.user.id` for room name. 
+ */
+export const connectSocketClient = (clientRoomId) => ({
+  type: CONNECT_SOCKET_CLIENT,
+  payload: clientRoomId,
+});
+
 // Reducer
-const reducer = (state = { user: userTemplate }, { type, payload }) => {
+const reducer = (state = sessionTemplate, { type, payload }) => {
   switch (type) {
     case POST_SESSION:
-      return { user: { ...state.user, ...payload } };
+      return { ...state, user: { ...state.user, ...payload } };
 
     case DELETE_SESSION:
       return { user: {} };
 
     case POST_USER:
-      return { user: { ...state.user, ...payload } };
+      return { ...state, user: { ...state.user, ...payload } };
 
     case GET_SESSION:
-      return { user: { ...state.user, ...payload } };
+      return { ...state, user: { ...state.user, ...payload } };
 
     case POST_SESSION_GEOLOCATION:
-      return { user: { ...state.user, ...payload } };
+      return { ...state, user: { ...state.user, ...payload } };
+
+    case CONNECT_SOCKET_CLIENT:
+      const transports = process.env.NODE_ENV === "development"
+          ? ["polling"]
+          : ["polling", "websockets"];
+      const client = io(process.env.REACT_APP_HOST_NAME, {
+        transports: transports,
+      });
+      return { ...state, socketClient: client };
 
     default:
       return state;
