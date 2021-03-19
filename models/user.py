@@ -198,13 +198,13 @@ class User(db.Model, UserMixin):
 
     def update(self, config_object):
         self.email_address_is_unique(config_object["email"])
-        self.first_name = config_object("firstName") or self.first_name
-        self.last_name = config_object("lastName") or self.last_name
-        self.email = config_object("email") or self.email
-        self.coord_lat = config_object("coordLat") or self.coord_lat
-        self.coord_long = config_object("coordLong") or self.coord_long
+        self.first_name = config_object["first_name"] or self.first_name
+        self.last_name = config_object["last_name"] or self.last_name
+        self.email = config_object["email"] or self.email
+        self.coord_lat = config_object["coord_lat"] or self.coord_lat
+        self.coord_long = config_object["coord_long"] or self.coord_long
         self.share_location = (True
-                               if config_object("shareLocation") is True
+                               if config_object["share_location"] is True
                                else False)
 
         return True
