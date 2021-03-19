@@ -81,7 +81,7 @@ class ChatMessage(db.Model):
     # ** «««««««««««««««« Getters and Setters »»»»»»»»»»»»»»»» **
 
     # «««««««« Sender User »»»»»»»»
-    
+
     @property
     def sender(self):
         return self._sender_user
