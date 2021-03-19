@@ -74,7 +74,7 @@ class User(db.Model, UserMixin):
 
     def to_json_connections(self):
         return {
-            "connections": [x.to_json() for x in self.connections],
+            "connections": [x.to_json(self.id) for x in self.connections],
         }
 
     def to_json_without_coordinates(self):
