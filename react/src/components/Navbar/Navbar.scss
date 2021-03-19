@@ -138,9 +138,23 @@
                     }
                 }
             }
+            .user-menu__location {
+                position: relative;
+                height: 12rem;
+                width: 100%;
+                .map-preloader {
+                    align-content: center;
+                    justify-content: center;
+                    background-color: white;
+                    position: absolute;
+                    height: 100%;
+                    width: 100%;
+                    z-index: 950;
+                }
+            }
             .user-menu__menu {
                 display: grid;
-                grid-template-rows: repeat(5, 2.5rem);
+                grid-template-rows: repeat(2, 2.5rem);
                 padding: 1rem 0 1.5rem;
                 text-align: center;
                 li {
@@ -154,9 +168,6 @@
                             margin: 0.75rem 0;
                         }
                     }
-                }
-                li.logout {
-                    grid-row: -2 / span 1;
                 }
             }
         }
