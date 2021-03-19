@@ -15,8 +15,6 @@ import * as sessionActions from "./store/reducers/session";
 import "./reset.css";
 import "./App.css";
 
-console.log(process.env)
-
 const App = () => {
   // Hooks
   const xCsrfToken = useSelector((s) => s.security.xCsrfToken);
