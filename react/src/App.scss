@@ -21,6 +21,9 @@ a {
     &.active, &:hover {
         opacity: 1;
     }
+    &.inactive {
+        color: g.$blk-60;
+    }
 }
 button {
     cursor: pointer;

@@ -19,6 +19,9 @@ a {
 a.active, a:hover {
   opacity: 1;
 }
+a.inactive {
+  color: #999999;
+}
 
 button {
   cursor: pointer;
