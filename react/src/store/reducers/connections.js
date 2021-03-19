@@ -16,18 +16,17 @@ const stateTemplate = {
 
 // ** «««««««««««««««««««««««« Actions »»»»»»»»»»»»»»»»»»»»»»»» **
 
-const GET_ESTABLISHED_CONNECTIONS = "connections/getEst...Connections";
+const GET_CONNECTIONS = "connections/getConnections";
 /**
  * Populate Redux established connections state on app
  * renders via request to the webserver.
  */
-export const getEstConnectionsOnLoad = () => async (dispatch) => {
-  const res = await fetch("/api/connections/established");
+export const getConnections = () => async (dispatch) => {
+  const res = await fetch("/api/connections");
   const { data } = res.data;
-  data.connections = normalize(data.connections);
   dispatch(
     ((payload) => ({
-      type: GET_ESTABLISHED_CONNECTIONS,
+      type: GET_CONNECTIONS,
       payload,
     }))(data)
   );
@@ -107,11 +106,18 @@ const reducer = (state = stateTemplate, { type, payload }) => {
   let stateCopy;
 
   switch (type) {
-    case GET_ESTABLISHED_CONNECTIONS:
+    case GET_CONNECTIONS:
+      const estConnections = payload.filter(c => {
+        if(c.establishedAt !== null) return c
+      })
+      const pendingConnections = payload.filter(c => {
+        if(c.establishedAt === null) return c
+      })
       return {
         ...state,
         datestamp: new Date().toISOString(),
-        established: payload.connections,
+        established: normalize(estConnections),
+        pending: normalize(pendingConnections),
       };
 
     case UPDATE_ESTABLISHED_CONNECTIONS:
