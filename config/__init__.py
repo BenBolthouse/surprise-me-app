@@ -2,7 +2,7 @@ import os
 
 
 class Config:
-    HOST_NAME = os.environ.get('HOST_NAME')
+    HOST_NAME = os.environ.get('PUBLIC_URL')
     S3_BUCKET = os.environ.get('S3_BUCKET')
     SECRET_KEY = os.environ.get('SECRET_KEY')
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
