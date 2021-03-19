@@ -157,3 +157,8 @@ cython_debug/
 
 # Using multiple environment configs
 *.env
+
+# Ignore CSS as Sass will pre-compile on deploy
+# "SO MANY CSS FILES!!!"
+*.css
+*.css.map
