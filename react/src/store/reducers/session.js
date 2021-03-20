@@ -143,9 +143,9 @@ const CONNECT_SOCKET_CLIENT = "session/connectSocketClient";
  * @param {*} clientRoomId Required; usually
  * `session.user.id` for room name. 
  */
-export const connectSocketClient = (clientRoomId) => ({
+export const connectSocketClient = (client) => ({
   type: CONNECT_SOCKET_CLIENT,
-  payload: clientRoomId,
+  payload: client,
 });
 
 // Reducer
@@ -167,13 +167,7 @@ const reducer = (state = sessionTemplate, { type, payload }) => {
       return { ...state, user: { ...state.user, ...payload } };
 
     case CONNECT_SOCKET_CLIENT:
-      const transports = process.env.NODE_ENV === "development"
-          ? ["polling"]
-          : ["polling", "websockets"];
-      const client = io(process.env.REACT_APP_HOST_NAME, {
-        transports: transports,
-      });
-      return { ...state, socketClient: client };
+      return { ...state, socketClient: payload };
 
     default:
       return state;
