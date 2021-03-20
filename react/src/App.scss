@@ -8,6 +8,9 @@ body,
 #root {
     height: 100vh;
 }
+.view-container {
+    display: block;
+}
 .view {
     overflow: hidden;
     position: relative;

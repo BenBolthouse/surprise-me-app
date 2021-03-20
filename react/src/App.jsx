@@ -19,6 +19,7 @@ const App = () => {
   // Hooks
   const xCsrfToken = useSelector((s) => s.security.xCsrfToken);
   const sessionUser = useSelector((s) => s.session.user)
+  const modalComponent = useSelector((s) => s.modal.component)
   const dispatch = useDispatch();
 
   // Component state
@@ -41,6 +42,13 @@ const App = () => {
 
   return (
     <div className="view-container">
+      {modalComponent ?
+        modalComponent.map(modal => (
+          <div key="modal">
+            {modal}
+          </div>
+        )) : ""
+      }
       <Switch>
         <Route exact path="/signup">
           {sessionUser.id ?
