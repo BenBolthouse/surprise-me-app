@@ -164,9 +164,13 @@ const POST_CHAT_MESSAGE = "session/postChatMessage";
 export const postChatMessage = (chatObject) => async (dispatch) => {
   const storeState = getState();
   const client = storeState.session.socketClient;
-  client.emit("post_chat_message", {
-    foo: "bar",
-  });
+  client.emit("post_chat_message", chatObject);
+  dispatch(
+    ((payload) => ({
+      type: POST_CHAT_MESSAGE,
+      payload,
+    }))(chatObject)
+  );
 }
 
 // Reducer
@@ -195,6 +199,9 @@ const reducer = (state = sessionTemplate, { type, payload }) => {
         state.socketClient.disconnect();
       }
       return { ...state, socketClient: null };
+    
+      case POST_CHAT_MESSAGE:
+        return state;
 
     default:
       return state;
