@@ -10,23 +10,28 @@ const SocketioRoom = ({ children }) => {
   const sessionUser = useSelector(s => s.session.user);
   const sessionSocketClient = useSelector(s => s.session.socketClient);
 
+  // Component state
+  const isProd = process.env.NODE_ENV === "production"
 
-  // Side effect set mounted on initial render
   useEffect(() => {
+    // Create the socketio client on application state
     if (sessionUser && !sessionSocketClient) {
-      // Socketio client configuration
+      const transports = isProd ? ["websocket"] : ["polling"];
       const socketio = io("http://localhost:5000").connect({
-        transports: ["polling", "websocket"]
+        transports: transports,
+        upgrade: false,
+        room: sessionUser.id,
       });
-
-      // Add client to app state
       dispatch(sessionActions.connectSocketClient(socketio));
     }
-
-    // Disconnect socket client on cleanup
-    return () => {
-      socketio.disconnect();
-      // TODO add dispatch to remove from Redux 
+    // Development logging for socket lifecycle events
+    if(!isProd && sessionSocketClient) {
+      sessionSocketClient.on("connect", () => {
+        console.log("socketio: Client is connected.")
+      })
+      sessionSocketClient.on("disconnect", (reason) => {
+        console.log("socketio: Client was disconnected:", reason)
+      })
     }
   }, [sessionSocketClient]);
 
