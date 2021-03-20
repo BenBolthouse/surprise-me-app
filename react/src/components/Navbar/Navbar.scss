@@ -88,86 +88,86 @@
                     }
                 }
             }
-            .user-menu {
-                background-color: white;
-                border-radius: 0.5rem;
-                overflow: hidden;
-                align-content: start;
-                position: relative;
-                .close {
-                    cursor: pointer;
-                    fill: #ffffff;
-                    position: absolute;
-                    height: 1.5rem;
-                    width: 1.5rem;
-                    opacity: 0.8;
-                    top: 1rem;
-                    right: 1rem;
-                    z-index: 902;
-                    &:hover {
-                        opacity: 1;
-                    }
-                }
+        }
+    }
+    .user-menu {
+        background-color: white;
+        border-radius: 0.5rem;
+        overflow: hidden;
+        align-content: start;
+        position: relative;
+        .close {
+            cursor: pointer;
+            fill: #ffffff;
+            position: absolute;
+            height: 1.5rem;
+            width: 1.5rem;
+            opacity: 0.8;
+            top: 1rem;
+            right: 1rem;
+            z-index: 902;
+            &:hover {
+                opacity: 1;
             }
-            .user-menu__header {
-                grid-template: 10rem 2rem 2rem / 1fr;
-                background-color: rgb(140, 47, 79);
-                color: white;
-                padding: 1.5rem 0 1rem;
-                img {
-                    background-color: white;
-                    border: 2px solid white;
-                    align-self: center;
-                    justify-self: center;
-                    border-radius: 50%;
-                    object-fit: cover;
-                    height: 128px;
-                    width: 128px;
-                }
-                p {
-                    text-align: center;
-                    &.name {
-                        line-height: 2rem;
-                        font-size: (20rem / 16);
-                    }
-                    &.email {
-                        line-height: 2rem;
-                        font-size: (14rem / 16);
-                        font-weight: bold;
-                        opacity: 0.6;
-                    }
-                }
+        }
+    }
+    .user-menu__header {
+        grid-template: 10rem 2rem 2rem / 1fr;
+        background-color: rgb(140, 47, 79);
+        color: white;
+        padding: 1.5rem 0 1rem;
+        img {
+            background-color: white;
+            border: 2px solid white;
+            align-self: center;
+            justify-self: center;
+            border-radius: 50%;
+            object-fit: cover;
+            height: 128px;
+            width: 128px;
+        }
+        p {
+            text-align: center;
+            &.name {
+                line-height: 2rem;
+                font-size: (20rem / 16);
             }
-            .user-menu__location {
-                position: relative;
-                height: 12rem;
-                width: 100%;
-                .map-preloader {
-                    align-content: center;
-                    justify-content: center;
-                    background-color: white;
-                    position: absolute;
-                    height: 100%;
-                    width: 100%;
-                    z-index: 950;
-                }
+            &.email {
+                line-height: 2rem;
+                font-size: (14rem / 16);
+                font-weight: bold;
+                opacity: 0.6;
             }
-            .user-menu__menu {
+        }
+    }
+    .user-menu__location {
+        position: relative;
+        height: 12rem;
+        width: 100%;
+        .map-preloader {
+            align-content: center;
+            justify-content: center;
+            background-color: white;
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            z-index: 950;
+        }
+    }
+    .user-menu__menu {
+        display: grid;
+        grid-template-rows: repeat(2, 2.5rem);
+        padding: 1rem 0 1.5rem;
+        text-align: center;
+        li {
+            height: 2.5rem;
+            line-height: 2.5rem;
+            a {
                 display: grid;
-                grid-template-rows: repeat(2, 2.5rem);
-                padding: 1rem 0 1.5rem;
-                text-align: center;
-                li {
-                    height: 2.5rem;
-                    line-height: 2.5rem;
-                    a {
-                        display: grid;
-                        grid-template-columns: 1.5rem auto;
-                        justify-content: center;
-                        svg {
-                            margin: 0.75rem 0;
-                        }
-                    }
+                grid-template-columns: 1.5rem auto;
+                justify-content: center;
+                svg {
+                    margin: 0.75rem 0;
                 }
             }
         }
