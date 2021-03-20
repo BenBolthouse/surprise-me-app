@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "370983ee7345292d83953216f987e4bec088e4e035b65b8156bfbea08d399e82"
+            "sha256": "d3fd0aa09eeba31a598f60f76c02102e0641de8ef34e1571aab96985977f03d2"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -244,6 +244,9 @@
             "version": "==1.0.0"
         },
         "gunicorn": {
+            "extras": [
+                "eventlet"
+            ],
             "hashes": [
                 "sha256:1904bb2b8a43658807108d59c3f3d56c2b6121a701161de0ddf9ad140073c626",
                 "sha256:cd4a810dd51bf497552cf3f863b575dabd73d6ad6a91075b65936b151cbf4f9c"
