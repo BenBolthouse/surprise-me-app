@@ -10,8 +10,10 @@ from werkzeug.exceptions import InternalServerError, Unauthorized
 import os
 import traceback
 
+
 from config import Config
 from models import db, User
+
 
 # Route imports
 from routes import chat_message_routes
@@ -21,7 +23,6 @@ from routes import session_routes
 from routes import user_connection_routes
 from routes import user_routes
 
-# Needed to run eventlet server
 
 app = Flask(__name__, static_folder="static/", static_url_path="/")
 
@@ -67,6 +68,9 @@ app.register_blueprint(s3_routes)
 app.register_blueprint(session_routes)
 app.register_blueprint(user_connection_routes)
 app.register_blueprint(user_routes)
+
+# Configure socketio events
+from events import events  # noqa
 
 # Models and migration configuration
 db.init_app(app)
