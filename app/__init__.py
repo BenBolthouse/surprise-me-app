@@ -33,7 +33,7 @@ socketio = SocketIO(app,
 
 # Environment setup
 app.config.from_object(Config)
-is_production = os.environ.get('FLASK_ENV') == 'production'
+is_production = os.environ.get("FLASK_ENV") == "production"
 
 # User login configuration
 login = LoginManager(app)
@@ -80,18 +80,18 @@ CORS(app)
 # Redirect to HTTPS if in production
 def https_redirect():
     if is_production:
-        if request.headers.get('X-Forwarded-Proto') == 'http':
-            url = request.url.replace('http://', 'https://', 1)
+        if request.headers.get("X-Forwarded-Proto") == "http":
+            url = request.url.replace("http://", "https://", 1)
             code = 301
             return redirect(url, code=code)
 
 
-@app.route('/', defaults={'path': ''}, methods=["GET"])
+@app.route("/", defaults={"path": ""}, methods=["GET"])
 # Response with frontend
 def react_root(path):
-    if path == 'favicon.ico':
-        return app.send_static_file('favicon.ico')
-    return app.send_static_file('index.html')
+    if path == "favicon.ico":
+        return app.send_static_file("favicon.ico")
+    return app.send_static_file("index.html")
 
 
 @app.errorhandler(InternalServerError)
@@ -117,14 +117,9 @@ def handle_all_other_exceptions(exception):
     }), 500
 
 
-@socketio.on("connect")
-def socketio_on_client_connect():
-    emit('connect', {'data': 'Client connected successfully'})
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     socketio.run(
         app,
-        host='0.0.0.0',
-        port=os.environ.get('PORT'),
+        host="0.0.0.0",
+        port=os.environ.get("PORT"),
         debug=False)
