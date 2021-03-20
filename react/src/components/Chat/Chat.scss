@@ -5,6 +5,14 @@ $compose_height: 16rem;
 $menu_item_height: 3rem;
 $side_bar_width: 16rem;
 
+.chat-viewport-container {
+    position: absolute;
+    top: 3.5rem;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 500;
+}
 .chat-view {
     height: 100vh;
 }
@@ -19,10 +27,9 @@ $side_bar_width: 16rem;
     padding-top: 1rem;
     width: $side_bar_width;
     position: absolute;
-    top: $top_bar_height;
+    top: 0;
     bottom: 0;
     left: 0;
-    z-index: 100;
     * {
         color: g.$blk-60;
         &:hover, &:focus {
