@@ -24,14 +24,18 @@ const SocketioRoom = ({ children }) => {
       });
       dispatch(sessionActions.connectSocketClient(socketio));
     }
-    // Development logging for socket lifecycle events
-    if(!isProd && sessionSocketClient) {
-      sessionSocketClient.on("connect", () => {
-        console.log("socketio: Client is connected.")
-      })
+    // Development logging for host messages
+    if (!isProd && sessionSocketClient) {
+      sessionSocketClient.on("message", (message) => {
+        console.log(message);
+      });
       sessionSocketClient.on("disconnect", (reason) => {
-        console.log("socketio: Client was disconnected:", reason)
-      })
+        console.log("Socketio Client: Client was disconnected:", reason);
+      });
+    }
+    // Join the user's room
+    if (sessionSocketClient) {
+      sessionSocketClient.emit("join", { roomId: sessionUser.id });
     }
   }, [sessionSocketClient]);
 
