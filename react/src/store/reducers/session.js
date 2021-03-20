@@ -1,5 +1,4 @@
-import { io } from "socket.io-client";
-
+import { store } from "../../index";
 import { fetch } from "../../services/fetch";
 
 import * as connectionsActions from "./connections";
@@ -18,6 +17,9 @@ const sessionTemplate = {
   },
   socketClient: null,
 };
+
+// Return a pointer to current state
+const getState = () => store.getState();
 
 // ** «««««««««««««««««««««««« Actions »»»»»»»»»»»»»»»»»»»»»»»» **
 
@@ -80,6 +82,7 @@ export const logoutSessionUser = () => async (dispatch) => {
       payload,
     }))(data)
   );
+  dispatch(disconnectSocketClient());
   dispatch(securityActions.getXCsrfToken());
   return res;
 };
@@ -148,6 +151,24 @@ export const connectSocketClient = (client) => ({
   payload: client,
 });
 
+const DISCONNECT_SOCKET_CLIENT = "session/disconnectSocketClient";
+/**
+ * Disconnect the client from the Redux state.
+ */
+export const disconnectSocketClient = () => ({
+  type: DISCONNECT_SOCKET_CLIENT,
+});
+
+const POST_CHAT_MESSAGE = "session/postChatMessage";
+
+export const postChatMessage = (chatObject) => async (dispatch) => {
+  const storeState = getState();
+  const client = storeState.session.socketClient;
+  client.emit("post_chat_message", {
+    foo: "bar",
+  });
+}
+
 // Reducer
 const reducer = (state = sessionTemplate, { type, payload }) => {
   switch (type) {
@@ -155,7 +176,7 @@ const reducer = (state = sessionTemplate, { type, payload }) => {
       return { ...state, user: { ...state.user, ...payload } };
 
     case DELETE_SESSION:
-      return { user: {} };
+      return { ...state, user: {} };
 
     case POST_USER:
       return { ...state, user: { ...state.user, ...payload } };
@@ -168,6 +189,12 @@ const reducer = (state = sessionTemplate, { type, payload }) => {
 
     case CONNECT_SOCKET_CLIENT:
       return { ...state, socketClient: payload };
+
+    case DISCONNECT_SOCKET_CLIENT:
+      if(state.socketClient) {
+        state.socketClient.disconnect();
+      }
+      return { ...state, socketClient: null };
 
     default:
       return state;
