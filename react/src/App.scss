@@ -9,13 +9,14 @@ body,
     height: 100vh;
 }
 .view-container {
+    background-color: g.$blk-90;
     display: block;
 }
 .view {
     overflow: hidden;
     position: relative;
-    height: 100vh;
-    width: 100vw;
+    height: 100%;
+    width: 100%;
 }
 a {
     color: g.$color-interact;
