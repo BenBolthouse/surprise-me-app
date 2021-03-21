@@ -1,51 +1,72 @@
+import _ from "lodash";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { NavLink } from "react-router-dom";
+import { NavLink, useParams } from "react-router-dom";
 import { IoMdMailUnread } from "react-icons/io";
 
 import "./Chat.css";
+import ChatThread from "../ChatThread/ChatThread";
+import validate from "validate.js";
 
 const Chat = ({ children }) => {
 
+  // URL slug
+  const { slug } = useParams()
+
   // Hooks
+  const sessionUser = useSelector(s => s.session.user);
   const connections = useSelector(s => s.connections);
-  const estConnections = useSelector(s => s.connections.established);
-  const notifications = useSelector(s => s.notifications);
 
   // Component state
-  const [threadsAvail, setThreadsAvail] = useState(false);
-  const [mount, setMount] = useState(false);
+  const [scopedMessageThread, setScopedMessageThread] = useState(null);
+  const [activeMessageThreads, setActiveMessageThreads] = useState(null);
 
-  // Side effect for mount component
   useEffect(() => {
-    // Get all existing chat threads
-    const threads = []
-    for (const [key, value] of Object.entries(estConnections)) {
-      if (value.hasChatHistory) threads.push(value);
+    const messageThreads = [];
+    for (const [key, value] of Object.entries(connections.established)) {
+      if (value.lastChatMessageDatetime) messageThreads.push(value);
     }
-    setThreadsAvail(threads);
-
-    setMount(true);
+    setActiveMessageThreads(messageThreads);
   }, []);
 
+  useEffect(() => {
+    if (slug === "start") setScopedMessageThread(null);
+    else setScopedMessageThread(connections.established[slug]);
+  }, [slug]);
+
   return (
-    <>
-      {mount ?
-        <div className="chat-viewport-container">
-          <div className="view chat-view">
-            <div className="chat__sidebar">
-              <ul className="chat__threads-available">
-                {threadsAvail.map(thread => (
+    <div className="chat-viewport-container">
+      <div className="view chat-view">
+        <div className="chat__mobile-nav">
+
+        </div>
+        <div className="chat__sidebar">
+          <ul className="chat__threads-available">
+            {activeMessageThreads ?
+              <>
+                {activeMessageThreads.map(messageThread => (
                   <ThreadAvailable
-                    threadId={thread.id}
-                    otherUser={thread.otherUser} />
+                    key={`active-message-thread-${messageThread.id}`}
+                    threadId={messageThread.id}
+                    otherUser={messageThread.otherUser} />
                 ))}
-              </ul>
+              </> : ""
+            }
+          </ul>
+        </div>
+        {scopedMessageThread ?
+          <div className="chat__thread-container">
+            <ChatThread thread={scopedMessageThread} />
+          </div> :
+          <div className="chat__splash-container">
+            <div className="chat__splash">
+              <h1>Messages</h1>
+              <p>Select or search for a friend to start a conversation.</p>
             </div>
           </div>
-        </div> : ""
-      }
-    </>
+        }
+      </div>
+    </div>
   );
 }
 
