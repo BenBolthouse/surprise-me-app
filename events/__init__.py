@@ -24,7 +24,7 @@ def on_join_room(data):
 
 @socketio.on("leave")
 def on_leave_room(data):
-    room = data['room']
+    room = data["roomId"]
     leave_room(room)
     send(f"Socketio Host: Client left room {room}")
 
