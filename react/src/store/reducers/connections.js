@@ -8,7 +8,7 @@ import * as notificationsActions from "./notifications";
 
 // State template
 const stateTemplate = {
-  datestamp: null,
+  timestamp: null,
   established: {},
   pending: {},
   awaiting: {},
@@ -43,7 +43,7 @@ export const updateEstConnections = () => async (dispatch) => {
   const established = { ...store.getState().connections.established };
   const normalized = Object.values(established);
   const request_body = {
-    datestamp: established.datestamp,
+    timestamp: established.timestamp,
     connections: normalized.map((connection) => ({
       id: connection.id,
       messagesCount: connection.messages.length,
@@ -107,15 +107,22 @@ const reducer = (state = stateTemplate, { type, payload }) => {
 
   switch (type) {
     case GET_CONNECTIONS:
-      const estConnections = payload.filter(c => {
-        if(c.establishedAt !== null) return c
-      })
-      const pendingConnections = payload.filter(c => {
-        if(c.establishedAt === null) return c
-      })
+      const estConnections = payload.filter((c) => {
+        if (c.establishedAt !== null) {
+          if (c.lastChatMessageDatetime) {
+            let isoDate = Date.parse(c.lastChatMessageDatetime);
+            isoDate = new Date().toISOString(isoDate);
+            c.lastChatMessageDatetime = isoDate;
+          }
+          return c;
+        }
+      });
+      const pendingConnections = payload.filter((c) => {
+        if (c.establishedAt === null) return c;
+      });
       return {
         ...state,
-        datestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString(),
         established: normalize(estConnections),
         pending: normalize(pendingConnections),
       };
@@ -124,7 +131,7 @@ const reducer = (state = stateTemplate, { type, payload }) => {
       if (!_.isEmpty(payload.connections)) {
         return {
           ...state,
-          datestamp: new Date().toISOString(),
+          timestamp: new Date().toISOString(),
           established: {
             ...state.established,
             ...payload.connections,
@@ -134,10 +141,8 @@ const reducer = (state = stateTemplate, { type, payload }) => {
 
     case POST_CONNECTION_MESSAGE:
       stateCopy = { ...state };
-      stateCopy.datestamp = new Date().toISOString();
-      stateCopy.established[payload.userConnectionId].messages.push(
-        payload
-      );
+      stateCopy.timestamp = new Date().toISOString();
+      stateCopy.established[payload.userConnectionId].messages.push(payload);
       return stateCopy;
 
     default:
