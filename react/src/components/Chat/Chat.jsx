@@ -1,20 +1,17 @@
-import _ from "lodash";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { NavLink, useParams } from "react-router-dom";
-import { IoMdMailUnread } from "react-icons/io";
+
+import ChatThread from "../ChatThread/ChatThread";
 
 import "./Chat.css";
-import ChatThread from "../ChatThread/ChatThread";
-import validate from "validate.js";
 
-const Chat = ({ children }) => {
+const Chat = () => {
 
   // URL slug
   const { slug } = useParams()
 
   // Hooks
-  const sessionUser = useSelector(s => s.session.user);
   const connections = useSelector(s => s.connections);
 
   // Component state
@@ -23,16 +20,19 @@ const Chat = ({ children }) => {
 
   useEffect(() => {
     const messageThreads = [];
+    // eslint-disable-next-line no-unused-vars
     for (const [key, value] of Object.entries(connections.established)) {
       if (value.lastChatMessageDatetime) messageThreads.push(value);
     }
     setActiveMessageThreads(messageThreads);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (slug === "start") setScopedMessageThread(null);
     else setScopedMessageThread(connections.established[slug]);
-  }, [slug]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slug, connections.established]);
 
   return (
     <div className="chat-viewport-container">

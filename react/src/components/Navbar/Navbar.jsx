@@ -10,7 +10,7 @@ import {
 import { MdClose } from "react-icons/md";
 import { NavLink } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import Modal from "../Modal/Modal";
 
@@ -54,7 +54,7 @@ const Navbar = () => {
               <BsFillChatDotsFill />
             </NavLink>
             <a href="/#" className="profile" onClick={toggleUserMenu}>
-              <img src={profilePictureSrc64} />
+              <img src={profilePictureSrc64} alt="" />
             </a>
           </div>
         </div>
@@ -87,7 +87,7 @@ const UserMenu = ({ onClearCallback }) => {
 
   // Event handlers
   const onGoogleMapsMount = (evt) => {
-    dispatch(sessionActions.postSessionGeolocation());
+    dispatch(sessionActions.patchSessionGeolocation());
     setMapLoaded(true);
   }
   const onGoogleMapsUnmount = () => {
@@ -106,7 +106,7 @@ const UserMenu = ({ onClearCallback }) => {
       <div className="user-menu">
         <MdClose className="close" onClick={clearModal} />
         <div className="user-menu__header">
-          <img src={profilePictureSrc128} />
+          <img src={profilePictureSrc128} alt="" />
           <p className="name">{sessionUser.firstName} {sessionUser.lastName}</p>
           <p className="email">{sessionUser.email}</p>
         </div>
@@ -132,13 +132,13 @@ const UserMenu = ({ onClearCallback }) => {
         </div>
         <ul className="user-menu__menu">
           <li className="edit-profile">
-            <a href="#" onClick={null} className="inactive">
+            <a href="/#" onClick={null} className="inactive">
               <BsPersonFill />
               <p>Edit Profile</p>
             </a>
           </li>
           <li className="logout">
-            <a href="#" onClick={logout}>
+            <a href="/#" onClick={logout}>
               <BsFillCaretLeftFill />
               <p>Logout</p>
             </a>

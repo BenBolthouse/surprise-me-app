@@ -19,13 +19,16 @@ const SocketioRoom = ({ children }) => {
   const [socketClientConnected, setSocketClientConnected] = useState(false);
   const isProd = process.env.NODE_ENV === "production"
 
-  useEffect(async () => {
-    await dispatch(sessionActions.getSessionUser());
-    await dispatch(sessionActions.postSessionGeolocation());
-    await dispatch(connectionsActions.getConnections());
-  }, [])
+  useEffect(() => {
+    const dispatchState = async () => {
+      await dispatch(sessionActions.patchSessionGeolocation());
+      await dispatch(connectionsActions.getConnections());
+    }
+    dispatchState();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  useEffect(async () => {
+  useEffect(() => {
     if (sessionUser.id && !sessionSocketClient) {
       const transports = isProd ? ["websocket"] : ["polling"];
       const socketio = io("http://localhost:5000").connect({
@@ -33,7 +36,10 @@ const SocketioRoom = ({ children }) => {
         upgrade: false,
         room: sessionUser.id,
       });
-      await dispatch(sessionActions.connectSocketClient(socketio));
+      const dispatchConnectSocketClient = async () => {
+        await dispatch(sessionActions.connectSocketClient(socketio));
+      }
+      dispatchConnectSocketClient();
     }
     else if (sessionUser && sessionSocketClient && !socketClientConnected) {
       if (!isProd) {
@@ -44,9 +50,13 @@ const SocketioRoom = ({ children }) => {
           console.log("Socketio Client: Client was disconnected:", reason);
         });
       }
-      await dispatch(sessionActions.joinSocketClientRoom(sessionUser.id));
-      setSocketClientConnected(true);
+      const dispatchJoinSocketClientRoom = async () => {
+        await dispatch(sessionActions.joinSocketClientRoom(sessionUser.id));
+        setSocketClientConnected(true);
+      }
+      dispatchJoinSocketClientRoom();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionUser, sessionSocketClient])
 
   useEffect(() => {

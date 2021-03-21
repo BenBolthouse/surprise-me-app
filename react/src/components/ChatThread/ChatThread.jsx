@@ -1,9 +1,6 @@
-import { useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 
-import * as connectionsActions from "../../store/reducers/connections"
-import * as notificationsActions from "../../store/reducers/notifications"
 import * as sessionActions from "../../store/reducers/session"
 
 const ChatThread = ({ thread }) => {
@@ -18,6 +15,7 @@ const ChatThread = ({ thread }) => {
   useEffect(() => {
     dispatch(sessionActions.joinSocketClientRoom(thread.id));
     return () => dispatch(sessionActions.leaveSocketClientRoom(thread.id));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [thread]);
 
   // Event handlers

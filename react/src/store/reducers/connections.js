@@ -116,9 +116,11 @@ const reducer = (state = stateTemplate, { type, payload }) => {
           }
           return c;
         }
+        return false;
       });
       const pendingConnections = payload.filter((c) => {
         if (c.establishedAt === null) return c;
+        return false;
       });
       return {
         ...state,

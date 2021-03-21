@@ -4,7 +4,6 @@ import { Redirect, Route, Switch } from "react-router-dom";
 
 import AuthView from "./components/AuthView/AuthView.jsx";
 import Chat from "./components/Chat/Chat.jsx";
-import ChatThread from "./components/ChatThread/ChatThread.jsx";
 import Navbar from "./components/Navbar/Navbar.jsx";
 import UnauthSplash from "./components/UnauthSplash/UnauthSplash.jsx";
 import SocketioRoom from "./components/SocketIOClient/SocketIOClient.jsx";
@@ -17,58 +16,71 @@ import "./App.css";
 
 const App = () => {
   // Hooks
-  const xCsrfToken = useSelector((s) => s.security.xCsrfToken);
   const sessionUser = useSelector((s) => s.session.user)
   const modalComponent = useSelector((s) => s.modal.component)
   const dispatch = useDispatch();
 
+  // Component state
+  const [mount, setMount] = useState(false);
+
   useEffect(() => {
-    if (!xCsrfToken) {
-      dispatch(securityActions.getXCsrfToken());
+    const dispatchState = async () => {
+      await dispatch(securityActions.getXCsrfToken());
+      await dispatch(sessionActions.getSessionUser())
+        .then(() => setMount(true))
+        .catch(() => setMount(true));
     }
+    dispatchState()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch]);
 
   return (
-    <div className="view-container">
-      {modalComponent ?
-        modalComponent.map(modal => (
-          <div key="modal">
-            {modal}
-          </div>
-        )) : ""
-      }
-      <Switch>
-        <Route exact path="/signup">
-          {sessionUser.id ?
-            <Redirect to="/" /> :
-            <AuthView type="Signup" />
+    <>
+      {mount ?
+        <div className="view-container">
+          {modalComponent ?
+            modalComponent.map(modal => (
+              <div key="modal">
+                {modal}
+              </div>
+            )) : ""
           }
-        </Route>
-        <Route exact path="/login">
-          {sessionUser.id ?
-            <Redirect to="/" /> :
-            <AuthView type="Login" />
-          }
-        </Route>
-        <Route path="/">
-          <SocketioRoom>
-            <Navbar />
-            <Route exact path="/">
-              HOME
+          <Switch>
+            <Route exact path="/signup">
+              {sessionUser.id ?
+                <Redirect to="/" /> :
+                <AuthView type="Signup" />
+              }
+            </Route>
+            <Route exact path="/login">
+              {sessionUser.id ?
+                <Redirect to="/" /> :
+                <AuthView type="Login" />
+              }
+            </Route>
+            <Route path="/">
+              {sessionUser.id ?
+                <SocketioRoom>
+                  <Navbar />
+                  <Route exact path="/">
+                    HOME
                   </Route>
-            <Route exact path="/messages">
-              <Redirect to="/messages/start" />
+                  <Route exact path="/messages">
+                    <Redirect to="/messages/start" />
+                  </Route>
+                  <Route path="/messages/:slug">
+                    <Chat />
+                  </Route>
+                </SocketioRoom> :
+                <UnauthSplash />
+              }
             </Route>
-            <Route path="/messages/:slug">
-              <Chat />
+            <Route to="*">
+              404!!!
             </Route>
-          </SocketioRoom>
-        </Route>
-        <Route to="*">
-          404!!!
-        </Route>
-      </Switch>
-    </div>
+          </Switch>
+        </div> : ""}
+    </>
   );
 };
 

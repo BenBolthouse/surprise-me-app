@@ -1,10 +1,9 @@
 import { store } from "../../index";
 import { fetch } from "../../services/fetch";
 
-import * as connectionsActions from "./connections";
 import * as securityActions from "./security";
 
-// State template
+// Reducer template
 const sessionTemplate = {
   user: {
     id: null,
@@ -16,17 +15,43 @@ const sessionTemplate = {
     coordLong: null,
   },
   socketClient: null,
+  socketConnectedRoomId: null,
 };
 
-// Return a pointer to current state
+/**
+ * Get the current state.
+ */
 const getState = () => store.getState();
 
-// ** «««««««««««««««««««««««« Actions »»»»»»»»»»»»»»»»»»»»»»»» **
+// ** «««««««««««««««««««««««« Session User Actions »»»»»»»»»»»»»»»»»»»»»»»» **
+
+const POST_SESSION_USER = "session/postSessionUser";
+/**
+ * Create a new user; establish a session and persist user
+ * data to the Redux store.
+ *
+ * @param {*} userObject Contains all of the parameters for
+ * a new user.
+ */
+export const createNewUser = (userObject) => async (dispatch) => {
+  const res = await fetch("/api/users", {
+    method: "POST",
+    body: JSON.stringify(userObject),
+  });
+  const { data } = res.data;
+  dispatch(
+    ((payload) => ({
+      type: POST_SESSION_USER,
+      payload,
+    }))(data)
+  );
+  return res;
+};
 
 const POST_SESSION = "session/postSession";
 /**
- * Establish a session for a user and get the user's data to
- * the Redux store.
+ * Establish a session for a user and persist the user's
+ * data to the Redux store.
  *
  * @param {*} object Contains required arguments string
  * **email** and string **password**.
@@ -49,7 +74,7 @@ export const loginSessionUser = ({ email, password }) => async (dispatch) => {
 const GET_SESSION = "session/getSession";
 /**
  * Assuming that the client holds a session token, retrieve
- * the session data and add to Redux state.
+ * the session data and persist to the Redux store.
  */
 export const getSessionUser = () => async (dispatch) => {
   const res = await fetch("/api/sessions", {
@@ -77,7 +102,7 @@ export const logoutSessionUser = () => async (dispatch) => {
   dispatch(
     ((payload) => ({
       type: DELETE_SESSION,
-      payload, 
+      payload,
     }))(data)
   );
   dispatch(disconnectSocketClient());
@@ -85,64 +110,42 @@ export const logoutSessionUser = () => async (dispatch) => {
   return res;
 };
 
-const POST_USER = "session/postSessionUser";
-/**
- * Create a new user and establish a session.
- *
- * @param {*} userObject Contains all of the parameters for
- * a new user.
- */
-export const createNewUser = (userObject) => async (dispatch) => {
-  const res = await fetch("/api/users", {
-    method: "POST",
-    body: JSON.stringify(userObject),
-  });
-  const { data } = res.data;
-  dispatch(
-    ((payload) => ({
-      type: POST_USER,
-      payload,
-    }))(data)
-  );
-  return res;
-};
+// ** ««««««««««««««««««««« Client Geolocation Actions »»»»»»»»»»»»»»»»»»»»» **
 
-const POST_SESSION_GEOLOCATION = "session/postSessionGeolocation";
+const PATCH_SESSION_GEOLOCATION = "session/patchSessionGeolocation";
 /**
  * Retrieve the client location from the browser and update
- * Redux and backend state.
+ * the Redux store and host database.
  */
-export const postSessionGeolocation = () => async (dispatch) => {
-  navigator.geolocation.getCurrentPosition(
-    async ({ coords }) => {
-      await fetch("/api/users", {
-        method: "PATCH",
-        body: JSON.stringify({
-          coordLat: coords.latitude,
-          coordLong: coords.longitude,
-        }),
-      });
-      dispatch(
-        ((payload) => ({
-          type: POST_SESSION_GEOLOCATION,
-          payload,
-        }))({
-          coordLat: coords.latitude,
-          coordLong: coords.longitude,
-        })
-      );
-      return true;
-    }
-  );
+export const patchSessionGeolocation = () => async (dispatch) => {
+  navigator.geolocation.getCurrentPosition(async ({ coords }) => {
+    await fetch("/api/users", {
+      method: "PATCH",
+      body: JSON.stringify({
+        coordLat: coords.latitude,
+        coordLong: coords.longitude,
+      }),
+    });
+    dispatch(
+      ((payload) => ({
+        type: PATCH_SESSION_GEOLOCATION,
+        payload,
+      }))({
+        coordLat: coords.latitude,
+        coordLong: coords.longitude,
+      })
+    );
+    return true;
+  });
 };
+
+// ** ««««««««««««««««««««« Client Websockets Actions »»»»»»»»»»»»»»»»»»»»» **
 
 const CONNECT_SOCKET_CLIENT = "session/connectSocketClient";
 /**
- * Connect a websocket connection with the server with a
- * specific room name.
- * 
- * @param {*} clientRoomId Required; usually
- * `session.user.id` for room name. 
+ * Establish a Socketio connection.
+ *
+ * @param {*} client Socketio client using `io.connect(...)`.
  */
 export const connectSocketClient = (client) => ({
   type: CONNECT_SOCKET_CLIENT,
@@ -151,14 +154,18 @@ export const connectSocketClient = (client) => ({
 
 const DISCONNECT_SOCKET_CLIENT = "session/disconnectSocketClient";
 /**
- * Disconnect the client from the Redux state.
+ * Disconnect the Socketio client.
  */
 export const disconnectSocketClient = () => ({
   type: DISCONNECT_SOCKET_CLIENT,
 });
 
 const JOIN_SOCKET_CLIENT_ROOM = "session/joinSocketClientRoom";
-
+/**
+ * Connect to a Socketio room on the host.
+ *
+ * @param {*} roomId Integer room ID.
+ */
 export const joinSocketClientRoom = (roomId) => async (dispatch) => {
   const storeState = getState();
   const client = storeState.session.socketClient;
@@ -169,10 +176,14 @@ export const joinSocketClientRoom = (roomId) => async (dispatch) => {
       payload,
     }))(roomId)
   );
-}
+};
 
 const LEAVE_SOCKET_CLIENT_ROOM = "session/leaveSocketClientRoom";
-
+/**
+ * Leave a Socketio room on the host.
+ *
+ * @param {*} roomId Integer room ID.
+ */
 export const leaveSocketClientRoom = (roomId) => async (dispatch) => {
   const storeState = getState();
   const client = storeState.session.socketClient;
@@ -181,23 +192,9 @@ export const leaveSocketClientRoom = (roomId) => async (dispatch) => {
     ((payload) => ({
       type: LEAVE_SOCKET_CLIENT_ROOM,
       payload,
-    }))(roomId)
+    }))()
   );
-}
-
-const POST_CHAT_MESSAGE = "session/postChatMessage";
-
-export const postChatMessage = (chatObject) => async (dispatch) => {
-  const storeState = getState();
-  const client = storeState.session.socketClient;
-  client.emit("post_chat_message", chatObject);
-  dispatch(
-    ((payload) => ({
-      type: POST_CHAT_MESSAGE,
-      payload,
-    }))(chatObject)
-  );
-}
+};
 
 // Reducer
 const reducer = (state = sessionTemplate, { type, payload }) => {
@@ -208,32 +205,29 @@ const reducer = (state = sessionTemplate, { type, payload }) => {
     case DELETE_SESSION:
       return { ...state, user: {} };
 
-    case POST_USER:
+    case POST_SESSION_USER:
       return { ...state, user: { ...state.user, ...payload } };
 
     case GET_SESSION:
       return { ...state, user: { ...state.user, ...payload } };
 
-    case POST_SESSION_GEOLOCATION:
+    case PATCH_SESSION_GEOLOCATION:
       return { ...state, user: { ...state.user, ...payload } };
 
     case CONNECT_SOCKET_CLIENT:
       return { ...state, socketClient: payload };
 
     case DISCONNECT_SOCKET_CLIENT:
-      if(state.socketClient) {
+      if (state.socketClient) {
         state.socketClient.disconnect();
       }
       return { ...state, socketClient: null };
-    
+
     case JOIN_SOCKET_CLIENT_ROOM:
-      return state;
-    
+      return {...state, socketConnectedRoomId: payload};
+
     case LEAVE_SOCKET_CLIENT_ROOM:
-      return state;
-    
-    case POST_CHAT_MESSAGE:
-      return state;
+      return {...state, socketConnectedRoomId: null};
 
     default:
       return state;
