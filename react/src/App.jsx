@@ -22,22 +22,10 @@ const App = () => {
   const modalComponent = useSelector((s) => s.modal.component)
   const dispatch = useDispatch();
 
-  // Component state
-  const [mounted, setMounted] = useState(false)
-
   useEffect(() => {
-    // On every render check if the
-    // X-CsrfToken exists. If null then
-    // retrieve one.
     if (!xCsrfToken) {
       dispatch(securityActions.getXCsrfToken());
     }
-
-    // On every render attempt to get
-    // the session user.
-    dispatch(sessionActions.getSessionUser())
-      .then(() => setMounted(true))
-      .catch(() => setMounted(true));
   }, [dispatch]);
 
   return (
@@ -63,27 +51,18 @@ const App = () => {
           }
         </Route>
         <Route path="/">
-          <>
-            {mounted ?
-              <>
-                {sessionUser.id ?
-                  <SocketioRoom>
-                    <Navbar />
-                    <Switch>
-                      <Route exact path="/">
-                        HOME
-                      </Route>
-                      <Route path="/messages">
-                        <Chat>
-                          <ChatThread />
-                        </Chat>
-                      </Route>
-                    </Switch>
-                  </SocketioRoom> : <UnauthSplash />
-                }
-              </> : <Redirect push to="/" />
-            }
-          </>
+          <SocketioRoom>
+            <Navbar />
+            <Route exact path="/">
+              HOME
+                  </Route>
+            <Route exact path="/messages">
+              <Redirect to="/messages/start" />
+            </Route>
+            <Route path="/messages/:slug">
+              <Chat />
+            </Route>
+          </SocketioRoom>
         </Route>
         <Route to="*">
           404!!!
