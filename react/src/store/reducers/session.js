@@ -62,8 +62,6 @@ export const getSessionUser = () => async (dispatch) => {
       payload,
     }))(data)
   );
-  dispatch(postSessionGeolocation());
-  dispatch(connectionsActions.getConnections());
   return res;
 };
 
@@ -79,7 +77,7 @@ export const logoutSessionUser = () => async (dispatch) => {
   dispatch(
     ((payload) => ({
       type: DELETE_SESSION,
-      payload,
+      payload, 
     }))(data)
   );
   dispatch(disconnectSocketClient());
@@ -159,6 +157,34 @@ export const disconnectSocketClient = () => ({
   type: DISCONNECT_SOCKET_CLIENT,
 });
 
+const JOIN_SOCKET_CLIENT_ROOM = "session/joinSocketClientRoom";
+
+export const joinSocketClientRoom = (roomId) => async (dispatch) => {
+  const storeState = getState();
+  const client = storeState.session.socketClient;
+  client.emit("join", { roomId });
+  dispatch(
+    ((payload) => ({
+      type: JOIN_SOCKET_CLIENT_ROOM,
+      payload,
+    }))(roomId)
+  );
+}
+
+const LEAVE_SOCKET_CLIENT_ROOM = "session/leaveSocketClientRoom";
+
+export const leaveSocketClientRoom = (roomId) => async (dispatch) => {
+  const storeState = getState();
+  const client = storeState.session.socketClient;
+  client.emit("leave", { roomId });
+  dispatch(
+    ((payload) => ({
+      type: LEAVE_SOCKET_CLIENT_ROOM,
+      payload,
+    }))(roomId)
+  );
+}
+
 const POST_CHAT_MESSAGE = "session/postChatMessage";
 
 export const postChatMessage = (chatObject) => async (dispatch) => {
@@ -200,8 +226,14 @@ const reducer = (state = sessionTemplate, { type, payload }) => {
       }
       return { ...state, socketClient: null };
     
-      case POST_CHAT_MESSAGE:
-        return state;
+    case JOIN_SOCKET_CLIENT_ROOM:
+      return state;
+    
+    case LEAVE_SOCKET_CLIENT_ROOM:
+      return state;
+    
+    case POST_CHAT_MESSAGE:
+      return state;
 
     default:
       return state;
