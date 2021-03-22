@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { NavLink, useParams } from "react-router-dom";
 
 import ChatThread from "../ChatThread/ChatThread";
@@ -7,7 +7,6 @@ import ChatThread from "../ChatThread/ChatThread";
 import "./Chat.css";
 
 const Chat = () => {
-
   // URL slug
   const { slug } = useParams()
 
@@ -15,7 +14,6 @@ const Chat = () => {
   const connections = useSelector(s => s.connections);
 
   // Component state
-  const [scopedMessageThread, setScopedMessageThread] = useState(null);
   const [activeMessageThreads, setActiveMessageThreads] = useState(null);
 
   useEffect(() => {
@@ -26,13 +24,7 @@ const Chat = () => {
     }
     setActiveMessageThreads(messageThreads);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (slug === "start") setScopedMessageThread(null);
-    else setScopedMessageThread(connections.established[slug]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slug, connections.established]);
+  }, [connections.established]);
 
   return (
     <div className="chat-viewport-container">
@@ -47,16 +39,15 @@ const Chat = () => {
                 {activeMessageThreads.map(messageThread => (
                   <ThreadAvailable
                     key={`active-message-thread-${messageThread.id}`}
-                    threadId={messageThread.id}
-                    otherUser={messageThread.otherUser} />
+                    thread={messageThread} />
                 ))}
               </> : ""
             }
           </ul>
         </div>
-        {scopedMessageThread ?
+        {slug !== "start" ?
           <div className="chat__thread-container">
-            <ChatThread thread={scopedMessageThread} />
+            <ChatThread />
           </div> :
           <div className="chat__splash-container">
             <div className="chat__splash">
@@ -70,11 +61,11 @@ const Chat = () => {
   );
 }
 
-const ThreadAvailable = ({ threadId, otherUser }) => {
-  const otherUserName = `${otherUser.firstName} ${otherUser.lastName}`;
-  const otherUserThumbnail = `/f/profile_${otherUser.id}_64p.jpg`;
-  const otherUserThumbAlt = `User ${otherUser.id} profile picture`;
-  const threadUrl = `/messages/${threadId}`;
+const ThreadAvailable = ({ thread }) => {
+  const otherUserName = `${thread.otherUser.firstName} ${thread.otherUser.lastName}`;
+  const otherUserThumbnail = `/f/profile_${thread.otherUser.id}_64p.jpg`;
+  const otherUserThumbAlt = `User ${thread.otherUser.id} profile picture`;
+  const threadUrl = `/messages/${thread.id}`;
   return (
     <NavLink to={threadUrl}>
       <li>

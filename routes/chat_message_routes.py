@@ -20,8 +20,8 @@ chat_message_routes = Blueprint(
 @login_required
 def post_connection_message(connection_id):
 
-    # Get user with collections from session user id
-    user = User.get_by_id(current_user.id)
+    # Get session user
+    session_user = current_user
 
     # Get request body properties
     message_body = request.json.get("body")
@@ -88,18 +88,18 @@ def get_messages_after_datetime(id):
 @login_required
 def get_messages_with_offset(id):
 
+    # Get session user
+    session_user = current_user
+
     # From URL args
-    messages_offset = int(request.args.get("offset"))
-    messages_qty = int(request.args.get("quantity"))
+    messages_offset = int(request.args.get("ofs"))
+    messages_qty = int(request.args.get("qty"))
 
     # Get the connection
     connection = UserConnection.get_by_id(int(id))
 
-    # Get user with collections from session user id
-    user = User.get_by_id(current_user.id)
-
     # Check if the user is part of the connection
-    connection.user_by_id_is_associated(user.id)
+    connection.user_is_associated(session_user.id)
 
     # Get the messages
     messages = connection.get_chat_messages_by_offset(

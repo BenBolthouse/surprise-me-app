@@ -56,7 +56,7 @@ class ChatMessage(db.Model):
             "body": self.body if not self.deleted else None,
             "deleted": self.deleted,
             "updated": self.updated,
-            "createdAt": self.created_at,
+            "createdAt": self.created_at.isoformat(),
         }
 
     def to_dict(self):

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { io } from "socket.io-client";
 
+import * as chatActions from "../../store/reducers/chat";
 import * as connectionsActions from "../../store/reducers/connections";
 // import * as notificationsActions from "../../store/reducers/notifications";
 import * as sessionActions from "../../store/reducers/session";
@@ -43,18 +44,34 @@ const SocketioRoom = ({ children }) => {
     }
     else if (sessionUser && sessionSocketClient && !socketClientConnected) {
       if (!isProd) {
-        sessionSocketClient.on("message", (message) => {
+        sessionSocketClient.on("chat_message", (message) => {
           console.log(message);
         });
         sessionSocketClient.on("disconnect", (reason) => {
           console.log("Socketio Client: Client was disconnected:", reason);
         });
+        sessionSocketClient.on("messages", (payload) => {
+          console.log("Socketio Client: Message received:", payload);
+        });
       }
-      const dispatchJoinSocketClientRoom = async () => {
-        await dispatch(sessionActions.joinSocketClientRoom(sessionUser.id));
-        setSocketClientConnected(true);
-      }
-      dispatchJoinSocketClientRoom();
+      sessionSocketClient.on("composer_interacting", (payload) => {
+        if (payload.interacting) {
+          dispatch(chatActions.postComposerInteracting(payload.roomId))
+        }
+        else {
+          dispatch(chatActions.deleteComposerInteracting(payload.roomId))
+        }
+      })
+      sessionSocketClient.on("chat_message", (payload) => {
+        if (payload.sender.id !== sessionUser.id) {
+          dispatch(chatActions.getMessage({
+            connId: payload.userConnectionId,
+            message: payload,
+          }));
+        }
+      })
+      dispatch(sessionActions.joinSocketClientRoom(sessionUser.id));
+      setSocketClientConnected(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionUser, sessionSocketClient])

@@ -1,0 +1,43 @@
+@use "../../global" as g;
+
+.login {
+    grid-template-rows: 2rem 8rem auto 3rem;
+    padding: 2rem;
+    position: relative;
+    .login__error-message {
+        color: rgb(201, 25, 78);
+        align-self: center;
+    }
+    form {
+        align-self: start;
+        display: grid;
+    }
+    h1 {
+        color: g.$blk-60;
+        font-weight: 300;
+        font-size: (24rem / 16);
+        text-align: center;
+    }
+    .login__fetching-container {
+        align-content: center;
+        justify-content: center;
+        background-color: rgba(0, 0, 0, 0.4);
+        position: absolute;
+        top: -1rem;
+        right: -1rem;
+        bottom: -1rem;
+        left: -1rem;
+        z-index: 500;
+    }
+    .login__fetching {
+        display: block;
+        height: 24px;
+        width: 58px;
+        div {
+            display: inline-block;
+        }
+    }
+    .login__register-link {
+        text-align: center;
+    }
+}

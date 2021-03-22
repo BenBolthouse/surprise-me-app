@@ -177,7 +177,6 @@ class UserConnection(db.Model):
         """
         offset_quantity = offset + quantity
         message_list = self.messages.copy()
-        message_list.reverse()
         message_list = message_list[offset:offset_quantity]
 
         if not message_list:

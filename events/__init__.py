@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import Blueprint
 from flask_login import current_user
 from flask_socketio import emit, send, join_room, leave_room
@@ -5,6 +6,7 @@ from flask_socketio import ConnectionRefusedError
 
 
 from app import socketio
+from models import db, UserConnection, ChatMessage
 
 
 events = Blueprint("events", __name__)
@@ -29,9 +31,26 @@ def on_leave_room(data):
     send(f"Socketio Host: Client left room {room}")
 
 
-@socketio.on("post_chat_message")
+@socketio.on("composer_interacting")
 def post_chat_message(payload):
-    emit("")
+    emit("composer_interacting", payload, room=payload["roomId"])
+
+
+@socketio.on("chat_message")
+def post_chat_message(payload):
+    msg_conn_id = payload["message"]["userConnectionId"]
+    sender_user_id = payload["message"]["sender"]["id"]
+    connection = UserConnection.get_by_id(msg_conn_id)
+    recipient_user_id = connection.user_is_associated(sender_user_id)
+    chat_message = ChatMessage({
+        "user_connection_id": msg_conn_id,
+        "sender_user_id": sender_user_id,
+        "recipient_user_id": recipient_user_id,
+        "body": payload["message"]["body"],
+    })
+    db.session.add(chat_message)
+    db.session.commit()
+    emit("chat_message", payload["message"], room=payload["roomId"])
 
 
 @socketio.on_error_default

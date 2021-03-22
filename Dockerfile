@@ -1,5 +1,5 @@
 # Node container does the npm stuff
-FROM node:12 AS build-stage
+FROM node AS build-stage
 
 # Copy stuff from React to root
 WORKDIR /react
@@ -33,4 +33,4 @@ RUN pip install -r requirements.txt
 RUN pip install psycopg2
 
 # Run the app
-CMD gunicorn app:app
+CMD gunicorn --worker-class eventlet -w 1 app:app

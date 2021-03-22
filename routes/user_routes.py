@@ -23,12 +23,12 @@ def post_user():
     config_object = {
         "password": request.json.get("password"),
         "email": request.json.get("email"),
-        "first_name": request.json.get("first_name"),
-        "last_name": request.json.get("last_name"),
+        "first_name": request.json.get("firstName"),
+        "last_name": request.json.get("lastName"),
         "email": request.json.get("email"),
-        "share_location": request.json.get("share_location"),
-        "coord_lat": request.json.get("coord_lat"),
-        "coord_long": request.json.get("coord_long"),
+        "share_location": request.json.get("shareLocation"),
+        "coord_lat": request.json.get("coordLat"),
+        "coord_long": request.json.get("coordLong"),
     }
 
     # Respond 400 if requested email is already in use
@@ -45,7 +45,7 @@ def post_user():
     # Respond 201 if successful
     return jsonify({
         "message": "Success",
-        "data": session_user.to_json()
+        "data": user.to_json()
     }), 201
 
 

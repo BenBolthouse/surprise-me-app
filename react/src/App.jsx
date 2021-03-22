@@ -13,6 +13,8 @@ import * as sessionActions from "./store/reducers/session";
 
 import "./reset.css";
 import "./App.css";
+import Signup from "./components/Signup/Signup.jsx";
+import Login from "./components/Login/Login.jsx";
 
 const App = () => {
   // Hooks
@@ -47,15 +49,16 @@ const App = () => {
           }
           <Switch>
             <Route exact path="/signup">
-              {sessionUser.id ?
-                <Redirect to="/" /> :
-                <AuthView type="Signup" />
-              }
+              <AuthView>
+                <Signup />
+              </AuthView>
             </Route>
             <Route exact path="/login">
               {sessionUser.id ?
                 <Redirect to="/" /> :
-                <AuthView type="Login" />
+                <AuthView>
+                  <Login />
+                </AuthView>
               }
             </Route>
             <Route path="/">

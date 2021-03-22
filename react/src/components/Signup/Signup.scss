@@ -1,11 +1,77 @@
+@use "../../global" as g;
+
 .signup {
-    grid-template-columns: repeat(4, 24rem);
+    grid-template-columns: repeat(4, 22rem);
     margin-left: 0;
     transition: margin .5s;
     -o-transition: margin .5s;
     -moz-transition: margin .5s;
     -webkit-transition: margin .5s;
-}
-.signup > div {
-    padding: 1rem;
+    .panel {
+        padding: 2rem;
+        > h1 {
+            color: g.$blk-60;
+            font-weight: 300;
+            font-size: (24rem / 16);
+            text-align: center;
+        }
+        > p {
+            line-height: 1.5rem;
+            text-align: center;
+        }
+    }
+    .signup__links {
+        padding: 0 1rem;
+    }
+    .signup__links a {
+        height: 2rem;
+        line-height: 2rem;
+        text-align: center;
+    }
+    .signup__basic-info {
+        grid-template-rows: 6rem 3rem auto;
+        form {
+            align-self: end;
+            display: grid;
+        }
+        .form-group.email {
+            grid-template-rows: 1.5rem 3rem 4rem;
+        }
+        .form-group.email.errors > svg {
+            top: 2.15rem;
+        }
+        .form-group__email-fetching {
+            height: 4rem;
+        }
+        .form-group__email-not-unique p {
+            font-size: (14rem / 16);
+            line-height: 1.25rem;
+        }
+    }
+    .signup__share-location {
+        grid-template-rows: 6rem 6rem auto;
+        form {
+            align-self: end;
+        }
+        .checkbox.form-group {
+            grid-template-rows: 2rem 4rem;
+            text-align: center;
+        }
+        .form-group input {
+            justify-self: center;
+            height: 1.5rem;
+            width: 1.5rem;
+        }
+    }
+    .signup__set-password {
+        grid-template-rows: 6rem 6rem auto;
+        form {
+            align-self: end;
+            .form-group {
+                &.errors > svg {
+                    top: 2.15rem;
+                }
+            }
+        }
+    }
 }

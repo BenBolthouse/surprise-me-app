@@ -196,7 +196,8 @@ export const leaveSocketClientRoom = (roomId) => async (dispatch) => {
   );
 };
 
-// Reducer
+// ** «««««««««««««««««««««««««««««« Reducer »»»»»»»»»»»»»»»»»»»»»»»»»»»»»» **
+
 const reducer = (state = sessionTemplate, { type, payload }) => {
   switch (type) {
     case POST_SESSION:

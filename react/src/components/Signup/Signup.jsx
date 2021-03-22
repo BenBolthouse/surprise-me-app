@@ -222,7 +222,7 @@ const Signup = () => {
   return (
     <div className="signup" style={{ "marginLeft": signupLeftMargin }}>
 
-      <div className="signup__basic-info">
+      <div className="panel signup__basic-info">
         <h1>Create An Account</h1>
         <p>Set up your profile.</p>
         <form onSubmit={submitBasicInfo}>
@@ -285,29 +285,35 @@ const Signup = () => {
             }
           </div>
 
-          <div className={`form-group${email.errors.length || !email.isUnique ? " errors" : ""}`}>
+          <div className={`form-group email${email.errors.length || !email.isUnique ? " errors" : ""}`}>
             <label htmlFor="signupEmailInput">Email</label>
             <input
               type="text"
               id="signupEmailInput"
               disabled={position !== 0}
               onChange={(e) => checkIsEmailUnique(e)} />
-            <div className="form-group__email-fetching">
-              {email.fetching ?
-                // <Loader type="bars" color="#000000" /> : ""
-                "" : ""
-              }
-            </div>
-            <div className="form-group__email-uniqueness">
-              {!email.isUnique ?
-                <>
-                  <p>Email address is already being used by another account.</p>
-                  <p>Do you have an account? You can log in <Link to="/login">here!</Link></p>
-                </> :
-                email.value && !email.errors.length && !email.fetching ?
-                  <p>✅</p> : ""
-              }
-            </div>
+            {email.fetching ?
+              <div className="form-group__email-fetching">
+                {/* <Loader type="bars" color="#000000" /> */}
+              </div> : ""
+            }
+            {!email.fetching ?
+              <>
+                {!email.isUnique ?
+                  <>
+                    {!email.value.length ?
+                      <div className="form-group__email-unique">
+                        <p>✅</p>
+                      </div> :
+                      <div className="form-group__email-not-unique">
+                        <p>Email address is already being used by another account.</p>
+                        <p>Do you have an account? You can log in <Link to="/login">here!</Link></p>
+                      </div>
+                    }
+                  </> : ""
+                }
+              </> : ""
+            }
             {email.errors.length ?
               <BsExclamationSquare
                 className="form-group__show-errors"
@@ -330,7 +336,7 @@ const Signup = () => {
             }
           </div>
 
-          <div className="form-group">
+          <div className="nav form-group">
             <button
               className="form-group__next-button"
               type="submit"
@@ -342,7 +348,7 @@ const Signup = () => {
         </form>
       </div>
 
-      <div className="signup__share-location">
+      <div className="panel signup__share-location">
         <h1>Where are you?</h1>
         <p>
           Surprise Me needs to know your device's location.
@@ -350,7 +356,7 @@ const Signup = () => {
         </p>
 
         <form onSubmit={submitGeolocation}>
-          <div className={`form-group${geolocation.errors.length ? " errors" : ""}`}>
+          <div className={`checkbox form-group${geolocation.errors.length ? " errors" : ""}`}>
             <label htmlFor="signupShareLocationInput">Share my location</label>
             <input
               type="checkbox"
@@ -358,36 +364,27 @@ const Signup = () => {
               disabled={position !== 1}
               checked={geolocation.value}
               onClick={getGeolocation} />
-            <div className="form-group__errors">
-              {geolocation.errors ?
-                <ul>
-                  {geolocation.errors.map((err, i) => (
-                    <li key={`signup-form-share-location-error-${i}`}>{err}</li>
-                  ))}
-                </ul> : ""
-              }
-            </div>
           </div>
 
-          <div className="form-group">
+          <div className="nav form-group">
+            <button
+              className="form-group__back-button"
+              type="button"
+              onClick={() => setPosition(0)}
+              disabled={position !== 1}>
+              Go back...
+            </button>
             <button
               className="form-group__next-button"
               type="submit"
               disabled={position !== 1}>
               Next...
             </button>
-            <button
-              className="form-group__back-button"
-              type="button"
-              onClick={() => setPosition(0)}
-              disabled={position !== 1}>
-              Go back
-            </button>
           </div>
 
         </form>
       </div>
-      <div className="signup__set-password">
+      <div className="panel signup__set-password">
         <h1>Last step...</h1>
         <p>Choose a password and confirm.</p>
 
@@ -402,15 +399,26 @@ const Signup = () => {
                 ...password,
                 value: e.target.value
               })} />
-            <div className="form-group__errors">
-              {password.errors.length ?
-                <ul>
-                  {password.errors.map((err, i) => (
-                    <li key={`signup-form-password-error-${i}`}>{err}</li>
-                  ))}
-                </ul> : ""
-              }
-            </div>
+            {password.errors.length ?
+              <BsExclamationSquare
+                className="form-group__show-errors"
+                onClick={() => setPassword({ ...password, errorsVisible: true })} />
+              : ""
+            }
+            {password.errorsVisible ?
+              <div className="form-group__errors">
+                <BsX
+                  className="form-group__hide-all-errors"
+                  onClick={() => setPassword({ ...password, errorsVisible: false })} />
+                {password.errors ?
+                  <ul>
+                    {password.errors.map((err, i) => (
+                      <li key={`signup-form-password-error-${i}`}>{err}</li>
+                    ))}
+                  </ul> : ""
+                }
+              </div> : ""
+            }
           </div>
 
           <div className={`form-group${confirmPassword.errors.length ? " errors" : ""}`}>
@@ -423,45 +431,51 @@ const Signup = () => {
                 ...confirmPassword,
                 value: e.target.value
               })} />
-            <div className="form-group__errors">
-              {confirmPassword.errors ?
-                <ul>
-                  {confirmPassword.errors.map((err, i) => (
-                    <li key={`signup-form-confirm-password-error-${i}`}>
-                      {err}
-                    </li>
-                  ))}
-                </ul> : ""
-              }
-            </div>
+            {confirmPassword.errors.length ?
+              <BsExclamationSquare
+                className="form-group__show-errors"
+                onClick={() => setConfirmPassword({ ...confirmPassword, errorsVisible: true })} />
+              : ""
+            }
+            {confirmPassword.errorsVisible ?
+              <div className="form-group__errors">
+                <BsX
+                  className="form-group__hide-all-errors"
+                  onClick={() => setConfirmPassword({ ...confirmPassword, errorsVisible: false })} />
+                {confirmPassword.errors ?
+                  <ul>
+                    {confirmPassword.errors.map((err, i) => (
+                      <li key={`signup-form-c-password-error-${i}`}>{err}</li>
+                    ))}
+                  </ul> : ""
+                }
+              </div> : ""
+            }
           </div>
 
           <div className="form-group">
+            <button
+              className="form-group__back-button"
+              type="button"
+              onClick={() => setPosition(1)}
+              disabled={position !== 2}>
+              Go back...
+            </button>
             <button
               className="form-group__next-button"
               type="submit"
               disabled={position !== 2}>
               Sign up
             </button>
-            <button
-              className="form-group__back-button"
-              type="button"
-              onClick={() => setPosition(1)}
-              disabled={position !== 2}>
-              Go back
-            </button>
           </div>
 
         </form>
       </div>
-      <div className="signup__success">
-        <h2>Welcome to Surprise Me</h2>
+      <div className="panel signup__success">
+        <h1>Welcome to Surprise Me</h1>
         {position === 3 ?
-          <Link to="/">Let's get started</Link> : ""
+          <Link to="/">Home</Link> : ""
         }
-      </div>
-      <div className="signup__links">
-        <Link to="/login">I have an account</Link>
       </div>
     </div >
   );

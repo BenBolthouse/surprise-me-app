@@ -1,5 +1,5 @@
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
-import { Loader } from "react-loaders"
+import { Loader } from "react-loaders";
 import {
   BsSearch,
   BsFillChatDotsFill,
@@ -96,6 +96,7 @@ const UserMenu = ({ onClearCallback }) => {
   const logout = (evt) => {
     evt.preventDefault()
     dispatch(sessionActions.logoutSessionUser());
+    clearModal();
   }
   const clearModal = (evt) => {
     dispatch(modalActions.clearModal());
