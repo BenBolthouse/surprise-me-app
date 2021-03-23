@@ -167,3 +167,6 @@ cython_debug/
 
 # Ignore local production test conf file
 gunicorn.conf.py
+
+# React's linter cache
+*.eslintcache
