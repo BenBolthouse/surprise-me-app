@@ -1,5 +1,5 @@
 # Node container does the npm stuff
-FROM node AS build-stage
+FROM node:14-alpine AS build-stage
 
 # Copy stuff from React to root
 WORKDIR /react
@@ -10,6 +10,8 @@ ENV REACT_APP_BASE_URL=https://bbotlhouse-surprise-me.herokuapp.com/
 
 # React install and build
 RUN npm install
+RUN npm i -g sass
+RUN sass ./src
 RUN npm run build
 
 # Python container runs the app
@@ -18,7 +20,6 @@ FROM python:3.9
 # Production environment variables go here
 ENV FLASK_APP=app
 ENV FLASK_ENV=production
-ENV SQLALCHEMY_ECHO=True
 
 # Punch a hole at 8000
 EXPOSE 8000
