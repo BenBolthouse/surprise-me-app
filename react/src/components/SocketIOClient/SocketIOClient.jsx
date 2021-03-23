@@ -4,14 +4,12 @@ import { io } from "socket.io-client";
 
 import * as chatActions from "../../store/reducers/chat";
 import * as connectionsActions from "../../store/reducers/connections";
-// import * as notificationsActions from "../../store/reducers/notifications";
 import * as sessionActions from "../../store/reducers/session";
 
 const SocketioRoom = ({ children }) => {
   // Hooks
   const dispatch = useDispatch()
   const connectionsTimestamp = useSelector(s => s.connections.timestamp);
-  // const notificationsTimestamp = useSelector(s => s.notifications.timestamp);
   const sessionSocketClient = useSelector(s => s.session.socketClient);
   const sessionUser = useSelector(s => s.session.user);
 
@@ -32,7 +30,7 @@ const SocketioRoom = ({ children }) => {
   useEffect(() => {
     if (sessionUser.id && !sessionSocketClient) {
       const transports = isProd ? ["websocket"] : ["polling"];
-      const socketio = io("http://localhost:5000").connect({
+      const socketio = io.connect({
         transports: transports,
         upgrade: false,
         room: sessionUser.id,
