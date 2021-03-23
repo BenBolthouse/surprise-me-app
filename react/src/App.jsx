@@ -4,17 +4,17 @@ import { Redirect, Route, Switch } from "react-router-dom";
 
 import AuthView from "./components/AuthView/AuthView.jsx";
 import Chat from "./components/Chat/Chat.jsx";
+import Login from "./components/Login/Login.jsx";
 import Navbar from "./components/Navbar/Navbar.jsx";
-import UnauthSplash from "./components/UnauthSplash/UnauthSplash.jsx";
+import Signup from "./components/Signup/Signup.jsx";
 import SocketioRoom from "./components/SocketIOClient/SocketIOClient.jsx";
+import UnauthSplash from "./components/UnauthSplash/UnauthSplash.jsx";
 
 import * as securityActions from "./store/reducers/security";
 import * as sessionActions from "./store/reducers/session";
 
 import "./reset.css";
 import "./App.css";
-import Signup from "./components/Signup/Signup.jsx";
-import Login from "./components/Login/Login.jsx";
 
 const App = () => {
   // Hooks
@@ -26,13 +26,10 @@ const App = () => {
   const [mount, setMount] = useState(false);
 
   useEffect(() => {
-    const dispatchState = async () => {
-      await dispatch(securityActions.getXCsrfToken());
-      await dispatch(sessionActions.getSessionUser())
-        .then(() => setMount(true))
-        .catch(() => setMount(true));
-    }
-    dispatchState()
+    dispatch(securityActions.getXCsrfToken());
+    dispatch(sessionActions.getSessionUser())
+      .then(() => setMount(true))
+      .catch(() => setMount(true));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch]);
 
@@ -82,7 +79,8 @@ const App = () => {
               404!!!
             </Route>
           </Switch>
-        </div> : ""}
+        </div> : ""
+      }
     </>
   );
 };
