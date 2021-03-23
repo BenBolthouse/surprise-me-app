@@ -1,4 +1,5 @@
 from flask import Flask, session, request, redirect, jsonify
+from flask import send_from_directory
 from flask_cors import CORS
 from flask_login import LoginManager
 from flask_migrate import Migrate
@@ -23,8 +24,12 @@ from routes import session_routes
 from routes import user_connection_routes
 from routes import user_routes
 
+is_prod = os.environ.get("FLASK_ENV") == "production"
 
-app = Flask(__name__, static_folder="static/", static_url_path="/")
+# Development static app location
+static_folder = "static/" if is_prod else "../react/build/"
+
+app = Flask(__name__, static_folder=static_folder)
 
 # Configure websockets
 socketio = SocketIO(app,
@@ -34,7 +39,6 @@ socketio = SocketIO(app,
 
 # Environment setup
 app.config.from_object(Config)
-is_production = os.environ.get("FLASK_ENV") == "production"
 
 # User login configuration
 login = LoginManager(app)
@@ -83,19 +87,20 @@ CORS(app)
 @app.before_request
 # Redirect to HTTPS if in production
 def https_redirect():
-    if is_production:
+    if is_prod:
         if request.headers.get("X-Forwarded-Proto") == "http":
             url = request.url.replace("http://", "https://", 1)
             code = 301
             return redirect(url, code=code)
 
 
-@app.route("/", defaults={"path": ""}, methods=["GET"])
-# Response with frontend
-def react_root(path):
-    if path == "favicon.ico":
-        return app.send_static_file("favicon.ico")
-    return app.send_static_file("index.html")
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
+def serve(path):
+    if path != "" and os.path.exists(app.static_folder + "/" + path):
+        return send_from_directory(app.static_folder, path)
+    else:
+        return send_from_directory(app.static_folder, "index.html")
 
 
 @app.errorhandler(InternalServerError)
@@ -117,7 +122,7 @@ def handle_all_other_exceptions(exception):
     trace_array = [t for t in trace.args]
     return jsonify({
         "message": "There was an unexpected internal server error.",
-        "traceback": trace_array if not is_production else ""
+        "traceback": trace_array
     }), 500
 
 
