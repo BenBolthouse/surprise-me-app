@@ -6,7 +6,7 @@ from flask_socketio import ConnectionRefusedError
 
 
 from app import socketio
-from models import db, UserConnection, ChatMessage
+from models import db, User, UserConnection, ChatMessage, ChatNotification
 
 
 events = Blueprint("events", __name__)
@@ -38,10 +38,11 @@ def post_chat_message(payload):
 
 @socketio.on("chat_message")
 def post_chat_message(payload):
-    msg_conn_id = payload["message"]["userConnectionId"]
     sender_user_id = payload["message"]["sender"]["id"]
+    msg_conn_id = payload["message"]["userConnectionId"]
     connection = UserConnection.get_by_id(msg_conn_id)
     recipient_user_id = connection.user_is_associated(sender_user_id)
+    sender_user = User.query.get(sender_user_id)
     chat_message = ChatMessage({
         "user_connection_id": msg_conn_id,
         "sender_user_id": sender_user_id,
@@ -49,7 +50,18 @@ def post_chat_message(payload):
         "body": payload["message"]["body"],
     })
     db.session.add(chat_message)
-    db.session.commit()
+    existing_notification = ChatNotification.query.filter(
+        ChatNotification.user_connection_id == msg_conn_id).first()
+    if not existing_notification:
+        chat_notification = ChatNotification({
+            "sender_user_id": sender_user_id,
+            "user_connection_id": msg_conn_id,
+            "notification_type": "message",
+            "hook": f"/messages/{msg_conn_id}",
+            "body": f"{sender_user.first_name} {sender_user.last_name} sent you a message"
+        })
+        db.session.add(chat_notification)
+        db.session.commit()
     emit("chat_message", payload["message"], room=payload["roomId"])
 
 

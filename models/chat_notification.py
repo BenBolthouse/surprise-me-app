@@ -50,9 +50,9 @@ class ChatNotification(db.Model):
     def to_json(self):
         return {
             "id": self.id,
+            "aggrType": self.notification_type,
             "userConnectionId": self.user_connection_id,
             "senderUserId": self.sender_user_id,
-            "type": self.notification_type,
             "hook": self.hook,
             "body": self.body,
             "active": self.active,

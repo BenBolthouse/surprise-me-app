@@ -18,6 +18,7 @@ from models import db, User
 
 # Route imports
 from routes import chat_message_routes
+from routes import chat_notification_routes
 from routes import csrf_routes
 from routes import s3_routes
 from routes import session_routes
@@ -66,6 +67,7 @@ def validate_csrf_token():
 
 
 # Route configuration
+app.register_blueprint(chat_notification_routes)
 app.register_blueprint(chat_message_routes)
 app.register_blueprint(csrf_routes)
 app.register_blueprint(s3_routes)
