@@ -130,6 +130,10 @@ class User(db.Model, UserMixin):
         back_populates="_sender_user",
         foreign_keys=[ChatMessage.sender_user_id],
         cascade="all, delete")
+    _chat_notifications = db.relationship(
+        "ChatNotification",
+        backref="users",
+        cascade="all, delete")
 
     # ** «««««««««««««««« Getters and Setters »»»»»»»»»»»»»»»» **
 
@@ -164,6 +168,16 @@ class User(db.Model, UserMixin):
     @notifications.setter
     def notifications(self, notification):
         self._notifications.append(notification)
+
+    # «««««««« Chat Notifications »»»»»»»»
+
+    @property
+    def chat_notifications(self):
+        return self._chat_notifications
+
+    @chat_notifications.setter
+    def chat_notifications(self, chat_notification):
+        self._chat_notifications.append(notification)
 
     # ** «««««««««««««««« Static Class Methods »»»»»»»»»»»»»»»» **
 

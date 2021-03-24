@@ -40,8 +40,8 @@ def post_chat_message(payload):
 def post_chat_message(payload):
     sender_user_id = payload["message"]["sender"]["id"]
     msg_conn_id = payload["message"]["userConnectionId"]
-    connection = UserConnection.get_by_id(msg_conn_id)
-    recipient_user_id = connection.user_is_associated(sender_user_id)
+    user_connection = UserConnection.get_by_id(msg_conn_id)
+    recipient_user_id = user_connection.user_is_associated(sender_user_id)
     sender_user = User.query.get(sender_user_id)
     chat_message = ChatMessage({
         "user_connection_id": msg_conn_id,
@@ -51,18 +51,19 @@ def post_chat_message(payload):
     })
     db.session.add(chat_message)
     existing_notification = ChatNotification.query.filter(
-        ChatNotification.user_connection_id == msg_conn_id).first()
+        ChatNotification.user_connection_id == user_connection.id,
+        ChatNotification.recipient_user_id == recipient_user_id).first()
     if not existing_notification:
         chat_notification = ChatNotification({
-            "sender_user_id": sender_user_id,
-            "user_connection_id": msg_conn_id,
+            "user_connection_id": user_connection.id,
+            "recipient_user_id": recipient_user_id,
             "notification_type": "message",
             "hook": f"/messages/{msg_conn_id}",
             "body": f"{sender_user.first_name} {sender_user.last_name} sent you a message"
         })
         db.session.add(chat_notification)
         db.session.commit()
-    emit("chat_message", payload["message"], room=payload["roomId"])
+    emit("chat_message", payload["message"], room=recipient_user_id)
 
 
 @socketio.on_error_default

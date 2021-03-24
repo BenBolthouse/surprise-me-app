@@ -3,8 +3,8 @@ from .db import db
 
 class ChatNotification(db.Model):
     def __init__(self, config_object):
-        self.sender_user_id = config_object["sender_user_id"]
         self.user_connection_id = config_object["user_connection_id"]
+        self.recipient_user_id = config_object["recipient_user_id"]
         self.notification_type = config_object["notification_type"]
         self.hook = config_object["hook"]
         self.body = config_object["body"]
@@ -20,7 +20,7 @@ class ChatNotification(db.Model):
         db.Integer,
         db.ForeignKey('user_connections.id'),
         nullable=False)
-    sender_user_id = db.Column(
+    recipient_user_id = db.Column(
         db.Integer,
         db.ForeignKey('users.id'),
         nullable=False)
@@ -50,9 +50,9 @@ class ChatNotification(db.Model):
     def to_json(self):
         return {
             "id": self.id,
-            "aggrType": self.notification_type,
             "userConnectionId": self.user_connection_id,
-            "senderUserId": self.sender_user_id,
+            "recipientUserId": self.recipient_user_id,
+            "aggrType": self.notification_type,
             "hook": self.hook,
             "body": self.body,
             "active": self.active,
