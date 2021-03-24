@@ -29,7 +29,6 @@ const Chat = () => {
     for (const value of Object.values(connections.established)) {
       if (value.lastMessage) {
         messageThreads.push(value)
-        dispatch(sessionActions.joinSocketClientRoom(value.id));
       };
     }
     setActiveMessageThreads(messageThreads);
@@ -58,17 +57,19 @@ const Chat = () => {
                 placeholder="Search" />
             </div>
             <h2>Recents</h2>
-            <ul>
-              {activeMessageThreads
-                ? activeMessageThreads.map((messageThread) => (
-                  <ThreadAvailable
-                    imageSize="64"
-                    key={`active-message-thread-${messageThread.id}`}
-                    thread={messageThread}
-                  />
-                ))
-                : ""}
-            </ul>
+            <div className="scroll">
+              <ul>
+                {activeMessageThreads
+                  ? activeMessageThreads.map((messageThread) => (
+                    <ThreadAvailable
+                      imageSize="64"
+                      key={`active-message-thread-${messageThread.id}`}
+                      thread={messageThread}
+                    />
+                  ))
+                  : ""}
+              </ul>
+            </div>
           </div>
         </div>
         <div className="chat__content">
@@ -85,17 +86,19 @@ const Chat = () => {
               </div>
               <div className="chat__splash-mobile">
                 <h2>Recents</h2>
-                <ul>
-                  {activeMessageThreads
-                    ? activeMessageThreads.map((messageThread) => (
-                      <ThreadAvailable
-                        imageSize="128"
-                        key={`active-message-thread-${messageThread.id}`}
-                        thread={messageThread}
-                      />
-                    ))
-                    : ""}
-                </ul>
+                <div className="scroll">
+                  <ul>
+                    {activeMessageThreads
+                      ? activeMessageThreads.map((messageThread) => (
+                        <ThreadAvailable
+                          imageSize="128"
+                          key={`active-message-thread-${messageThread.id}`}
+                          thread={messageThread}
+                        />
+                      ))
+                      : ""}
+                  </ul>
+                </div>
               </div>
             </>
           }
@@ -109,9 +112,11 @@ const ThreadAvailable = ({ thread, imageSize }) => {
   // Hooks
   const sessionUser = useSelector(s => s.session.user);
   const chatThread = useSelector(s => s.chat[thread.id]);
+  const connectionsNotifications = useSelector(s => s.connections.notifications);
 
   // Component state
   const [lastMessage, setLastMessage] = useState("")
+  const [hasUnread, setHasUnread] = useState(false);
   const otherUserName = `${thread.otherUser.firstName} ${thread.otherUser.lastName}`;
   const otherUserThumbnail = `/f/profile_${thread.otherUser.id}_${imageSize}p.jpg`;
   const threadUrl = `/messages/${thread.id}`;
@@ -132,12 +137,24 @@ const ThreadAvailable = ({ thread, imageSize }) => {
     }
   }, [chatThread]);
 
+  useEffect(() => {
+    if (connectionsNotifications.find(
+      n => n.userConnectionId === thread.id
+    )) {
+      setHasUnread(true);
+    }
+    else setHasUnread(false);
+  }, [connectionsNotifications])
+
   return (
     <NavLink to={threadUrl}>
       <li>
         <ImagePreload src={otherUserThumbnail} />
         <p className="name">{otherUserName}</p>
         <p className="last-message">{lastMessage}</p>
+        {hasUnread ?
+          <div className="unread" /> : ""
+        }
       </li>
     </NavLink>
   );
