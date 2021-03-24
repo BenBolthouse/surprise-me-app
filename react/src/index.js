@@ -8,7 +8,7 @@ import configureStore from "./store";
 
 import * as chatActions from "./store/reducers/chat";
 import * as connectionsActions from "./store/reducers/connections";
-import * as notificationsActions from "./store/reducers/notifications";
+import * as localStorageActions from "./store/reducers/localStorage";
 import * as sessionActions from "./store/reducers/session";
 
 export const store = configureStore();
@@ -18,8 +18,8 @@ if (process.env.NODE_ENV !== 'production') {
   window.store = store;
   window.chatActions = chatActions;
   window.connectionsActions = connectionsActions;
+  window.localStorageActions = localStorageActions;
   window.sessionActions = sessionActions;
-  window.notificationsActions = notificationsActions;
 }
 
 // React root entry point
