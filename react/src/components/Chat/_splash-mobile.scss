@@ -1,0 +1,58 @@
+@media screen and (min-width: g.$screen-size-sm) {
+    .chat-view {
+        .chat__splash-mobile {
+            grid-template-rows: 6rem 1fr;
+            h2 {
+                color: g.$blk-50;
+                font-size: (24rem / 16);
+                font-weight: 300;
+                line-height: 3rem;
+                margin: 2rem 0 1rem;
+                text-align: center;
+            }
+            ul {
+                display: grid;
+                align-content: start;
+                justify-content: center;
+                a {
+                    display: block;
+                    height: 6rem;
+                    margin-bottom: 1rem;
+                    opacity: 1;
+                    text-decoration: none;
+                    width: 20rem;
+                    li {
+                        display: grid;
+                        grid-template: 3rem 3rem / 6rem 1fr;
+                        height: 3rem;
+                        .img-pre {
+                            grid-row: 1 / 3;
+                            grid-column: 1 / 2;
+                            border-radius: 50%;
+                            height: 6rem;
+                            width: 6rem;
+                        }
+                        > p {
+                            margin-left: 0.5rem;
+                            white-space: nowrap;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                        }
+                        p.name {
+                            color: g.$blk-20;
+                            font-size: (20rem / 16);
+                            line-height: 2rem;
+                            margin-top: 1rem;
+                        }
+                        p.last-message {
+                            color: g.$blk-60;
+                            font-size: (18rem / 16);
+                            line-height: 2rem;
+                            margin-bottom: 1rem;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

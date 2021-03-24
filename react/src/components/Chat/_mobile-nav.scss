@@ -1,0 +1,44 @@
+@use "../../global" as g;
+
+@media screen and (min-width: g.$screen-size-sm) {
+    .chat-view {
+        .chat__mobile-nav {
+            grid-column: 1 / 27;
+            grid-template: 3.5rem / 0.75rem 1fr 16rem 1fr 0.75rem;
+            background-color: g.$blk-95;
+            border-bottom: 1px solid g.$blk-80;
+            height: 3.5rem;
+            z-index: 302;
+            a {
+                display: grid;
+                grid-column: 2 / 3;
+                align-content: center;
+                justify-content: center;
+                height: 3.5rem;
+                width: 3.5rem;
+                &.hide {
+                    display: none;
+                }
+                svg {
+                    color: g.$blk-40;
+                    height: 2.5rem;
+                    width: 2.5rem;
+                }
+            }
+            input {
+                font-weight: 300;
+                border: none;
+                grid-column: 3 / 4;
+                margin: 0.5rem 0;
+            }
+        }
+    }
+}
+
+@media screen and (min-width: g.$screen-size-lg) {
+    .chat-view {
+        .chat__mobile-nav {
+            display: none;
+        }
+    }
+}

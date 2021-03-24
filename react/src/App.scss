@@ -10,7 +10,6 @@ body,
 }
 .view-container {
     background-color: g.$blk-90;
-    display: block;
 }
 .view {
     overflow: hidden;
@@ -18,15 +17,46 @@ body,
     height: 100%;
     width: 100%;
 }
+.page-grid {
+    grid-template-columns: 1rem repeat(24, 1fr) 1rem;
+}
+
+// ** «««««««««««««««««««««««« Typography »»»»»»»»»»»»»»»»»»»»»»»» **
+
+* {
+    font-family: "Noto Sans", Arial, sans-serif;
+}
 a {
     color: g.$color-interact;
     opacity: 0.8;
-    &.active, &:hover {
+    &.active,
+    &:hover {
         opacity: 1;
     }
     &.inactive {
         color: g.$blk-60;
     }
+}
+
+// ** «««««««««««««««««««««««« Inputs »»»»»»»»»»»»»»»»»»»»»»»» **
+
+input[type="text"],
+input[type="password"] {
+    border: 1px solid g.$blk-40;
+    color: g.$blk-20;
+    border-radius: 0.25rem;
+    display: block;
+    font-weight: 300;
+    font-size: 1rem;
+    height: 2.5rem;
+    margin-bottom: 0.5rem;
+    padding: 0 0.5rem;
+}
+input[type="text"]:focus,
+input[type="password"]:focus {
+    box-shadow: 0 0 0 4px rgba(0, 169, 255, 0.3);
+    border: 1px rgb(0, 169, 255) solid;
+    outline: none;
 }
 button {
     cursor: pointer;
@@ -37,10 +67,4 @@ button {
     font-size: 1rem;
     line-height: 1rem;
     padding: 1rem 2rem;
-}
-
-// ** «««««««««««««««««««««««« Typography »»»»»»»»»»»»»»»»»»»»»»»» **
-
-* {
-    font-family: "Noto Sans", Arial, sans-serif;
 }
