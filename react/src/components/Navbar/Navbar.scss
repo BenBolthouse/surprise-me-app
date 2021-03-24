@@ -2,6 +2,7 @@
 
 @media screen and (min-width: g.$screen-size-sm) {
     .navbar-viewport-container {
+        background: linear-gradient(to right, g.$pr-1-v-4, g.$pr-2-v-7);
         position: absolute;
         top: 0;
         right: 0;
@@ -9,10 +10,10 @@
         z-index: 400;
         .navbar {
             background-color: white;
-            border-bottom: 1px solid g.$blk-90;
+            border-bottom: 1px solid g.$blk-80;
             display: block;
-            height: 3.5rem;
-            padding: 0.25rem 0 0;
+            height: 3.25rem;
+            margin: 0.25rem 0 0;
             .links {
                 grid-template-columns: repeat(2, 2.5rem) 3rem;
                 grid-auto-flow: column;
@@ -23,12 +24,14 @@
                     display: block;
                     padding: 0.5rem;
                     margin: 0.25rem 0 0;
+                    position: relative;
+                    text-decoration: none;
                     height: 3rem;
                     width: 2.5rem;
                     &.active {
                         border-bottom: 1px solid g.$color-interact;
                         * {
-                            color: g.$color-interact;
+                            color: g.$pr-1-v-8;
                         }
                     }
                     &.profile {
@@ -48,8 +51,6 @@
                         }
                     }
                     img {
-                        border: 2px solid white;
-                        box-shadow: 0 1px 2px 0 g.$blk-60;
                         border-radius: 50%;
                         object-fit: cover;
                         height: 2.5rem;
@@ -57,6 +58,19 @@
                         &:hover {
                             box-shadow: 0 3px 3px 0 g.$blk-70;
                         }
+                    }
+                    .notifications {
+                        align-content: center;
+                        justify-content: center;
+                        border-radius: 50%;
+                        background-color: red;
+                        color: white;
+                        font-size: (12rem / 16);
+                        height: 1rem;
+                        width: 1rem;
+                        position: absolute;
+                        bottom: 9px;
+                        right: 6px;
                     }
                 }
             }
@@ -85,7 +99,7 @@
         .top {
             grid-template: 10rem 2rem 2rem / 1fr;
             background-color: white;
-            border-bottom: 4px solid #fd9f24;
+            border-bottom: 4px solid g.$pr-1-v-4;
             padding: 1.5rem 0 1rem;
             .img-pre {
                 align-self: center;
@@ -141,5 +155,15 @@
                 }
             }
         }
+    }
+}
+@media screen and (min-width: g.$screen-size-lg) {
+    .navbar-viewport-container .navbar .links {
+        grid-column: 11 / 24;
+    }
+}
+@media screen and (min-width: g.$screen-size-dt) {
+    .navbar-viewport-container .navbar .links {
+        grid-column: 11 / 22;
     }
 }
