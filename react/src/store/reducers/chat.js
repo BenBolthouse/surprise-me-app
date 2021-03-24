@@ -7,17 +7,17 @@ import * as sessionActions from "./session";
 const messageThreadsTemplate = {};
 
 /**
- * Get the current state.
+ * Get the current client state.
  */
 const getState = () => store.getState();
 
 // ** «««««««««««««««««««««««««««««« Actions »»»»»»»»»»»»»»»»»»»»»»»»»»»»»» **
 
 const POST_MESSAGE = "chat/postMessage";
-
 export const postMessage = ({ connId, body }) => async (dispatch) => {
   const storeState = getState();
   const message = {
+    aggrType: "message",
     body,
     createdAt: new Date().toISOString(),
     deleted: false,
@@ -37,21 +37,18 @@ export const postMessage = ({ connId, body }) => async (dispatch) => {
 };
 
 const POST_COMPOSER_INTERACTING = "chat/postComposerInteracting";
-
 export const postComposerInteracting = (connId) => ({
   type: POST_COMPOSER_INTERACTING,
   payload: connId,
 });
 
 const DELETE_COMPOSER_INTERACTING = "chat/deleteComposerInteracting";
-
 export const deleteComposerInteracting = (connId) => ({
   type: DELETE_COMPOSER_INTERACTING,
   payload: connId,
 });
 
 const GET_MESSAGES = "chat/getMessages";
-
 export const getMessages = ({ connId, qty, offsetQty }) => async (dispatch) => {
   const url = `/api/connections/${connId}/messages/range?qty=${qty}&ofs=${offsetQty}`;
   const res = await fetch(url);
@@ -65,29 +62,33 @@ export const getMessages = ({ connId, qty, offsetQty }) => async (dispatch) => {
   return res;
 };
 
-const GET_MESSAGE = "chat/getMessage";
+const SPOOF_GET_MESSAGES = "chat/spoofGetMessages";
+export const spoofGetMessages = (connId) => ({
+  type: SPOOF_GET_MESSAGES,
+  payload: connId,
+});
 
-export const getMessage = ({connId, message}) => ({
+const GET_MESSAGE = "chat/getMessage";
+export const getMessage = ({ connId, message }) => ({
   type: GET_MESSAGE,
-  payload: {connId, message},
+  payload: { connId, message },
 });
 
 // ** «««««««««««««««««««««««««««««« Reducer »»»»»»»»»»»»»»»»»»»»»»»»»»»»»» **
 
 const reducer = (state = messageThreadsTemplate, { type, payload }) => {
   switch (type) {
+    // ********************
     case POST_MESSAGE:
       return {
         ...state,
         [payload.connId]: {
+          ...state[payload.connId],
           interacting: false,
-          messages: [
-            ...state[payload.connId].messages,
-            payload.message,
-          ]
+          messages: [...state[payload.connId].messages, payload.message],
         },
       };
-
+    // ********************
     case POST_COMPOSER_INTERACTING:
       return {
         ...state,
@@ -96,7 +97,7 @@ const reducer = (state = messageThreadsTemplate, { type, payload }) => {
           interacting: true,
         },
       };
-
+    // ********************
     case DELETE_COMPOSER_INTERACTING:
       return {
         ...state,
@@ -105,28 +106,37 @@ const reducer = (state = messageThreadsTemplate, { type, payload }) => {
           interacting: false,
         },
       };
-
+    // ********************
     case GET_MESSAGES:
       return {
         ...state,
         [payload.connId]: {
+          lastMessage: null,
           interacting: false,
           messages: payload.data,
         },
       };
-    
+    // ********************
+    case SPOOF_GET_MESSAGES:
+      return {
+        ...state,
+        [payload]: {
+          lastMessage: null,
+          interacting: false,
+          messages: [],
+        },
+      };
+    // ********************
     case GET_MESSAGE:
       return {
         ...state,
         [payload.connId]: {
+          lastMessage: payload.message,
           interacting: false,
-          messages: [
-            ...state[payload.connId].messages,
-            payload.message,
-          ]
+          messages: [...state[payload.connId].messages, payload.message],
         },
       };
-
+    // ********************
     default:
       return state;
   }
