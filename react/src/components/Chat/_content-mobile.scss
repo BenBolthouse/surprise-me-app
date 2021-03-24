@@ -2,9 +2,9 @@
 
 @media screen and (min-width: g.$screen-size-sm) {
     .chat-view {
+        background-color: #eaecee;
         .chat__content {
             grid-column: 1 / 27;
-            background-color: g.$blk-95;
             overflow-y: scroll;
             z-index: 301;
             > div {
@@ -18,11 +18,13 @@
                             grid-row: 1 / 2;
                             align-content: end;
                             .date {
+                                border-bottom: 1px solid g.$blk-70;
                                 color: g.$blk-60;
                                 font-size: (18rem / 16);
                                 font-weight: 300;
                                 height: 3rem;
                                 line-height: 3rem;
+                                margin-bottom: 1rem;
                                 text-align: center;
                             }
                             .bubble {
