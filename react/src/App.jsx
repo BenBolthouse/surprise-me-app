@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Redirect, Route, Switch } from "react-router-dom";
+import { Redirect, Route, Switch, useLocation } from "react-router-dom";
 
 import AuthView from "./components/AuthView/AuthView.jsx";
 import Chat from "./components/Chat/Chat.jsx";
@@ -21,17 +21,20 @@ const App = () => {
   const sessionUser = useSelector((s) => s.session.user)
   const modalComponent = useSelector((s) => s.modal.component)
   const dispatch = useDispatch();
+  const location = useLocation();
 
   // Component state
   const [mount, setMount] = useState(false);
 
   useEffect(() => {
-    dispatch(securityActions.getXCsrfToken());
     dispatch(sessionActions.getSessionUser())
       .then(() => setMount(true))
       .catch(() => setMount(true));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch]);
+
+  useEffect(() => {
+    dispatch(securityActions.getXCsrfToken());
+  }, [location])
 
   return (
     <>
