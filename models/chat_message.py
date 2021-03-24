@@ -51,6 +51,7 @@ class ChatMessage(db.Model):
     def to_json(self):
         return {
             "id": self.id,
+            "aggrType": "message",
             "userConnectionId": self.user_connection_id,
             "sender": self.sender.to_json_without_coordinates(),
             "body": self.body if not self.deleted else None,
