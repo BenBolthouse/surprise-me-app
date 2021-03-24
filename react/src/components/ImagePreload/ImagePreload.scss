@@ -1,0 +1,58 @@
+@use "../../global" as g;
+
+.img-pre {
+    background-color: white;
+    display: block;
+    overflow: hidden;
+    img {
+        $opacity-trans-speed: .25s;
+        opacity: 0;
+        transition: opacity $opacity-trans-speed;
+        -o-transition: opacity $opacity-trans-speed;
+        -moz-transition: opacity $opacity-trans-speed;
+        -webkit-transition: opacity $opacity-trans-speed;
+    }
+    img.show {
+        visibility: show;
+        object-fit: cover;
+        opacity: 1;
+        height: 100%;
+        width: 100%;
+    }
+    img.fetching,
+    img.error {
+        visibility: hidden;
+    }
+    .preloader.show {
+        display: none;
+    }
+    .preloader.fetching,
+    .preloader.error {
+        display: grid;
+        height: 100%;
+        width: 100%;
+    }
+    .preloader.fetching {
+        background: linear-gradient(90deg, #ddd, #ffffff, #ddd);
+        background-size: 600% 400%;
+        animation: gradient 2s infinite;
+    }
+    .preloader.error {
+        color: g.$blk-60;
+        font-size: (32rem / 16);
+        background-color: g.$blk-90;
+        align-content: center;
+        justify-content: center;
+    }
+    @keyframes gradient {
+        0% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+}
