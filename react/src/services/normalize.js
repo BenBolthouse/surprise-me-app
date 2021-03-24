@@ -5,10 +5,15 @@
  * contain an `id` integer property. Does not mutate the
  * input array.
  */
-export const normalize = (array) => {
+export const normalize = (array, prop) => {
   const arrayCopy = [...array]
   const out = {}
-  arrayCopy.forEach(item => out[item.id] = item)
+  if (prop) {
+    arrayCopy.forEach(item => out[item[prop]] = item)
+  }
+  else {
+    arrayCopy.forEach(item => out[item.id] = item)
+  }
   return out;
 }
 
