@@ -31,7 +31,7 @@ def upload_a_file():
         }, 500
 
 
-@s3_routes.route("<path:file_name>", methods=["GET"])
+@s3_routes.route("/<path:file_name>", methods=["GET"])
 def download_a_file(file_name):
     response = download_file(file_name)
 
