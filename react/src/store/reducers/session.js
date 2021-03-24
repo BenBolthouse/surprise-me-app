@@ -169,7 +169,6 @@ const JOIN_SOCKET_CLIENT_ROOM = "session/joinSocketClientRoom";
 export const joinSocketClientRoom = (roomId) => async (dispatch) => {
   const storeState = getState();
   const client = storeState.session.socketClient;
-  client.emit("join", { roomId });
   dispatch(
     ((payload) => ({
       type: JOIN_SOCKET_CLIENT_ROOM,
