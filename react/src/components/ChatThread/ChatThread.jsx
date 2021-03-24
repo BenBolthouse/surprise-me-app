@@ -3,7 +3,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 
 import * as chatActions from "../../store/reducers/chat"
+import * as connectionsActions from "../../store/reducers/connections"
 import * as sessionActions from "../../store/reducers/session"
+import Typing from "../Chat/Typing";
+import ImagePreload from "../ImagePreload/ImagePreload";
 
 const ChatThread = () => {
   // URL slug
@@ -15,79 +18,56 @@ const ChatThread = () => {
   // Hooks
   const chat = useSelector(s => s.chat);
   const connections = useSelector(s => s.connections);
+  const connectionsContext = useSelector(s => s.connections[slug]);
+  const sessionUser = useSelector(s => s.session.user);
   const sessionSocketClient = useSelector(s => s.session.socketClient);
   const dispatch = useDispatch();
 
   // Component state
   const [message, setMessage] = useState("");
-  const [mount, setMount] = useState(false);
   const [thread, setThread] = useState(null);
-  const [messages, setMessages] = useState(null);
-  const [prevRoom, setPrevRoom] = useState(null);
-  const [myInteract, setMyInteract] = useState(false);
-  const [theirInteract, setTheirInteract] = useState(false);
   const [isScrolledToBottom, setIsScrolledToBottom] = useState(true);
-
-  useEffect(() => {
-    if (!chat[slug]) {
-      dispatch(chatActions.getMessages({
-        connId: slug,
-        qty: 30,
-        offsetQty: 0,
-      }));
-    }
-    dispatch(sessionActions.joinSocketClientRoom(parseInt(slug)));
-    if (prevRoom) dispatch(sessionActions.leaveSocketClientRoom(prevRoom));
-  }, [slug]);
-
-  useEffect(() => {
-    if (chat[slug]) {
-      setThread(connections.established[slug]);
-      setTheirInteract(chat[slug].interacting);
-      setPrevRoom(parseInt(slug));
-      const agg = aggregateMessages();
-      const messagesResult = agg(chat[slug].messages);
-      setMessages(messagesResult);
-    }
-  }, [slug, chat]);
-
-  useEffect(() => {
-    if (scrollLayerRef.current && isScrolledToBottom) {
-      scrollLayerRef.current.scrollTop = 1000000;
-    }
-  }, [messages]);
-
-  useEffect(() => {
-    if (mount) {
-      if (message.length && !myInteract) {
-        sessionSocketClient.emit("composer_interacting", {
-          roomId: parseInt(slug),
-          interacting: true,
-        });
-        setMyInteract(true);
+  
+  // side effect awaits loading of messages and then
+  // triggers a change in component state to allow
+  // conditional render
+  useEffect(async () => {
+    // check if the user is connected to the other user
+    if (connections.established[slug]) {
+      // then do the magic
+      if (chat[slug]) {
+        setThread(aggregateThread()(chat[slug]));
       }
-      else if (!message.length && myInteract) {
-        sessionSocketClient.emit("composer_interacting", {
-          roomId: parseInt(slug),
-          interacting: false,
-        });
-        setMyInteract(false);
+      else if (connections.established[slug].lastMessage) {
+        dispatch(chatActions.getMessages({
+          connId: slug,
+          qty: 30,
+          offsetQty: 0,
+        }));
+      }
+      else {
+        await dispatch(connectionsActions.spoofMessageConnection(slug));
+        await dispatch(chatActions.spoofGetMessages(slug));
       }
     }
-    else setMount(true);
-  }, [message])
+  }, [slug, chat, connections]);
 
-  // Event handlers
-  const onTextAreaKeyDown = (evt) => {
+  // event listener expects an enter keystroke to submit the
+  // message form and then clear the message input
+  const onSubmit = (evt) => {
     if (evt.key === "Enter" || evt.keyCode === 13) {
       evt.preventDefault();
       dispatch(chatActions.postMessage({
-        connId: thread.id,
+        connId: parseInt(slug),
         body: message,
       }));
       setMessage("");
     }
   }
+
+
+
+
   const onScroll = (evt) => {
     const current = scrollLayerRef.current;
     const currentScroll = current.scrollTop + current.clientHeight;
@@ -104,26 +84,23 @@ const ChatThread = () => {
 
   return (
     <>
-      {thread && messages ?
+      {thread ?
         <div
           onScroll={onScroll}
           ref={scrollLayerRef}
-          className="scroll-layer">
+          className="scroll">
           <div className="chat-thread">
-            <div className="chat-thread__messages">
-              {messages}
+            <div className="messages">
+              {thread}
             </div>
           </div>
-          <div className="compose-message">
+          <div className="compose page-grid">
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={onTextAreaKeyDown}
+              onKeyDown={onSubmit}
               placeholder="Write your message here..." />
-            <div className="chat-thread__typing">
-              {theirInteract ?
-                <>{thread.otherUser.firstName} is typing...</> : ""
-              }
+            <div className="typing">
             </div>
           </div>
         </div> : ""
@@ -132,17 +109,26 @@ const ChatThread = () => {
   );
 }
 
-const aggregateMessages = () => {
+// closure function receives a chat context and aggregates
+// several sources of chat material into a single thread
+const aggregateThread = () => {
+  // tracks message days to prevent duplicate markers
   const dateMarkerMemo = [];
+  // holds a sorted collection of thread components
   const components = [];
-  return (messages) => {
-    messages.forEach((msg, i) => {
-      const datestring = new Date(msg.createdAt).toDateString();
-      if (!dateMarkerMemo.includes(datestring)) {
-        components.push(<DateMarker key={`feed-aggr-date-${i}`} date={msg.createdAt} />);
-        dateMarkerMemo.push(datestring);
+  // closure function collects disparate items into an array
+  // for processing into a message thread
+  return (chatContext) => {
+    const aggregate = [...chatContext.messages];
+    aggregate.forEach((x, i) => {
+      const dateString = new Date(x.createdAt).toDateString();
+      if (!dateMarkerMemo.includes(dateString)) {
+        components.push(<DateMarker key={`thread-aggr-mrk-${i}`} date={x.createdAt} />);
+        dateMarkerMemo.push(dateString);
       }
-      components.push(<MessageBubble key={`feed-aggr-msg-${i}`} message={msg} />);
+      if (x.aggrType === "message") {
+        components.push(<MessageBubble key={`thread-aggr-msg-${i}`} message={x} />);
+      }
     });
     return components;
   }
@@ -179,19 +165,19 @@ const DateMarker = ({ date }) => {
   }
   const monthConvert = (monthInt) => {
     switch (monthInt) {
-      case 1: return "January"
-      case 2: return "February"
-      case 3: return "March"
-      case 4: return "April"
-      case 5: return "May"
-      case 6: return "June"
-      case 7: return "July"
-      case 8: return "August"
-      case 9: return "September"
-      case 10: return "October"
-      case 11: return "November"
-      case 12: return "December"
-      default: RangeError("monthInt must be between 1 and 12 inclusive.");
+      case 0: return "January"
+      case 1: return "February"
+      case 2: return "March"
+      case 3: return "April"
+      case 4: return "May"
+      case 5: return "June"
+      case 6: return "July"
+      case 7: return "August"
+      case 8: return "September"
+      case 9: return "October"
+      case 10: return "November"
+      case 11: return "December"
+      default: RangeError("monthInt must be between 0 and 11 inclusive.");
     }
   }
 
@@ -209,7 +195,7 @@ const DateMarker = ({ date }) => {
   }
 
   return (
-    <h2 className="chat-thread__date-marker">{dateString}</h2>
+    <h2 className="date">{dateString}</h2>
   );
 }
 
@@ -220,6 +206,7 @@ const MessageBubble = ({ message }) => {
   // Component state
   const [timeSent, setTimeSent] = useState("");
   const whose = message.sender.id === sessionUser.id ? "mine" : "theirs";
+  const imageSrc = `/f/profile_${message.sender.id}_64p.jpg`;
 
   useEffect(() => {
     setTimeSent(updateTimeSent(message));
@@ -267,10 +254,11 @@ const MessageBubble = ({ message }) => {
   }
 
   return (
-    <div className={"message-bubble " + whose}>
+    <div className={"bubble " + whose}>
+      <ImagePreload src={imageSrc} />
       <h3>{message.sender.firstName}</h3>
-      <p className="message-bubble__body">{message.body}</p>
-      <p className="message-bubble__time">{timeSent}</p>
+      <p className="body">{message.body}</p>
+      <p className="sent">{timeSent}</p>
     </div>
   )
 }
