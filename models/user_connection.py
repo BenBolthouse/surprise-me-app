@@ -43,9 +43,9 @@ class UserConnection(db.Model):
             "otherUser": (self.recipient.to_json_without_coordinates()
                           if user_is_requestor
                           else self.requestor.to_json_without_coordinates()),
-            "lastChatMessageDatetime": (self.messages[-1].created_at
-                                        if len(self.messages)
-                                        else None),
+            "lastMessage": (self.messages[-1].to_json()
+                            if len(self.messages)
+                            else None),
         }
 
     def to_dict(self):
