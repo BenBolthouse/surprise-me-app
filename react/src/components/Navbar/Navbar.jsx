@@ -1,7 +1,6 @@
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import { Loader } from "react-loaders";
 import {
-  BsSearch,
   BsFillChatDotsFill,
   BsGift,
   BsFillCaretLeftFill,
@@ -10,7 +9,7 @@ import {
 import { MdClose } from "react-icons/md";
 import { NavLink } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import Modal from "../Modal/Modal";
 
@@ -24,6 +23,7 @@ import ImagePreload from "../ImagePreload/ImagePreload";
 const Navbar = () => {
   // Hooks
   const sessionUser = useSelector(s => s.session.user);
+  const notifications = useSelector(s => s.connections.notifications);
   const dispatch = useDispatch();
 
   // Component state
@@ -49,6 +49,11 @@ const Navbar = () => {
             </NavLink>
             <NavLink to="/messages" activeClassName="active" className="chat">
               <BsFillChatDotsFill />
+              {notifications && notifications.length ?
+                <div className="notifications">
+                  {notifications.length}
+                </div> : ""
+              }
             </NavLink>
             <a href="/#" className="profile" onClick={toggleUserMenu}>
               <img src={profilePictureSrc64} alt="" />
@@ -60,7 +65,7 @@ const Navbar = () => {
   )
 }
 
-const UserMenu = ({ onClearCallback }) => {
+const UserMenu = () => {
   // Hooks
   const sessionUser = useSelector(s => s.session.user);
   const dispatch = useDispatch();
