@@ -14,47 +14,7 @@ chat_message_routes = Blueprint(
     url_prefix="/api/connections")
 
 
-@chat_message_routes.route(
-    "/<connection_id>/messages",
-    methods=["POST"])
-@login_required
-def post_connection_message(connection_id):
-
-    # Get session user
-    session_user = current_user
-
-    # Get request body properties
-    message_body = request.json.get("body")
-
-    # Get the connection
-    connection = UserConnection.get_by_id(int(connection_id))
-
-    # Don't allow users to send messages until the connection is established
-    connection.require_establishment()
-
-    # Don't allow unassociated users ability to post messages
-    other_user = connection.user_by_id_is_associated(user.id)
-
-    # Don't allow empty messages
-    ChatMessage.require_body_text_not_empty_or_none(message_body)
-
-    # Create a new chat message
-    message = ChatMessage({
-        "user_connection_id": connection.id,
-        "sender_user_id": user.id,
-        "recipient_user_id": other_user,
-        "body": request.json.get("body"),
-    })
-
-    # Add and commit changes
-    db.session.add(message)
-    db.session.commit()
-
-    # Respond 201 if successful
-    return jsonify({
-        "message": "Success",
-        "data": message.to_json()
-    }), 201
+# ** «««««««««««««««« GET Routes »»»»»»»»»»»»»»»» **
 
 
 @chat_message_routes.route("/<id>/messages/datetime", methods=["GET"])
@@ -116,6 +76,9 @@ def get_messages_with_offset(id):
     }), 200
 
 
+# ** «««««««««««««««« PATCH Routes »»»»»»»»»»»»»»»» **
+
+
 @chat_message_routes.route("/<id>/messages", methods=["PATCH"])
 @login_required
 def patch_connection_message(id):
@@ -136,6 +99,9 @@ def patch_connection_message(id):
         "message": "Success",
         "data": message.to_json()
     }), 200
+
+
+# ** «««««««««««««««« DELETE Routes »»»»»»»»»»»»»»»» **
 
 
 @chat_message_routes.route("/<id>/messages/<message_id>", methods=["DELETE"])
