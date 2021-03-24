@@ -1,9 +1,10 @@
 @use "../../global" as g;
 
-$top_bar_height: 2.5rem;
-$compose_height: 16rem;
-$menu_item_height: 3rem;
-$side_bar_width: 16rem;
+@import "./content-mobile";
+@import "./content";
+@import "./recent-threads";
+@import "./mobile-nav";
+@import "./splash-mobile";
 
 @media screen and (min-width: g.$screen-size-sm) {
     .chat-viewport-container {
@@ -15,178 +16,22 @@ $side_bar_width: 16rem;
         z-index: 300;
     }
     .chat-view {
-        max-width: g.$screen-size-dt;
-        grid-template: 2.5rem auto / 1fr;
-        justify-self: center;
+        grid-template-rows: 3.5rem 1fr;
         position: relative;
-    }
-    .chat__sidebar {
-        display: none;
-    }
-    .chat__splash-container {
-        display: none;
-    }
-    .chat__mobile-nav {
-        background-color: g.$blk-90;
-        height: 2.5rem;
-    }
-    .chat__thread-container {
-        grid-template-columns: 1rem auto 1rem;
-        grid-row: 2 / 3;
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-    }
-    .scroll-layer {
-        scroll-behavior: smooth;
-        grid-column: 2 / 3;
-        overflow-y: scroll;
-        margin-bottom: 7rem;
-    }
-    .chat-thread {
-        margin-right: 0.5rem;
-    }
-    .chat-thread__messages {
-        grid-row: 1 / 2;
-        align-content: end;
-    }
-    .compose-message {
-        position: absolute;
-        height: 7rem;
-        right: 1rem;
-        bottom: 0;
-        left: 1rem;
-    }
-    .compose-message textarea {
-        border: 1px solid g.$blk-50;
-        border-radius: 0.25rem;
-        font-size: 1rem;
-        line-height: 1.5rem;
-        padding: 0.5rem;
-        margin: 0.5rem 0 0;
-        resize: none;
-    }
-    .chat-thread__typing {
-        height: 2rem;
-        line-height: 2rem;
-    }
-    .chat-thread__date-marker {
-        color: g.$blk-60;
-        font-size: (18rem / 16);
-        font-weight: 300;
-        height: 3rem;
-        line-height: 3rem;
-        text-align: center;
-    }
-    .message-bubble {
-        background-color: white;
-        border-radius: 0.5rem;
-        margin-top: 1rem;
-        padding: 0.5rem 0.6rem;
-        min-width: 33%;
-        max-width: 75%;
-        &.mine {
-            border-bottom-right-radius: 0;
-            justify-self: end;
-            text-align: right;
-        }
-        &.theirs {
-            border-bottom-left-radius: 0;
-            justify-self: start;
+        .chat__splash {
+            display: none;
         }
     }
-    .message-bubble h3 {
-        color: g.$blk-60;
-        font-weight: normal;
-        font-size: (14rem / 16);
-    }
-    .message-bubble__body {
-        line-height: 1.25rem;
-        margin: 0.25rem 0;
-    }
-    .message-bubble__time {
-        color: g.$blk-60;
-        font-size: (14rem / 16);
+}
+@media screen and (min-width: g.$screen-size-md) {
+    .chat-view {
+        grid-template-rows: 3.5rem auto;
     }
 }
 @media screen and (min-width: g.$screen-size-lg) {
     .chat-view {
-        grid-template: auto / 16rem auto;
-    }
-    .chat__mobile-nav {
-        display: none;
-    }
-    .chat__sidebar {
-        display: grid;
-    }
-    .chat__splash-container {
-        grid-template: auto 16rem auto / auto 24rem auto;
-        display: grid;
-    }
-    .chat__splash {
-        align-content: start;
-        grid-column: 2 / 3;
-        grid-row: 2 / 3;
-        color: g.$blk-70;
-        text-align: center;
-    }
-    .chat__splash h1 {
-        font-size: (48rem / 16);
-        font-weight: 300;
-        margin-bottom: 2rem;
-    }
-    .chat__splash p {
-        line-height: 1.5rem;
-    }
-    .chat__threads-available {
-        background-color: g.$blk-95;
-        border: 1px solid g.$blk-90;
-        border-top-right-radius: 0.5rem;
-        border-bottom-right-radius: 0.5rem;
-        padding: 1rem 0;
-        align-content: start;
-        display: grid;
-        overflow: hidden;
-    }
-    .chat__threads-available a {
-        display: block;
-        height: 3.5rem;
-    }
-    .chat__threads-available a.active {
-        border-right: 4px solid red;
-    }
-    .chat__threads-available a li {
-        display: grid;
-        grid-template-columns: 4rem auto;
-        margin: 0 1.5rem;
-    }
-    .chat__threads-available a li img {
-        border-radius: 0.5rem;
-        object-fit: cover;
-        margin: 0.25rem;
-        height: 3rem;
-        width: 3rem;
-    }
-    .chat__threads-available a li p {
-        line-height: 3.5rem;
-    }
-    .chat__thread-container {
-        grid-template-columns: 2rem auto 0.5rem;
-        grid-row: 1 / 2;
-        grid-column: 2 / 3;
-    }
-    .compose-message {
-        right: 0.5rem;
-        left: 2rem;
-    }
-    .chat-thread__message-bubble {
-        max-width: 66%;
+        grid-template-rows: auto;
     }
 }
 @media screen and (min-width: g.$screen-size-dt) {
-    .chat__threads-available {
-        border-radius: 0.5rem;
-    }
 }

@@ -19,6 +19,7 @@ import * as sessionActions from "../../store/reducers/session";
 
 import "loaders.css/src/animations/ball-scale.scss";
 import "./Navbar.css";
+import ImagePreload from "../ImagePreload/ImagePreload";
 
 const Navbar = () => {
   // Hooks
@@ -41,14 +42,10 @@ const Navbar = () => {
   return (
     <div className="navbar-viewport-container">
       <div className="navbar">
-        <div className="navbar__page-width">
-          <div className="navbar__brand"></div>
-          <div className="navbar__links">
+        <div className="page-grid">
+          <div className="links">
             <NavLink exact to="/" activeClassName="active" className="browse">
               <BsGift />
-            </NavLink>
-            <NavLink to="/search" activeClassName="active" className="search">
-              <BsSearch />
             </NavLink>
             <NavLink to="/messages" activeClassName="active" className="chat">
               <BsFillChatDotsFill />
@@ -106,12 +103,12 @@ const UserMenu = ({ onClearCallback }) => {
     <Modal>
       <div className="user-menu">
         <MdClose className="close" onClick={clearModal} />
-        <div className="user-menu__header">
-          <img src={profilePictureSrc128} alt="" />
+        <div className="top">
+          <ImagePreload src={profilePictureSrc128} />
           <p className="name">{sessionUser.firstName} {sessionUser.lastName}</p>
           <p className="email">{sessionUser.email}</p>
         </div>
-        <div className="user-menu__location">
+        <div className="location">
           {!mapLoaded ?
             <div className="map-preloader">
               <Loader
@@ -131,7 +128,7 @@ const UserMenu = ({ onClearCallback }) => {
             </GoogleMap>
           </LoadScript>
         </div>
-        <ul className="user-menu__menu">
+        <ul className="menu">
           <li className="edit-profile">
             <a href="/#" onClick={null} className="inactive">
               <BsPersonFill />
