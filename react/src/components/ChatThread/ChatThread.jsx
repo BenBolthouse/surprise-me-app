@@ -18,9 +18,9 @@ const ChatThread = () => {
   // Hooks
   const chat = useSelector(s => s.chat);
   const connections = useSelector(s => s.connections);
-  const connectionsContext = useSelector(s => s.connections[slug]);
   const sessionUser = useSelector(s => s.session.user);
   const sessionSocketClient = useSelector(s => s.session.socketClient);
+  const connectionsNotifications = useSelector(s => s.connections.notifications);
   const dispatch = useDispatch();
 
   // Component state
@@ -31,7 +31,7 @@ const ChatThread = () => {
   // side effect awaits loading of messages and then
   // triggers a change in component state to allow
   // conditional render
-  useEffect(async () => {
+  useEffect(() => {
     // check if the user is connected to the other user
     if (connections.established[slug]) {
       // then do the magic
@@ -46,11 +46,25 @@ const ChatThread = () => {
         }));
       }
       else {
-        await dispatch(connectionsActions.spoofMessageConnection(slug));
-        await dispatch(chatActions.spoofGetMessages(slug));
+        dispatch(connectionsActions.spoofMessageConnection(slug));
+        dispatch(chatActions.spoofGetMessages(slug));
       }
     }
   }, [slug, chat, connections]);
+
+  useEffect(() => {
+    const otherUserId = connections.established[slug].otherUser.id;
+    dispatch(sessionActions.joinSocketClientRoom(otherUserId));
+    return () => {
+      dispatch(sessionActions.leaveSocketClientRoom(otherUserId));
+    }
+  }, [sessionSocketClient, slug])
+
+  useEffect(() => {
+    if (connectionsNotifications.length) {
+      dispatch(connectionsActions.clearChatNotifications(slug));
+    }
+  }, [slug]);
 
   // event listener expects an enter keystroke to submit the
   // message form and then clear the message input
@@ -109,10 +123,10 @@ const ChatThread = () => {
   );
 }
 
-// closure function receives a chat context and aggregates
-// several sources of chat material into a single thread
+// closure function receives a chat Notifications and aggregates
 const aggregateThread = () => {
   // tracks message days to prevent duplicate markers
+  // several sources of.notificationsmaterial into a single thread
   const dateMarkerMemo = [];
   // holds a sorted collection of thread components
   const components = [];
