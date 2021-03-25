@@ -87,6 +87,7 @@
                                     padding-bottom: 0.5rem;
                                 }
                                 .unread {
+                                    $opacity-transition-speed: 0.05s;
                                     border: 2px solid white;
                                     display: block;
                                     border-radius: 50%;
@@ -96,6 +97,16 @@
                                     width: 1rem;
                                     bottom: .25rem;
                                     left: 2.5rem;
+                                    transition: opacity $opacity-transition-speed;
+                                    -o-transition: opacity $opacity-transition-speed;
+                                    -moz-transition: opacity $opacity-transition-speed;
+                                    -webkit-transition: opacity $opacity-transition-speed;
+                                    &.show {
+                                        opacity: 1;
+                                    }
+                                    &.hide {
+                                        opacity: 0;
+                                    }
                                 }
                             }
                         }
