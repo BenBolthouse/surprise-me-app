@@ -15,7 +15,7 @@ const Typing = ({ usersName }) => {
     };
   });
 
-  return (<p>{usersName} is typing{ellipsis}</p>);
+  return (<span>{usersName} is typing{ellipsis}</span>);
 };
 
 export default Typing;
