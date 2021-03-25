@@ -18,6 +18,8 @@ const sessionTemplate = {
   socketConnectedRoomId: null,
 };
 
+const production = process.env.NODE_ENV === "production";
+
 /**
  * Get the current state.
  */
@@ -106,7 +108,6 @@ export const logoutSessionUser = () => async (dispatch) => {
     }))(data)
   );
   dispatch(disconnectSocketClient());
-  dispatch(securityActions.getXCsrfToken());
   return res;
 };
 
@@ -221,13 +222,16 @@ const reducer = (state = sessionTemplate, { type, payload }) => {
       if (state.socketClient) {
         state.socketClient.disconnect();
       }
+      if (!production) {
+        console.log("Socketio Client: Disconnected from host");
+      }
       return { ...state, socketClient: null };
 
     case JOIN_SOCKET_CLIENT_ROOM:
-      return {...state, socketConnectedRoomId: payload};
+      return { ...state, socketConnectedRoomId: payload };
 
     case LEAVE_SOCKET_CLIENT_ROOM:
-      return {...state, socketConnectedRoomId: null};
+      return { ...state, socketConnectedRoomId: null };
 
     default:
       return state;
