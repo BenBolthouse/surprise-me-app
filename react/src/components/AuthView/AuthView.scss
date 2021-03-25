@@ -4,7 +4,7 @@
     .auth-view {
         background-color: white;
         grid-template: auto 36rem auto / auto 22rem auto;
-        .auth-view__center {
+        .center {
             grid-column: 2 / 3;
             grid-row: 2 / 3;
             background-color: white;
@@ -76,14 +76,13 @@
                 color: black;
             }
         }
-        .auth-view__demo-panel {
-            padding: 0 1rem 1rem;
-            grid-template-rows: 2rem 2rem;
-            width: 24rem;
+        .demo {
+            justify-self: center;
+            position: absolute;
+            bottom: 4rem;
             button {
                 background: none;
                 color: g.$blk-60;
-                display: inline-block;
                 line-height: 2rem;
                 text-align: center;
                 text-decoration: underline;
