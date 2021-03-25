@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 320 320" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;">
+    <g transform="matrix(1,0,0,1,-320,-1)">
+        <g id="unauth_bucket_b_badge_320p" transform="matrix(1,0,0,1,0,1)">
+            <rect x="320" y="0" width="320" height="320" style="fill:none;"/>
+            <g transform="matrix(0.625,0,0,0.625,320,0)">
+                <path d="M256,48C176.5,48 112,109.39 112,185C112,272 208,409.87 243.25,457.49C246.216,461.564 250.961,463.979 256,463.979C261.039,463.979 265.784,461.564 268.75,457.49C304,409.89 400,272.07 400,185C400,109.39 335.5,48 256,48Z" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:32px;"/>
+            </g>
+            <g transform="matrix(0.625,0,0,0.625,320,0)">
+                <circle cx="256" cy="192" r="48" style="fill:none;stroke:black;stroke-width:32px;"/>
+            </g>
+        </g>
+    </g>
+</svg>

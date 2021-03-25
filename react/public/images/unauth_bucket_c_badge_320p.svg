@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 320 320" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-miterlimit:10;">
+    <g transform="matrix(1,0,0,1,0,-1)">
+        <g id="unauth_bucket_c_badge_320p" transform="matrix(1.6,0,0,1.6,0,1)">
+            <rect x="0" y="0" width="200" height="200" style="fill:none;"/>
+            <clipPath id="_clip1">
+                <rect x="0" y="0" width="200" height="200"/>
+            </clipPath>
+            <g clip-path="url(#_clip1)">
+                <g id="gift-outline" transform="matrix(0.390625,0,0,0.390625,100,100)">
+                    <g transform="matrix(1,0,0,1,-256,-256)">
+                        <clipPath id="_clip2">
+                            <rect x="0" y="0" width="512" height="512"/>
+                        </clipPath>
+                        <g clip-path="url(#_clip2)">
+                            <path d="M256,104L256,160L312,160C342.721,160 368,134.721 368,104C368,73.279 342.721,48 312,48C281.279,48 256,73.279 256,104ZM256,104L256,160L200,160C169.279,160 144,134.721 144,104C144,73.279 169.279,48 200,48C230.721,48 256,73.279 256,104Z" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:32px;"/>
+                            <path d="M448,192C448,174.339 433.661,160 416,160L96,160C78.339,160 64,174.339 64,192L64,240C64,257.661 78.339,272 96,272L416,272C433.661,272 448,257.661 448,240L448,192Z" style="fill:none;stroke:black;stroke-width:32px;stroke-linejoin:round;stroke-miterlimit:4;"/>
+                            <path d="M416,272L416,416C416,442.332 394.332,464 368,464L144,464C117.668,464 96,442.332 96,416L96,272M256,160L256,464" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:32px;stroke-linejoin:round;stroke-miterlimit:4;"/>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
