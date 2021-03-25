@@ -86,6 +86,7 @@ class UserConnection(db.Model):
 
     @property
     def messages(self):
+        sorted(self._chat_messages, key=lambda m: m.id)
         return self._chat_messages
 
     @messages.setter
@@ -176,8 +177,10 @@ class UserConnection(db.Model):
         index of offset.
         """
         offset_quantity = offset + quantity
-        message_list = self.messages.copy()
-        message_list = message_list[offset:offset_quantity]
+        if offset == 0:
+            message_list = self.messages[-offset_quantity:]
+        else:
+            message_list = self.messages[-offset_quantity:offset]
 
         if not message_list:
             raise NotFound(response={
