@@ -1,7 +1,7 @@
 @use "../../global" as g;
 
 .login {
-    grid-template-rows: 2rem 8rem auto 3rem;
+    grid-template-rows: 2.5rem 8rem auto 3rem;
     padding: 2rem;
     position: relative;
     .login__error-message {
@@ -13,9 +13,10 @@
         display: grid;
     }
     h1 {
-        color: g.$blk-60;
+        font-family: "Source Sans Pro", Arial, Helvetica, sans-serif;
+        color: g.$blk-20;
         font-weight: 300;
-        font-size: (24rem / 16);
+        font-size: (36rem / 16);
         text-align: center;
     }
     .login__fetching-container {
