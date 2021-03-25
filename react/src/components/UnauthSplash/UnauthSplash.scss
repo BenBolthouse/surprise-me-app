@@ -5,12 +5,12 @@
         .unauth-splash__hook {
             background: linear-gradient(-45deg, #f72585, #3a0ca3, #4cc9f0);
             background-size: 300% 300%;
+            border-bottom: 4px solid g.$blk-90;
             animation: gradient 20s ease infinite;
-            grid-template: 1fr auto 1fr / 1fr auto 1fr;
+            grid-template: 3.5rem 1fr 6rem / auto;
             align-content: center;
-            justify-content: center;
-            margin-top: 4px;
-            height: 75vh;
+            justify-content: stretch;
+            height: 100vh;
             @keyframes gradient {
                 0% {
                     background-position: 0% 50%;
@@ -23,14 +23,13 @@
                 }
             }
             > div {
-                grid-template-rows: 1fr 1fr 4rem;
-                grid-auto-flow: column;
+                grid-template-rows: repeat(3, auto);
                 grid-row: 2 / 3;
-                grid-column: 2 / 3;
-                align-content: start;
+                align-content: center;
+                justify-self: center;
                 color: white;
-                min-width: 24rem;
-                max-width: 48rem;
+                min-width: 8rem;
+                max-width: g.$screen-size-lg;
                 padding: 0 2rem;
                 text-align: center;
                 * {
@@ -67,6 +66,55 @@
                         }
                     }
                 }
+            }
+        }
+        .unauth-splash__details {
+            grid-template-rows: repeat(3, auto);
+            justify-self: center;
+            max-width: 56rem;
+            padding: 4rem 0;
+            height: 100vh;
+            .bucket {
+                grid-template: auto auto / 1fr;
+                align-content: start;
+                justify-content: center;
+                grid-auto-flow: row;
+                object {
+                    justify-self: center;
+                    display: block;
+                    opacity: 0.25;
+                    height: 160px;
+                    margin-bottom: 1rem;
+                    width: 160px;
+                }
+                p {
+                    display: block;
+                    font-size: 1.25rem;
+                    line-height: 2rem;
+                    margin-bottom: 2rem;
+                    text-align: center;
+                }
+            }
+        }
+        .unauth-splash__cta {
+            background-color: g.$pr-1-v-8;
+            color: white;
+            height: 100vh;
+        }
+    }
+}
+@media screen and (min-width: g.$screen-size-lg) {
+    .unauth-splash {
+        .unauth-splash__hook {
+            height: 85vh;
+        }
+        .unauth-splash__details {
+            grid-template: 1fr / repeat(3, auto);
+            height: 70vh;
+            .bucket {
+                grid-template: auto auto / 1fr;
+                align-content: center;
+                justify-content: center;
             }
         }
     }
