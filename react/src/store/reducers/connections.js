@@ -7,7 +7,7 @@ const stateTemplate = {
   established: {},
   pending: {},
   awaiting: {},
-  notifications: [],
+  notifications: {},
 };
 
 // ** «««««««««««««««««««««««« Actions »»»»»»»»»»»»»»»»»»»»»»»» **
@@ -35,7 +35,8 @@ const GET_CHAT_NOTIFICATIONS = "chat/getChatNotifications";
 export const getChatNotifications = () => async (dispatch) => {
   const url = "/api/chat_notifications";
   const res = await fetch(url);
-  const { data } = res.data;
+  let { data } = res.data;
+  data = normalize(data, "userConnectionId");
   dispatch(
     ((payload) => ({
       type: GET_CHAT_NOTIFICATIONS,
@@ -51,8 +52,8 @@ export const updateChatNotification = (notification) => ({
   payload: notification,
 });
 
-const CLEAR_CHAT_NOTIFICATION = "chat/clearChatNotifications";
-export const clearChatNotifications = (connId) => async (dispatch) => {
+const CLEAR_CHAT_NOTIFICATION = "chat/clearChatNotification";
+export const clearChatNotification = (connId) => async (dispatch) => {
   const url = `/api/chat_notifications/${connId}`;
   const res = await fetch(url, {
     method: "DELETE",
@@ -108,28 +109,21 @@ const reducer = (state = stateTemplate, { type, payload }) => {
     case GET_CHAT_NOTIFICATIONS:
       return {
         ...state,
-        notifications: Array.isArray(payload) ? payload : [payload],
+        notifications: payload,
       };
     // ********************
     case UPDATE_CHAT_NOTIFICATION:
-      const exists = state.notifications.find(
-        (n) => n.userConnectionId === payload.userConnectionId
-      );
-      const insert = exists
-        ? [...state.notifications]
-        : [...state.notifications, payload];
       return {
         ...state,
-        notifications: [...insert],
+        notifications: {
+          ...state.notifications,
+          [payload.userConnectionId]: payload,
+        },
       };
     // ********************
     case CLEAR_CHAT_NOTIFICATION:
-      let notificationsCopy = [...state.notifications];
-      const toDelete = state.notifications.find(
-        (n) => (n.userConnectionId = payload)
-      );
-      const index = notificationsCopy.indexOf(toDelete);
-      notificationsCopy.splice(index, 1);
+      let notificationsCopy = {...state.notifications};
+      delete notificationsCopy[payload];
       return {
         ...state,
         notifications: notificationsCopy,
