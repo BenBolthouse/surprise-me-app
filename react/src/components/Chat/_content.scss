@@ -5,7 +5,7 @@
         .chat__content {
             grid-column: 11 / 27;
             > div {
-                grid-template-columns: repeat(15, 1fr);
+                grid-template-columns: repeat(15, 1fr) 1rem;
                 justify-self: stretch;
                 .scroll {
                     grid-column: 1 / 16;

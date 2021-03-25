@@ -1,6 +1,7 @@
 @use "./global" as g;
 
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;500;700;900&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,200;0,300;0,400;1,200;1,300;1,400&display=swap');
 
 // ** «««««««««««««««««««««««« Layout »»»»»»»»»»»»»»»»»»»»»»»» **
 
@@ -9,7 +10,7 @@ body,
     height: 100vh;
 }
 .view-container {
-    background-color: g.$blk-90;
+    background-color: white;
 }
 .view {
     overflow: hidden;
