@@ -10,14 +10,14 @@ const AuthView = ({ children }) => {
   // Hooks
   const dispatch = useDispatch();
 
-  const loginAsDemoUserA = (evt) => {
+  const loginA = (evt) => {
     evt.preventDefault()
     dispatch(sessionActions.loginSessionUser({
       "email": "cmeanwell0@t-online.de",
       "password": "Password1234$",
     }));
   }
-  const loginAsDemoUserB = (evt) => {
+  const loginB = (evt) => {
     evt.preventDefault()
     dispatch(sessionActions.loginSessionUser({
       "email": "mpitbladdo1@odnoklassniki.ru",
@@ -27,8 +27,12 @@ const AuthView = ({ children }) => {
 
   return (
     <div className="view auth-view">
-      <div className="auth-view__center">
+      <div className="center">
         {children}
+      </div>
+      <div className="demo">
+        <button onClick={loginA}>Login as Demo User A</button>
+        <button onClick={loginB}>Login as Demo User B</button>
       </div>
     </div>
   );
