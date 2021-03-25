@@ -1,5 +1,7 @@
 import { useEffect } from "react";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
+
+import "./UnauthSplash.css";
 
 const UnauthSplash = () => {
   // Hooks
@@ -10,12 +12,18 @@ const UnauthSplash = () => {
     history.push("/");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  
+
   return (
     <div className="view unauth-splash">
       <div className="unauth-splash__hook">
-        <h1>Gift a Friend</h1>
-        <p>Send a friend on the hunt for a surprise gift.</p>
+        <div>
+          <h1>Gift a Friend</h1>
+          <p>Send a friend on the hunt for a surprise gift.</p>
+          <div className="link-group">
+            <Link to="/signup" className="left">Get started</Link>
+            <Link to="/login">Sign in</Link>
+          </div>
+        </div>
       </div>
       <div className="unauth-splash__details">
         <div className="unauth-splash__details-bucket-a">

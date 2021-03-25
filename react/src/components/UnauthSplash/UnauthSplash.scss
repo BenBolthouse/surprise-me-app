@@ -1,0 +1,73 @@
+@use "../../global" as g;
+
+@media screen and (min-width: g.$screen-size-sm) {
+    .unauth-splash {
+        .unauth-splash__hook {
+            background: linear-gradient(-45deg, #f72585, #3a0ca3, #4cc9f0);
+            background-size: 300% 300%;
+            animation: gradient 20s ease infinite;
+            grid-template: 1fr auto 1fr / 1fr auto 1fr;
+            align-content: center;
+            justify-content: center;
+            margin-top: 4px;
+            height: 75vh;
+            @keyframes gradient {
+                0% {
+                    background-position: 0% 50%;
+                }
+                50% {
+                    background-position: 100% 50%;
+                }
+                100% {
+                    background-position: 0% 50%;
+                }
+            }
+            > div {
+                grid-template-rows: 1fr 1fr 4rem;
+                grid-auto-flow: column;
+                grid-row: 2 / 3;
+                grid-column: 2 / 3;
+                align-content: start;
+                color: white;
+                min-width: 24rem;
+                max-width: 48rem;
+                padding: 0 2rem;
+                text-align: center;
+                * {
+                    font-family: "Source Sans Pro", Arial, Helvetica, sans-serif;
+                }
+                h1 {
+                    font-size: 4rem;
+                    font-weight: 200;
+                    line-height: 4.5rem;
+                    margin-bottom: 2rem;
+                }
+                p {
+                    font-size: (22rem / 16);
+                    font-weight: 300;
+                    line-height: 2.5rem;
+                    margin-bottom: 4rem;
+                }
+                .link-group {
+                    grid-template-columns: 1fr 1fr;
+                    align-content: stretch;
+                    justify-self: center;
+                    background: none;
+                    border: 1px solid white;
+                    border-radius: 0.5rem;
+                    height: 4rem;
+                    width: 18rem;
+                    a {
+                        display: block;
+                        color: white;
+                        line-height: 3.75rem;
+                        text-decoration: none;
+                        &.left {
+                            border-right: 1px solid white;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
