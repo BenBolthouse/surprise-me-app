@@ -1,7 +1,7 @@
 import { store } from "../../index";
 import { fetch } from "../../services/fetch";
 
-import * as sessionActions from "./session";
+import * as connectionsActions from "./connections";
 
 // Reducer template
 const messageThreadsTemplate = {};
@@ -34,18 +34,41 @@ export const postMessage = ({ connId, body }) => async (dispatch) => {
       payload,
     }))({ connId, message })
   );
+  dispatch(getMessage({ connId, message }));
 };
 
 const POST_COMPOSER_INTERACTING = "chat/postComposerInteracting";
-export const postComposerInteracting = (connId) => ({
-  type: POST_COMPOSER_INTERACTING,
-  payload: connId,
-});
+export const postComposerInteracting = (roomId, connId) => async (dispatch) => {
+  const storeState = getState();
+  const message = { roomId, connId, interacting: true };
+  const client = storeState.session.socketClient;
+  client.emit("composer_interacting", message);
+  dispatch(
+    ((payload) => ({
+      type: POST_COMPOSER_INTERACTING,
+      payload,
+    }))({ roomId, connId })
+  );
+};
 
 const DELETE_COMPOSER_INTERACTING = "chat/deleteComposerInteracting";
-export const deleteComposerInteracting = (connId) => ({
-  type: DELETE_COMPOSER_INTERACTING,
-  payload: connId,
+export const deleteComposerInteracting = (roomId) => async (dispatch) => {
+  const storeState = getState();
+  const message = { roomId, interacting: false };
+  const client = storeState.session.socketClient;
+  client.emit("composer_interacting", message);
+  dispatch(
+    ((payload) => ({
+      type: DELETE_COMPOSER_INTERACTING,
+      payload,
+    }))({ roomId })
+  );
+};
+
+const GET_COMPOSER_INTERACTING = "chat/getComposerInteracting";
+export const getComposerInteracting = (payload) => ({
+  type: GET_COMPOSER_INTERACTING,
+  payload,
 });
 
 const GET_MESSAGES = "chat/getMessages";
@@ -85,25 +108,21 @@ const reducer = (state = messageThreadsTemplate, { type, payload }) => {
         [payload.connId]: {
           ...state[payload.connId],
           interacting: false,
-          messages: [...state[payload.connId].messages, payload.message],
         },
       };
     // ********************
     case POST_COMPOSER_INTERACTING:
-      return {
-        ...state,
-        [payload]: {
-          ...state[payload],
-          interacting: true,
-        },
-      };
+      return { ...state };
     // ********************
     case DELETE_COMPOSER_INTERACTING:
+      return { ...state };
+    // ********************
+    case GET_COMPOSER_INTERACTING:
       return {
         ...state,
-        [payload]: {
-          ...state[payload],
-          interacting: false,
+        [payload.connId]: {
+          ...state[payload.connId],
+          interacting: payload.interacting,
         },
       };
     // ********************
