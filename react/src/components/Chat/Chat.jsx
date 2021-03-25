@@ -1,38 +1,66 @@
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { NavLink, useParams } from "react-router-dom";
 import { BsArrowLeftShort } from "react-icons/bs";
+import { NavLink, useParams } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
 
 import ChatThread from "../ChatThread/ChatThread";
 
-import * as sessionActions from "../../store/reducers/session";
-
 import "./Chat.css";
-import ImagePreload from "../ImagePreload/ImagePreload";
+import RecentThread from "./RecentThread";
 
 const Chat = () => {
   // URL slug
-  const { slug } = useParams()
+  const { slug: hookSlug } = useParams()
+
+  // references the main scrollable content area
+  const scrollRef = useRef(null);
 
   // Hooks
   const connections = useSelector(s => s.connections);
-  const dispatch = useDispatch();
 
   // Component state
-  const [activeMessageThreads, setActiveMessageThreads] = useState(null);
+  const [slug, setSlug] = useState(null);
+  const [recents, setRecents] = useState(null);
 
+  // ******************************************************
+  // because apparently useParams doesn't work as a
+  // useEffect dependency get the slug to a local state var
+  // on every render
+  useEffect(() => {
+    setSlug(hookSlug);
+  }, [hookSlug]);
+
+  // ******************************************************
   // side effect gets the users with chat history to a
   // collection for recent chats and joins the user chat
   // rooms
   useEffect(() => {
-    const messageThreads = [];
-    for (const value of Object.values(connections.established)) {
-      if (value.lastMessage) {
-        messageThreads.push(value)
-      };
+    const est = connections.established;
+    const thr = [];
+    for (const val of Object.values(est)) {
+      if (val.lastMessage) thr.push(val)
     }
-    setActiveMessageThreads(messageThreads);
+    setRecents(thr);
   }, [connections]);
+
+  // ******************************************************
+  // event handler detects scroll events in the content area
+  const onContentScroll = (evt) => {
+    const current = scrollRef.current;
+    const scrollTop = current.scrollTop;
+    const scrollHeight = current.scrollHeight;
+    const clientHeight = current.clientHeight;
+  }
+
+  // ******************************************************
+  // helper function returns the user to the bottom of the thread
+  const scrollToBottom = () => {
+    const current = scrollRef.current;
+    const scrollTop = current.scrollTop;
+    const scrollHeight = current.scrollHeight;
+    const clientHeight = current.clientHeight;
+    scrollRef.current.scrollTop = scrollHeight;
+  }
 
   return (
     <div className="chat-viewport-container">
@@ -59,23 +87,29 @@ const Chat = () => {
             <h2>Recents</h2>
             <div className="scroll">
               <ul>
-                {activeMessageThreads
-                  ? activeMessageThreads.map((messageThread) => (
-                    <ThreadAvailable
+                {recents
+                  ? recents.map((messageThread) => (
+                    <RecentThread
                       imageSize="64"
-                      key={`active-message-thread-${messageThread.id}`}
                       thread={messageThread}
-                    />
+                      key={`active-message-thread-${messageThread.id}`} />
                   ))
                   : ""}
               </ul>
             </div>
           </div>
         </div>
-        <div className="chat__content">
+        <div
+          className="chat__content"
+          ref={scrollRef}
+          onScroll={onContentScroll}>
           {slug !== "start" ?
             <div>
-              {slug ? <ChatThread /> : ""}
+              <div className="scroll">
+                {slug ?
+                  <ChatThread scrollToBottom={scrollToBottom} /> : ""
+                }
+              </div>
             </div> :
             <>
               <div className="chat__splash">
@@ -88,13 +122,12 @@ const Chat = () => {
                 <h2>Recents</h2>
                 <div className="scroll">
                   <ul>
-                    {activeMessageThreads
-                      ? activeMessageThreads.map((messageThread) => (
-                        <ThreadAvailable
+                    {recents
+                      ? recents.map((messageThread) => (
+                        <RecentThread
                           imageSize="128"
-                          key={`active-message-thread-${messageThread.id}`}
                           thread={messageThread}
-                        />
+                          key={`active-message-thread-m-${messageThread.id}`} />
                       ))
                       : ""}
                   </ul>
@@ -105,58 +138,6 @@ const Chat = () => {
         </div>
       </div>
     </div>
-  );
-}
-
-const ThreadAvailable = ({ thread, imageSize }) => {
-  // Hooks
-  const sessionUser = useSelector(s => s.session.user);
-  const chatThread = useSelector(s => s.chat[thread.id]);
-  const connectionsNotifications = useSelector(s => s.connections.notifications);
-
-  // Component state
-  const [lastMessage, setLastMessage] = useState("")
-  const [hasUnread, setHasUnread] = useState(false);
-  const otherUserName = `${thread.otherUser.firstName} ${thread.otherUser.lastName}`;
-  const otherUserThumbnail = `/f/profile_${thread.otherUser.id}_${imageSize}p.jpg`;
-  const threadUrl = `/messages/${thread.id}`;
-
-  useEffect(() => {
-    let message = "";
-    if (chatThread && chatThread.lastMessage) {
-      message = chatThread.lastMessage;
-    }
-    else {
-      message = thread.lastMessage;
-    }
-    if (message.sender.id === sessionUser.id) {
-      setLastMessage("Me: " + message.body);
-    }
-    else {
-      setLastMessage(message.body);
-    }
-  }, [chatThread]);
-
-  useEffect(() => {
-    if (connectionsNotifications.find(
-      n => n.userConnectionId === thread.id
-    )) {
-      setHasUnread(true);
-    }
-    else setHasUnread(false);
-  }, [connectionsNotifications])
-
-  return (
-    <NavLink to={threadUrl}>
-      <li>
-        <ImagePreload src={otherUserThumbnail} />
-        <p className="name">{otherUserName}</p>
-        <p className="last-message">{lastMessage}</p>
-        {hasUnread ?
-          <div className="unread" /> : ""
-        }
-      </li>
-    </NavLink>
   );
 }
 

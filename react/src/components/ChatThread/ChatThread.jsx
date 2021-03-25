@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { connect, useDispatch, useSelector } from "react-redux";
+import { useLocation, useParams } from "react-router-dom";
 
 import * as chatActions from "../../store/reducers/chat"
 import * as connectionsActions from "../../store/reducers/connections"
@@ -8,37 +8,53 @@ import * as sessionActions from "../../store/reducers/session"
 import Typing from "../Chat/Typing";
 import ImagePreload from "../ImagePreload/ImagePreload";
 
-const ChatThread = () => {
+const ChatThread = ({ scrollToBottom }) => {
   // URL slug
-  const { slug } = useParams();
-
-  // Ref for scroll layer
-  const scrollLayerRef = useRef(null);
+  const { slug: hookSlug } = useParams();
 
   // Hooks
   const chat = useSelector(s => s.chat);
   const connections = useSelector(s => s.connections);
-  const sessionUser = useSelector(s => s.session.user);
-  const sessionSocketClient = useSelector(s => s.session.socketClient);
-  const connectionsNotifications = useSelector(s => s.connections.notifications);
+  const notifications = useSelector(s => s.connections.notifications);
   const dispatch = useDispatch();
 
   // Component state
+  const [slug, setSlug] = useState(null);
+  const [chatPropagated, setChatPropagated] = useState(false);
+  const [connection, setConnection] = useState(null);
   const [message, setMessage] = useState("");
   const [thread, setThread] = useState(null);
-  const [isScrolledToBottom, setIsScrolledToBottom] = useState(true);
-  
-  // side effect awaits loading of messages and then
-  // triggers a change in component state to allow
-  // conditional render
+  const [composing, setComposing] = useState(false);
+  const [joined, setJoined] = useState(false);
+
+  // ******************************************************
+  // because apparently useParams doesn't work as a
+  // useEffect dependency get the slug to a local state var
+  // on every render
   useEffect(() => {
-    // check if the user is connected to the other user
-    if (connections.established[slug]) {
-      // then do the magic
-      if (chat[slug]) {
-        setThread(aggregateThread()(chat[slug]));
-      }
-      else if (connections.established[slug].lastMessage) {
+    setSlug(hookSlug);
+  }, [hookSlug]);
+
+  // ******************************************************
+  // side effect awaits Redux population of the chat object
+  useEffect(() => {
+    if (chat[slug]) setChatPropagated(true);
+  }, [chat, slug]);
+
+  // ******************************************************
+  // side effect checks if the user is established connection
+  useEffect(() => {
+    const est = connections.established;
+    if (slug && est[slug] && !connection) setConnection(est[slug]);
+  }, [connections, slug])
+
+  // ******************************************************
+  // side effect propagates aggregate chat feed and spoofs a
+  // message thread for new connections threads by default
+  useEffect(() => {
+    if (connection) {
+      if (chat[slug]) setThread(aggregateThread()(chat[slug]));
+      else if (connection && connection.lastMessage) {
         dispatch(chatActions.getMessages({
           connId: slug,
           qty: 30,
@@ -50,25 +66,65 @@ const ChatThread = () => {
         dispatch(chatActions.spoofGetMessages(slug));
       }
     }
-  }, [slug, chat, connections]);
+  }, [connection, slug, chat]);
 
+  // ******************************************************
+  // side effect handles peer room join and leave
   useEffect(() => {
-    const otherUserId = connections.established[slug].otherUser.id;
-    dispatch(sessionActions.joinSocketClientRoom(otherUserId));
-    return () => {
-      dispatch(sessionActions.leaveSocketClientRoom(otherUserId));
+    if (connection && !joined) {
+      setJoined(true);
+      const oid = connection.otherUser.id;
+      dispatch(sessionActions.joinSocketClientRoom(oid));
+      return () => dispatch(sessionActions.leaveSocketClientRoom(oid));
     }
-  }, [sessionSocketClient, slug])
+  }, [connection, slug]);
 
+  // ******************************************************
+  // side effect clears all chat notifications for a thread
+  // when the user is viewing the thread
   useEffect(() => {
-    if (connectionsNotifications.length) {
-      dispatch(connectionsActions.clearChatNotifications(slug));
+    if (notifications.length) {
+      dispatch(connectionsActions.clearChatNotification(slug));
     }
   }, [slug]);
 
+  // ******************************************************
+  // side effect removes connection notifications when the
+  // slug is equal to the notification key
+  useEffect(() => {
+    const not = notifications[slug] ? notifications[slug] : null;
+    if (not) dispatch(connectionsActions.clearChatNotification(slug))
+  }, [chatPropagated, notifications, slug])
+
+  // ******************************************************
+  // side effect forces a scroll to bottom on propagation
+  useEffect(() => {
+    if (chatPropagated) scrollToBottom();
+  }, [chatPropagated, thread])
+
+  // ******************************************************
+  // side effect emits composing state on message composition
+  useEffect(() => {
+    if (connection) {
+      const oid = connection.otherUser.id;
+      const cmp = composing;
+      const msg = message.length;
+      const cid = parseInt(slug);
+      if (msg && !cmp) {
+        setComposing(true);
+        dispatch(chatActions.postComposerInteracting(oid, cid));
+      }
+      else if (!msg && cmp) {
+        setComposing(false);
+        dispatch(chatActions.deleteComposerInteracting(oid, cid))
+      }
+    }
+  }, [composing, message, connection])
+
+  // ******************************************************
   // event listener expects an enter keystroke to submit the
   // message form and then clear the message input
-  const onSubmit = (evt) => {
+  const onMessageKeyDown = (evt) => {
     if (evt.key === "Enter" || evt.keyCode === 13) {
       evt.preventDefault();
       dispatch(chatActions.postMessage({
@@ -79,30 +135,17 @@ const ChatThread = () => {
     }
   }
 
-
-
-
-  const onScroll = (evt) => {
-    const current = scrollLayerRef.current;
-    const currentScroll = current.scrollTop + current.clientHeight;
-    const threshold = (current.scrollHeight - currentScroll) < 300
-      ? true
-      : false;
-    if (threshold && !isScrolledToBottom) {
-      setIsScrolledToBottom(true)
-    }
-    else if (!threshold && isScrolledToBottom) {
-      setIsScrolledToBottom(false)
-    }
+  // ******************************************************
+  // event listener updates message value
+  const onMessageChange = (evt) => {
+    const val = evt.target.value;
+    setMessage(val);
   }
 
   return (
     <>
-      {thread ?
-        <div
-          onScroll={onScroll}
-          ref={scrollLayerRef}
-          className="scroll">
+      {chatPropagated ?
+        <>
           <div className="chat-thread">
             <div className="messages">
               {thread}
@@ -111,13 +154,13 @@ const ChatThread = () => {
           <div className="compose page-grid">
             <textarea
               value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={onSubmit}
+              onChange={onMessageChange}
+              onKeyDown={onMessageKeyDown}
               placeholder="Write your message here..." />
             <div className="typing">
             </div>
           </div>
-        </div> : ""
+        </> : ""
       }
     </>
   );
@@ -270,9 +313,10 @@ const MessageBubble = ({ message }) => {
   return (
     <div className={"bubble " + whose}>
       <ImagePreload src={imageSrc} />
-      <h3>{message.sender.firstName}</h3>
-      <p className="body">{message.body}</p>
-      <p className="sent">{timeSent}</p>
+      <div className="white-space">
+        <p className="body">{message.body}</p>
+        <p className="sent">{timeSent}</p>
+      </div>
     </div>
   )
 }

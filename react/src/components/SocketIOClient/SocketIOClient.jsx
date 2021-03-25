@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useLocation } from "react-router-dom";
 import { io } from "socket.io-client";
 
 import * as chatActions from "../../store/reducers/chat";
@@ -8,18 +7,21 @@ import * as connectionsActions from "../../store/reducers/connections";
 import * as sessionActions from "../../store/reducers/session";
 
 const SocketioRoom = ({ children }) => {
+  // set locals
+  const prd = process.env.NODE_ENV === "production"
+
   // Hooks
   const dispatch = useDispatch();
-  const location = useLocation();
-  const connectionsTimestamp = useSelector(s => s.connections.timestamp);
-  const sessionSocketClient = useSelector(s => s.session.socketClient);
+  const session = useSelector(s => s.session);
+  const connections = useSelector(s => s.connections);
   const sessionUser = useSelector(s => s.session.user);
 
   // Component state
   const [mount, setMount] = useState(false);
-  const [socketClientConnected, setSocketClientConnected] = useState(false);
-  const isProd = process.env.NODE_ENV === "production"
+  const [production, setProduction] = useState(prd);
 
+  // ******************************************************
+  // side effect establishes universal authenticated user context
   useEffect(() => {
     const dispatchState = async () => {
       await dispatch(sessionActions.patchSessionGeolocation());
@@ -27,68 +29,52 @@ const SocketioRoom = ({ children }) => {
       await dispatch(connectionsActions.getChatNotifications());
     }
     dispatchState();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // ******************************************************
+  // side effect establishes a connection with the host
+  // websocket server and defines application events
   useEffect(() => {
-    if (sessionUser.id && !sessionSocketClient) {
-      const transports = isProd ? ["websocket"] : ["polling"];
-      const socketio = io.connect({
-        transports: transports,
+    const sid = sessionUser.id;
+    const trs = prd ? ["websocket"] : ["polling"];
+    if (sid) {
+      const skt = io.connect({
+        transports: trs,
         upgrade: false,
         room: sessionUser.id,
       });
-      const dispatchConnectSocketClient = async () => {
-        await dispatch(sessionActions.connectSocketClient(socketio));
-      }
-      dispatchConnectSocketClient();
-    }
-    else if (sessionUser && sessionSocketClient && !socketClientConnected) {
-      if (!isProd) {
-        sessionSocketClient.on("chat_message", (message) => {
-          console.log(message);
-        });
-        sessionSocketClient.on("message", (message) => {
-          console.log(message);
-        });
-      }
-      sessionSocketClient.on("connect", () => {
-        sessionSocketClient.emit("join", { roomId: sessionUser.id });
-      })
-      sessionSocketClient.on("composer_interacting", (payload) => {
-        if (payload.interacting) {
-          dispatch(chatActions.postComposerInteracting(payload.roomId))
-        }
-        else {
-          dispatch(chatActions.deleteComposerInteracting(payload.roomId))
-        }
-      })
-      sessionSocketClient.on("chat_message", (payload) => {
-        const userOnThread = location.pathname.includes(`/messages/${payload.userConnectionId}`);
-        const senderNotRecipient = payload.sender.id !== sessionUser.id;
-        if (userOnThread && senderNotRecipient) {
+      skt.on("chat_message", (msg) => {
+        const cid = msg.userConnectionId;
+        const snd = msg.sender.id;
+        const sid = sessionUser.id;
+        if (sid !== snd) {
           dispatch(chatActions.getMessage({
-            connId: payload.userConnectionId,
-            message: payload,
+            connId: cid,
+            message: msg,
           }));
         }
-        if (!location.pathname.includes("/messages")) {
-          dispatch(connectionsActions.updateChatNotification(payload));
-        }
-      })
-      dispatch(sessionActions.joinSocketClientRoom(sessionUser.id));
-      setSocketClientConnected(true);
+        dispatch(connectionsActions.updateChatNotification(msg));
+      });
+      skt.emit("join", { roomId: sid });
+      skt.on("composer_interacting", (msg) => {
+        dispatch(chatActions.getComposerInteracting(msg));
+      });
+      if (skt && !production) {
+        skt.on("message", (msg) => console.log(msg));
+      }
+      dispatch(sessionActions.connectSocketClient(skt));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionUser, sessionSocketClient])
+  }, []);
 
+  // ******************************************************
+  // side effect prevents premature mounting by stop gating
+  // renders before vital state objects are loaded
   useEffect(() => {
-    if (!mount && sessionUser.id
-      && connectionsTimestamp
-      && sessionSocketClient) {
-      setMount(true);
-    }
-  })
+    const sid = sessionUser.id;
+    const skt = session.socketClient;
+    const con = connections.timestamp;
+    if (sid && skt && con) setMount(true);
+  }, [session, connections]);
 
   return mount ? children : "";
 }
