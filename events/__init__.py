@@ -34,6 +34,10 @@ def on_leave_room(data):
 @socketio.on("composer_interacting")
 def post_chat_message(payload):
     emit("composer_interacting", payload, room=payload["roomId"])
+    if payload["interacting"]:
+        send("Socketio Host: Client is composing")
+    else:
+        send("Socketio Host: Client has stopped composing")
 
 
 @socketio.on("chat_message")
@@ -50,6 +54,7 @@ def post_chat_message(payload):
         "body": payload["message"]["body"],
     })
     db.session.add(chat_message)
+    db.session.commit()
     existing_notification = ChatNotification.query.filter(
         ChatNotification.user_connection_id == user_connection.id,
         ChatNotification.recipient_user_id == recipient_user_id).first()
