@@ -25,8 +25,7 @@ export const normalize = (array, prop) => {
  * input object.
  */
 export const denormalize = (obj) => {
-  const objCopy = {...obj}
   const out = []
-  objCopy.forEach(item => out.push(item))
+  for (const v of Object.values(obj)) out.push(v);
   return out;
 }
