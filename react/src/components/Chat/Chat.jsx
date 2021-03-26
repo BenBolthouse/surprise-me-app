@@ -7,6 +7,8 @@ import ChatThread from "../ChatThread/ChatThread";
 
 import "./Chat.css";
 import RecentThread from "./RecentThread";
+import Search from "../Search/Search";
+import ChatSearchItem from "./ChatSearchItem";
 
 const Chat = () => {
   // URL slug
@@ -16,11 +18,12 @@ const Chat = () => {
   const scrollRef = useRef(null);
 
   // Hooks
-  const connections = useSelector(s => s.connections);
+  const established = useSelector(s => s.connections.established);
 
   // Component state
   const [slug, setSlug] = useState(null);
   const [recents, setRecents] = useState(null);
+  const [search, setSearch] = useState(false);
 
   // ******************************************************
   // because apparently useParams doesn't work as a
@@ -35,13 +38,13 @@ const Chat = () => {
   // collection for recent chats and joins the user chat
   // rooms
   useEffect(() => {
-    const est = connections.established;
+    const est = established;
     const thr = [];
     for (const val of Object.values(est)) {
       if (val.lastMessage) thr.push(val)
     }
     setRecents(thr);
-  }, [connections]);
+  }, [established, slug]);
 
   // ******************************************************
   // event handler detects scroll events in the content area
@@ -51,6 +54,10 @@ const Chat = () => {
     const scrollHeight = current.scrollHeight;
     const clientHeight = current.clientHeight;
   }
+
+  // ******************************************************
+  // event handler detects focus events in the search bar
+  const onSearchFocus = (evt) => setSearch(true);
 
   // ******************************************************
   // helper function returns the user to the bottom of the thread
@@ -65,23 +72,27 @@ const Chat = () => {
   return (
     <div className="chat-viewport-container">
       <div className="view chat-view page-grid">
+        {search ?
+          <Search
+            filter="connections"
+            prompt="Start typing to search for friends..."
+            ItemComponent={ChatSearchItem}
+            obscurityCallback={() => setSearch(false)} /> : null
+        }
         <div className="chat__mobile-nav">
           <NavLink activeClassName="hide" to="/messages/start">
             <BsArrowLeftShort />
           </NavLink>
-          <input
-            type="text"
-            name="search-mobile"
-            id="chatRecentsSearchMobile"
-            placeholder="Search" />
+          <h1>Messages</h1>
         </div>
         <div className="chat__recent-threads">
           <div>
-            <div className="search">
+            <div className="search-spoof">
               <input
                 type="text"
                 name="search"
                 id="chatRecentsSearch"
+                onFocus={onSearchFocus}
                 placeholder="Search" />
             </div>
             <h2>Recents</h2>
