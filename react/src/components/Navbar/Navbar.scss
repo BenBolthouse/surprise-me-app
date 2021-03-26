@@ -2,7 +2,6 @@
 
 @media screen and (min-width: g.$screen-size-sm) {
     .navbar-viewport-container {
-        background: linear-gradient(to right, g.$pr-1-v-4, g.$pr-2-v-7);
         position: absolute;
         top: 0;
         right: 0;
@@ -12,30 +11,33 @@
             background-color: white;
             border-bottom: 1px solid g.$blk-80;
             display: block;
-            height: 3.25rem;
-            margin: 0.25rem 0 0;
+            height: 3.5rem;
+            padding-top: 0.25rem;
             .links {
-                grid-template-columns: repeat(2, 2.5rem) 3rem;
+                grid-template-columns: repeat(2, 4rem) 4.5rem;
                 grid-auto-flow: column;
                 grid-column: 9 / 26;
                 justify-self: end;
                 margin-left: auto;
                 a {
                     display: block;
-                    padding: 0.5rem;
+                    padding: 0.25rem;
                     margin: 0.25rem 0 0;
                     position: relative;
                     text-decoration: none;
                     height: 3rem;
                     width: 2.5rem;
                     &.active {
-                        border-bottom: 1px solid g.$color-interact;
                         * {
-                            color: g.$pr-1-v-8;
+                            color: g.$color-interact;
                         }
                     }
+                    &.chat {
+                        height: 2.75rem;
+                        margin-top: 0.5rem;
+                    }
                     &.profile {
-                        padding: 0.25rem;
+                        justify-self: end;
                         padding: 0.25rem;
                         margin: 0;
                         opacity: 1;
@@ -44,8 +46,8 @@
                     }
                     svg {
                         color: g.$blk-60;
-                        height: 1.5rem;
-                        width: 1.5rem;
+                        height: 2rem;
+                        width: 2rem;
                         &:hover {
                             color: g.$blk-50;
                         }
@@ -157,13 +159,13 @@
         }
     }
 }
-@media screen and (min-width: g.$screen-size-lg) {
-    .navbar-viewport-container .navbar .links {
-        grid-column: 11 / 24;
-    }
-}
-@media screen and (min-width: g.$screen-size-dt) {
-    .navbar-viewport-container .navbar .links {
-        grid-column: 11 / 22;
-    }
-}
+// @media screen and (min-width: g.$screen-size-lg) {
+//     .navbar-viewport-container .navbar .links {
+//         grid-column: 11 / 24;
+//     }
+// }
+// @media screen and (min-width: g.$screen-size-dt) {
+//     .navbar-viewport-container .navbar .links {
+//         grid-column: 11 / 22;
+//     }
+// }

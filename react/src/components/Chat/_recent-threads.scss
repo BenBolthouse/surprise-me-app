@@ -17,18 +17,20 @@
             border-bottom-right-radius: 0.5rem;
             background-color: white;
             overflow: hidden;
+            z-index: 301;
             > div {
                 grid-template-rows: 5rem 4rem 1fr;
                 display: grid;
                 min-width: 18rem;
                 overflow: hidden;
-                .search {
+                .search-spoof {
                     padding: 2rem 1rem 0;
                     input {
                         display: block;
                     }
                 }
                 h2 {
+                    border-bottom: 1px solid g.$blk-80;
                     font-size: (18rem / 16);
                     font-weight: 300;
                     height: 4rem;
@@ -95,12 +97,16 @@
                                     background-color: red;
                                     height: 1rem;
                                     width: 1rem;
-                                    bottom: .25rem;
+                                    bottom: 0.25rem;
                                     left: 2.5rem;
-                                    transition: opacity $opacity-transition-speed;
-                                    -o-transition: opacity $opacity-transition-speed;
-                                    -moz-transition: opacity $opacity-transition-speed;
-                                    -webkit-transition: opacity $opacity-transition-speed;
+                                    transition: opacity
+                                        $opacity-transition-speed;
+                                    -o-transition: opacity
+                                        $opacity-transition-speed;
+                                    -moz-transition: opacity
+                                        $opacity-transition-speed;
+                                    -webkit-transition: opacity
+                                        $opacity-transition-speed;
                                     &.show {
                                         opacity: 1;
                                     }
