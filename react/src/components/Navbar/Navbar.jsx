@@ -1,12 +1,12 @@
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import { Loader } from "react-loaders";
-import {
-  BsFillChatDotsFill,
-  BsGift,
-  BsFillCaretLeftFill,
-  BsPersonFill,
-} from "react-icons/bs";
-import { MdClose } from "react-icons/md";
+
+import { BsFillChatSquareFill as ChatIcon } from "react-icons/bs";
+import { BsFillHouseDoorFill as HomeIcon } from "react-icons/bs";
+import { BsPersonFill as ProfileIcon } from "react-icons/bs";
+import { BsFillCaretLeftFill as LogoutIcon } from "react-icons/bs";
+import { BsX as CloseIcon } from "react-icons/bs";
+
 import { NavLink } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
@@ -45,10 +45,10 @@ const Navbar = () => {
         <div className="page-grid">
           <div className="links">
             <NavLink exact to="/" activeClassName="active" className="browse">
-              <BsGift />
+              <HomeIcon />
             </NavLink>
             <NavLink to="/messages" activeClassName="active" className="chat">
-              <BsFillChatDotsFill />
+              <ChatIcon />
               {notifications && notifications.length ?
                 <div className="notifications">
                   {notifications.length}
@@ -107,7 +107,7 @@ const UserMenu = () => {
   return (
     <Modal>
       <div className="user-menu">
-        <MdClose className="close" onClick={clearModal} />
+        <CloseIcon className="close" onClick={clearModal} />
         <div className="top">
           <ImagePreload src={profilePictureSrc128} />
           <p className="name">{sessionUser.firstName} {sessionUser.lastName}</p>
@@ -136,13 +136,13 @@ const UserMenu = () => {
         <ul className="menu">
           <li className="edit-profile">
             <a href="/#" onClick={null} className="inactive">
-              <BsPersonFill />
+              <ProfileIcon />
               <p>Edit Profile</p>
             </a>
           </li>
           <li className="logout">
             <a href="/#" onClick={logout}>
-              <BsFillCaretLeftFill />
+              <LogoutIcon />
               <p>Logout</p>
             </a>
           </li>
