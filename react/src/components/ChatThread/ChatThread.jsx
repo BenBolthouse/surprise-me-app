@@ -14,7 +14,7 @@ const ChatThread = ({ scrollToBottom }) => {
 
   // Hooks
   const chat = useSelector(s => s.chat);
-  const connections = useSelector(s => s.connections);
+  const established = useSelector(s => s.connections.established);
   const notifications = useSelector(s => s.connections.notifications);
   const dispatch = useDispatch();
 
@@ -44,9 +44,8 @@ const ChatThread = ({ scrollToBottom }) => {
   // ******************************************************
   // side effect checks if the user is established connection
   useEffect(() => {
-    const est = connections.established;
-    if (slug && est[slug] && !connection) setConnection(est[slug]);
-  }, [connections, slug])
+    if (slug && established[slug]) setConnection(established[slug]);
+  }, [established, slug])
 
   // ******************************************************
   // side effect propagates aggregate chat feed and spoofs a
