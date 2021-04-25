@@ -3,7 +3,7 @@
 @media screen and (min-width: g.$screen-size-sm) {
     .auth-view {
         background-color: white;
-        grid-template: auto 36rem auto / auto 22rem auto;
+        grid-template: 5rem 36rem auto / auto 22rem auto;
         .center {
             grid-column: 2 / 3;
             grid-row: 2 / 3;

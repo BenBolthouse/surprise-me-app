@@ -53,6 +53,8 @@
     "validate.js": "^0.13.1"
   },
   "devDependencies": {
+    "eslint": "^7.23.0",
+    "eslint-plugin-react": "^7.23.1",
     "sass": "^1.32.8"
   }
 }

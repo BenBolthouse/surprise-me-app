@@ -1,7 +1,9 @@
-import { BsArrowLeftShort } from "react-icons/bs";
 import { NavLink, useParams } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
+
+import { BsList as BackIcon } from "react-icons/bs";
+import { BsSearch as SearchIcon } from "react-icons/bs";
 
 import ChatThread from "../ChatThread/ChatThread";
 
@@ -81,9 +83,12 @@ const Chat = () => {
         }
         <div className="chat__mobile-nav">
           <NavLink activeClassName="hide" to="/messages/start">
-            <BsArrowLeftShort />
+            <BackIcon className="hamburger-icon"/>
           </NavLink>
           <h1>Messages</h1>
+          <SearchIcon
+            className="search-icon"
+            onClick={() => setSearch(true)} />
         </div>
         <div className="chat__recent-threads">
           <div>

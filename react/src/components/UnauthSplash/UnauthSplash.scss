@@ -1,6 +1,9 @@
 @use "../../global" as g;
 
 @media screen and (min-width: g.$screen-size-sm) {
+    .view.unauth-splash {
+        overflow: initial;
+    }
     .unauth-splash {
         .unauth-splash__hook {
             background: linear-gradient(-45deg, #f72585, #3a0ca3, #4cc9f0);
@@ -11,6 +14,27 @@
             align-content: center;
             justify-content: stretch;
             height: 100vh;
+            .top {
+                grid-template: 3.5rem / repeat(3, auto);
+                grid-row: 1 / 2;
+                justify-self: center;
+                font-weight: 300;
+                min-width: g.$screen-size-lg;
+                * {
+                    line-height: 3.5rem;
+                }
+                h2 {
+                    grid-column: 1 / 2;
+                    font-size: (22rem / 16);
+                    text-align: left;
+                }
+                a {
+                    grid-column: 3 / 4;
+                    font-size: (18rem / 16);
+                    color: white;
+                    text-align: right;
+                }
+            }
             @keyframes gradient {
                 0% {
                     background-position: 0% 50%;
@@ -23,6 +47,9 @@
                 }
             }
             > div {
+                * {
+                    font-family: "Source Sans Pro", Arial, Helvetica, sans-serif;
+                }
                 grid-template-rows: repeat(3, auto);
                 grid-row: 2 / 3;
                 align-content: center;
@@ -32,9 +59,6 @@
                 max-width: g.$screen-size-lg;
                 padding: 0 2rem;
                 text-align: center;
-                * {
-                    font-family: "Source Sans Pro", Arial, Helvetica, sans-serif;
-                }
                 h1 {
                     font-size: 4rem;
                     font-weight: 200;
@@ -82,7 +106,7 @@
                 object {
                     justify-self: center;
                     display: block;
-                    opacity: 0.25;
+                    opacity: 0.5;
                     height: 160px;
                     margin-bottom: 1rem;
                     width: 160px;
@@ -97,9 +121,26 @@
             }
         }
         .unauth-splash__cta {
-            background-color: g.$pr-1-v-8;
-            color: white;
+            grid-template: auto 1fr auto / auto 1fr auto;
+            background-color: g.$blk-90;
+            color: g.$blk-40;;
             height: 100vh;
+            > div {
+                grid-row: 2 / 3;
+                grid-column: 2 / 3;
+                align-self: center;
+                justify-self: center;
+                min-width: 12rem;
+                text-align: center;
+                h2 {
+                    font-size: 2.5rem;
+                    line-height: 2.5rem;
+                    margin-bottom: 2rem;
+                }
+                p {
+                    font-size: (20rem / 16);
+                }
+            }
         }
     }
 }
@@ -116,6 +157,9 @@
                 align-content: center;
                 justify-content: center;
             }
+        }
+        .unauth-splash__cta {
+            height: 70vh;
         }
     }
 }

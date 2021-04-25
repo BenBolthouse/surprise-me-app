@@ -4,32 +4,39 @@
     .chat-view {
         .chat__mobile-nav {
             grid-column: 1 / 27;
-            grid-template: 3.5rem / 1rem 3.5rem auto 3.5rem 1rem;
-            background-color: g.$blk-95;
+            grid-template: 3rem / 1rem 3rem auto 3rem 1rem;
+            background: linear-gradient(white, g.$blk-90);
             border-bottom: 1px solid g.$blk-80;
-            height: 3.5rem;
+            margin-top: 3.5rem;
+            height: 3rem;
             z-index: 302;
+            svg {
+                cursor: pointer;
+                color: g.$blk-40;
+            }
+            .hamburger-icon {
+                height: 2.25rem;
+                width: 2.25rem;
+                margin: 0.433333rem 0.33333rem 0.2rem;
+            }
+            .search-icon {
+                height: 1.75rem;
+                width: 1.75rem;
+                margin: 0.666666rem;
+            }
             a {
                 display: grid;
                 grid-column: 2 / 3;
-                align-content: center;
-                justify-content: center;
-                height: 3.5rem;
-                width: 3.5rem;
+                opacity: 1;
                 &.hide {
                     display: none;
                 }
-                svg {
-                    color: g.$blk-40;
-                    height: 2.5rem;
-                    width: 2.5rem;
-                }
             }
             h1 {
-                color: g.$blk-80;
-                font-size: (24rem / 16);
+                color: g.$blk-60;
+                font-size: (18rem / 16);
                 grid-column: 3 / 4;
-                line-height: 3.5rem;
+                line-height: 3rem;
                 text-align: center;
             }
         }

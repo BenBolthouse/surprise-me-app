@@ -1,28 +1,30 @@
-import Login from "../Login/Login.jsx";
-import Signup from "../Signup/Signup.jsx";
 import { useDispatch } from "react-redux";
 
 import * as sessionActions from "../../store/reducers/session";
 
 import "./AuthView.css";
+import { useHistory } from "react-router-dom";
 
 const AuthView = ({ children }) => {
   // Hooks
   const dispatch = useDispatch();
+  const history = useHistory();
 
-  const loginA = (evt) => {
+  const loginA = async (evt) => {
     evt.preventDefault()
-    dispatch(sessionActions.loginSessionUser({
+    await dispatch(sessionActions.loginSessionUser({
       "email": "cmeanwell0@t-online.de",
       "password": "Password1234$",
     }));
+    history.push("/");
   }
-  const loginB = (evt) => {
+  const loginB = async (evt) => {
     evt.preventDefault()
-    dispatch(sessionActions.loginSessionUser({
-      "email": "mpitbladdo1@odnoklassniki.ru",
+    await dispatch(sessionActions.loginSessionUser({
+      "email": "gbogace3@cbc.ca",
       "password": "Password1234$",
     }));
+    history.push("/");
   }
 
   return (

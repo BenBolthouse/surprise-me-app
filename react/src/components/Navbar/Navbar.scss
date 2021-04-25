@@ -8,8 +8,8 @@
         left: 0;
         z-index: 400;
         .navbar {
-            background-color: white;
-            border-bottom: 1px solid g.$blk-80;
+            background-color: #0f84f2;
+            border-bottom: 1px solid #0859a5;
             display: block;
             height: 3.5rem;
             padding-top: 0.25rem;
@@ -23,14 +23,16 @@
                     display: block;
                     padding: 0.25rem;
                     margin: 0.25rem 0 0;
+                    opacity: 0.5;
                     position: relative;
                     text-decoration: none;
                     height: 3rem;
                     width: 2.5rem;
+                    &:hover {
+                        color: g.$blk-50;
+                    }
                     &.active {
-                        * {
-                            color: g.$color-interact;
-                        }
+                        opacity: 1;
                     }
                     &.chat {
                         height: 2.75rem;
@@ -45,21 +47,16 @@
                         width: 3rem;
                     }
                     svg {
-                        color: g.$blk-60;
+                        color: white;
                         height: 2rem;
                         width: 2rem;
-                        &:hover {
-                            color: g.$blk-50;
-                        }
                     }
                     img {
+                        border: 1px solid #094d8d;
                         border-radius: 50%;
                         object-fit: cover;
                         height: 2.5rem;
                         width: 2.5rem;
-                        &:hover {
-                            box-shadow: 0 3px 3px 0 g.$blk-70;
-                        }
                     }
                     .notifications {
                         align-content: center;
@@ -101,7 +98,7 @@
         .top {
             grid-template: 10rem 2rem 2rem / 1fr;
             background-color: white;
-            border-bottom: 4px solid g.$pr-1-v-4;
+            border-bottom: 4px solid g.$pr-2-v-9;
             padding: 1.5rem 0 1rem;
             .img-pre {
                 align-self: center;

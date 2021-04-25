@@ -16,6 +16,10 @@ const UnauthSplash = () => {
   return (
     <div className="view unauth-splash">
       <div className="unauth-splash__hook">
+        <div className="top">
+          <h2>Surprise Me</h2>
+          <a>http://benbolt.house</a>
+        </div>
         <div>
           <h1>Gift a Friend</h1>
           <p>Send a friend on the hunt for a surprise gift.</p>
@@ -40,8 +44,10 @@ const UnauthSplash = () => {
         </div>
       </div>
       <div className="unauth-splash__cta">
-        <h2>Pretty simple, huh?</h2>
-        <p>Sign up to send a gift to a friend!</p>
+        <div>
+          <h2>Pretty simple, huh?</h2>
+          <p><Link to="/signup">Sign up</Link> to send a gift to a friend!</p>
+        </div>
       </div>
     </div>
   )

@@ -13,9 +13,8 @@
             justify-content: stretch;
             grid-column: span 10;
             border-right: 1px solid g.$blk-80;
-            border-top-right-radius: 0.5rem;
-            border-bottom-right-radius: 0.5rem;
-            background-color: white;
+            background-color: g.$blk-95;
+            padding-top: 3.5rem;
             overflow: hidden;
             z-index: 301;
             > div {

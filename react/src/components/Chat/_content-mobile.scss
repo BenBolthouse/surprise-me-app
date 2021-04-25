@@ -2,7 +2,6 @@
 
 @media screen and (min-width: g.$screen-size-sm) {
     .chat-view {
-        background-color: #eaecee;
         .chat__content {
             grid-column: 1 / 27;
             overflow-y: scroll;
@@ -64,9 +63,10 @@
                                     }
                                 }
                                 .white-space {
-                                    background-color: white;
+                                    background-color: g.$blk-95;
+                                    border-bottom: 1px solid g.$blk-90;
                                     border-radius: 0.5rem;
-                                    padding: 0.25rem 0.5rem;
+                                    padding: 0.25rem 1rem;
                                     p.body {
                                         grid-row: 2 / 3;
                                         grid-column: 1 / 3;
