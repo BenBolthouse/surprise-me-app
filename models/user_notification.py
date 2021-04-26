@@ -42,7 +42,7 @@ class UserNotification(db.Model):
 
     # ** «««««««««««««««« Scopes »»»»»»»»»»»»»»»» **
 
-    def to_json(self):
+    def to_json(self, includes):
         return {
             "id": self.id,
             "type": self.notification_type,
