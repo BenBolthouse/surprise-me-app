@@ -5,11 +5,9 @@ from .db import db
 
 
 class UserConnection(db.Model):
-    def __init__(self, config_object):
-        self.requestor_user_id = config_object["requestor_user_id"]
-        self.recipient_user_id = config_object["recipient_user_id"]
-
-    # ** «««««««««««««««« Mapped Properties »»»»»»»»»»»»»»»» **
+    def __init__(self, props):
+        self.requestor_user_id = props["requestor_user_id"]
+        self.recipient_user_id = props["recipient_user_id"]
 
     __tablename__ = "user_connections"
 
@@ -32,36 +30,41 @@ class UserConnection(db.Model):
         nullable=True,
         default=None)
 
-    # ** «««««««««««««««« Scopes »»»»»»»»»»»»»»»» **
-
-    def to_json(self, user_id):
+    def to_json(self, user_id, includes):
         user_is_requestor = self.requestor_user_id == user_id
-        return {
+        out = {
             "id": self.id,
-            "createdAt": self.created_at,
-            "establishedAt": self.established_at,
-            "otherUser": (self.recipient.to_json_without_coordinates()
-                          if user_is_requestor
-                          else self.requestor.to_json_without_coordinates()),
-            "lastMessage": (self.messages[-1].to_json()
-                            if len(self.messages)
-                            else None),
+            "createdAt": str(self.created_at),
+            "establishedAt": (str(self.established_at)
+                              if self.established_at
+                              else None),
         }
+        if "otherUser" in includes:
+            out["otherUser"] = (self.recipient.to_json([])
+                                if user_is_requestor
+                                else self.requestor.to_json([]))
+        if "lastMessage" in includes:
+            out["lastMessage"] = (self.messages[-1].to_json([])
+                                  if len(self.messages)
+                                  else None)
+        return out
 
-    def to_dict(self):
+    def to_dict(self, user_id, includes):
         user_is_requestor = self.requestor_user_id == user_id
-        return {
+        out = {
             "id": self.id,
             "created_at": self.created_at,
             "established_at": self.established_at,
-            "otherUser": (self.recipient.to_dict()
-                          if user_is_requestor
-                          else self.requestor.to_dict()),
-            "messages": [x.to_dict() for x in self.messages],
-            "notifications": [x.to_dict() for x in self.notifications],
         }
-
-    # ** «««««««««««««««« Associations »»»»»»»»»»»»»»»» **
+        if "other_user" in includes:
+            out["other_user"] = (self.recipient.to_json([])
+                                 if user_is_requestor
+                                 else self.requestor.to_json([]))
+        if "last_message" in includes:
+            out["last_message"] = (self.messages[-1].to_json([])
+                                   if len(self.messages)
+                                   else None)
+        return out
 
     _chat_messages = db.relationship(
         "ChatMessage",
@@ -80,10 +83,6 @@ class UserConnection(db.Model):
         back_populates="_requested_connections",
         foreign_keys=[requestor_user_id])
 
-    # ** «««««««««««««««« Getters and Setters »»»»»»»»»»»»»»»» **
-
-    # «««««««« Chat Messages »»»»»»»»
-
     @property
     def messages(self):
         sorted(self._chat_messages, key=lambda m: m.id)
@@ -93,8 +92,6 @@ class UserConnection(db.Model):
     def messages(self, messages):
         self._chat_messages = messages
 
-    # «««««««« Chat Notifications »»»»»»»»
-
     @property
     def notifications(self):
         return self._chat_notifications
@@ -103,30 +100,22 @@ class UserConnection(db.Model):
     def notifications(self, notifications):
         self._chat_notifications = notifications
 
-    # «««««««« Requestor User »»»»»»»»
-
     @property
     def requestor(self):
         return self._requestor_user
-
-    # «««««««« Recipient User »»»»»»»»
 
     @property
     def recipient(self):
         return self._recipient_user
 
-    # ** «««««««««««««««« Static Class Methods »»»»»»»»»»»»»»»» **
-
     @staticmethod
     def get_by_id(id):
-        con = UserConnection.query.get(id)
-        if con is None:
+        connection = UserConnection.query.get(id)
+        if connection is None:
             raise NotFound(response={
                 "message": "A connection was not found with the provided id."
             })
-        return con
-
-    # ** «««««««««««««««« Instance Methods »»»»»»»»»»»»»»»» **
+        return connection
 
     def user_is_associated(self, user_id):
         req_user = user_id == self.requestor_user_id

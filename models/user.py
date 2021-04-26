@@ -11,16 +11,14 @@ from .chat_message import ChatMessage
 
 
 class User(db.Model, UserMixin):
-    def __init__(self, config_object):
-        self.password = config_object["password"]
-        self.first_name = config_object["first_name"]
-        self.last_name = config_object["last_name"]
-        self.email = config_object["email"]
-        self.share_location = config_object["share_location"]
-        self.coord_lat = config_object["coord_lat"]
-        self.coord_long = config_object["coord_long"]
-
-    # ** «««««««««««««««« Mapped Properties »»»»»»»»»»»»»»»» **
+    def __init__(self, props):
+        self.first_name = props["first_name"]
+        self.last_name = props["last_name"]
+        self.email = props["email"]
+        self.share_location = props["share_location"]
+        self.coord_lat = props["coord_lat"]
+        self.coord_long = props["coord_long"]
+        self.hashed_password = generate_password_hash(props["password"])
 
     __tablename__ = "users"
 
@@ -56,39 +54,31 @@ class User(db.Model, UserMixin):
         db.DateTime,
         server_default=db.func.now())
 
-    # ** «««««««««««««««« Scopes »»»»»»»»»»»»»»»» **
-
-    def to_json(self):
-        return {
+    def to_json(self, includes):
+        out = {
             "id": self.id,
             "firstName": self.first_name,
             "lastName": self.last_name,
             "email": self.email,
-            "shareLocation": self.share_location,
-            "coordLat": self.coord_lat,
-            "coordLong": self.coord_long,
-            "notifications": [x.to_json() for x in self.notifications],
-            "createdAt": self.created_at,
-            "updatedAt": self.updated_at,
+            "createdAt": str(self.created_at),
+            "updatedAt": str(self.updated_at),
         }
+        if "connections" in includes:
+            out["connections"] = [x.to_json(self.id, ["otherUser"])
+                                  for x
+                                  in self.connections]
+        if "notifications" in includes:
+            out["notifications"] = [x.to_json([])
+                                    for x
+                                    in self.notifications]
+        if "location" in includes:
+            out["shareLocation"] = self.share_location
+            out["coordLat"] = self.coord_lat
+            out["coordLong"] = self.coord_long
+        return out
 
-    def to_json_connections(self):
-        return {
-            "connections": [x.to_json(self.id) for x in self.connections],
-        }
-
-    def to_json_without_coordinates(self):
-        return {
-            "id": self.id,
-            "firstName": self.first_name,
-            "lastName": self.last_name,
-            "email": self.email,
-            "createdAt": self.created_at,
-            "updatedAt": self.updated_at,
-        }
-
-    def to_dict(self):
-        return {
+    def to_dict(self, includes):
+        out = {
             "id": self.id,
             "first_name": self.first_name,
             "last_name": self.last_name,
@@ -99,8 +89,15 @@ class User(db.Model, UserMixin):
             "created_at": self.created_at,
             "updated_at": self.updated_at,
         }
-
-    # ** «««««««««««««««« Associations »»»»»»»»»»»»»»»» **
+        if "connections" in includes:
+            out["connections"] = [x.to_json(self.id, ["other_user"])
+                                  for x
+                                  in self.connections]
+        if "notifications" in includes:
+            out["notifications"] = [x.to_json([])
+                                    for x
+                                    in self.notifications]
+        return out
 
     _purchases = db.relationship(
         "Purchase",
@@ -135,10 +132,6 @@ class User(db.Model, UserMixin):
         backref="users",
         cascade="all, delete")
 
-    # ** «««««««««««««««« Getters and Setters »»»»»»»»»»»»»»»» **
-
-    # «««««««« Password »»»»»»»»
-
     @property
     def password(self):
         return self.hashed_password
@@ -146,8 +139,6 @@ class User(db.Model, UserMixin):
     @password.setter
     def password(self, password):
         self.hashed_password = generate_password_hash(password)
-
-    # «««««««« Connections »»»»»»»»
 
     @property
     def connections(self):
@@ -159,8 +150,6 @@ class User(db.Model, UserMixin):
     def connections(self, connection):
         self._requested_connections.append(connection)
 
-    # «««««««« Notifications »»»»»»»»
-
     @property
     def notifications(self):
         return self._notifications
@@ -168,8 +157,6 @@ class User(db.Model, UserMixin):
     @notifications.setter
     def notifications(self, notification):
         self._notifications.append(notification)
-
-    # «««««««« Chat Notifications »»»»»»»»
 
     @property
     def chat_notifications(self):
@@ -179,14 +166,14 @@ class User(db.Model, UserMixin):
     def chat_notifications(self, chat_notification):
         self._chat_notifications.append(notification)
 
-    # ** «««««««««««««««« Static Class Methods »»»»»»»»»»»»»»»» **
-
     @staticmethod
     def email_address_is_unique(email):
         user = User.query.filter(User.email == email).first()
         if user is not None:
             raise BadRequest(response={
-                "message": "The requested email is already in use.",  # noqa
+                "data": {
+                    "email": ["The requested email is already in use."],
+                },
             })
         return user
 
@@ -207,8 +194,6 @@ class User(db.Model, UserMixin):
                 "message": "A user was not found with the provided email.",  # noqa
             })
         return user
-
-    # ** «««««««««««««««« Instance Methods »»»»»»»»»»»»»»»» **
 
     def update(self, config_object):
         self.email_address_is_unique(config_object["email"])
@@ -255,5 +240,5 @@ class User(db.Model, UserMixin):
         return True
 
     def add_notification(self, notification):
-        self._notification.append(notification)
+        self._notifications.append(notification)
         return True
