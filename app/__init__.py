@@ -3,9 +3,9 @@ from flask import send_from_directory
 from flask_cors import CORS
 from flask_login import LoginManager
 from flask_migrate import Migrate
+from flask_socketio import SocketIO, emit
 from flask_wtf.csrf import validate_csrf
 from seed import seed_commands
-from flask_socketio import SocketIO, emit
 from werkzeug.exceptions import BadRequest, NotFound, Forbidden
 from werkzeug.exceptions import InternalServerError, Unauthorized
 import os
@@ -25,22 +25,18 @@ from routes import session_routes
 from routes import user_connection_routes
 from routes import user_routes
 
-is_prod = os.environ.get("FLASK_ENV") == "production"
 
+is_prod = os.environ.get("FLASK_ENV") == "production"
 # Development static app location
 static_folder = "static/" if is_prod else "../react/build/"
-
 app = Flask(__name__, static_folder=static_folder)
-
 # Configure websockets
 socketio = SocketIO(app,
                     logger=True,
                     engineio_logger=True,
                     cors_allowed_origins="*")
-
 # Environment setup
 app.config.from_object(Config)
-
 # User login configuration
 login = LoginManager(app)
 
@@ -52,9 +48,9 @@ def load_session_user(id):
 
 # Provide a command to seed the database
 app.cli.add_command(seed_commands)
-
-
 # Require a valid X-CSRFToken for all state-changing requests
+
+
 @app.before_request
 def validate_csrf_token():
     is_post = request.method == "POST"
@@ -74,14 +70,11 @@ app.register_blueprint(s3_routes)
 app.register_blueprint(session_routes)
 app.register_blueprint(user_connection_routes)
 app.register_blueprint(user_routes)
-
 # Configure socketio events
 from events import events  # noqa
-
 # Models and migration configuration
 db.init_app(app)
 Migrate(app, db)
-
 # Security configuration
 CORS(app)
 
@@ -105,7 +98,6 @@ def serve(path):
         return send_from_directory(app.static_folder, "index.html")
 
 
-@app.errorhandler(InternalServerError)
 @app.errorhandler(BadRequest)
 @app.errorhandler(NotFound)
 @app.errorhandler(Forbidden)
@@ -113,9 +105,13 @@ def serve(path):
 # Sends responses automatically from
 # raised exceptions in http routes
 def handle_werkzeug_exceptions(exception):
-    return jsonify(exception.response), exception.code
+    return jsonify({
+        "message": exception.name,
+        "data": exception.response["data"] if exception.response else None,
+    }), exception.code
 
 
+@app.errorhandler(InternalServerError)
 @app.errorhandler(Exception)
 # Sends responses for all other raise
 # exceptions
