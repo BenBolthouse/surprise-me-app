@@ -1,0 +1,60 @@
+{
+  "name": "surprise-me-browser-app",
+  "version": "0.1.0",
+  "description": "Frontend React SPA for the Surprise Me social app.",
+  "main": "./src/index.js",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "sass": "sass --watch ./src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BenBolthouse/surprise-me-app.git"
+  },
+  "author": "Ben Bolthouse",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BenBolthouse/surprise-me-app/issues"
+  },
+  "homepage": "/",
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "proxy": "http://localhost:5000",
+  "dependencies": {
+    "@react-google-maps/api": "^2.1.1",
+    "http-proxy-middleware": "^1.0.6",
+    "loaders.css": "^0.1.2",
+    "lodash": "^4.17.21",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "react-icons": "^4.2.0",
+    "react-loaders": "^3.0.1",
+    "react-redux": "^7.2.2",
+    "react-router-dom": "^5.2.0",
+    "react-scripts": "^4.0.3",
+    "redux": "^4.0.5",
+    "redux-logger": "^3.0.6",
+    "redux-thunk": "^2.3.0",
+    "socket.io-client": "^4.0.0",
+    "validate.js": "^0.13.1"
+  },
+  "devDependencies": {
+    "eslint": "^7.23.0",
+    "eslint-plugin-react": "^7.23.1",
+    "sass": "^1.32.8"
+  }
+}

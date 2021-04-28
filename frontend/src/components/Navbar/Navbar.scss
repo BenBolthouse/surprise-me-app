@@ -1,0 +1,168 @@
+@use '../../global' as g;
+
+@media screen and (min-width: g.$screen-size-sm) {
+    .navbar-viewport-container {
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        z-index: 400;
+        .navbar {
+            background-color: #0f84f2;
+            border-bottom: 1px solid #0859a5;
+            display: block;
+            height: 3.5rem;
+            padding-top: 0.25rem;
+            .links {
+                grid-template-columns: repeat(2, 4rem) 4.5rem;
+                grid-auto-flow: column;
+                grid-column: 9 / 26;
+                justify-self: end;
+                margin-left: auto;
+                a {
+                    display: block;
+                    padding: 0.25rem;
+                    margin: 0.25rem 0 0;
+                    opacity: 0.5;
+                    position: relative;
+                    text-decoration: none;
+                    height: 3rem;
+                    width: 2.5rem;
+                    &:hover {
+                        color: g.$blk-50;
+                    }
+                    &.active {
+                        opacity: 1;
+                    }
+                    &.chat {
+                        height: 2.75rem;
+                        margin-top: 0.5rem;
+                    }
+                    &.profile {
+                        justify-self: end;
+                        padding: 0.25rem;
+                        margin: 0;
+                        opacity: 1;
+                        height: 3.25rem;
+                        width: 3rem;
+                    }
+                    svg {
+                        color: white;
+                        height: 2rem;
+                        width: 2rem;
+                    }
+                    img {
+                        border: 1px solid #094d8d;
+                        border-radius: 50%;
+                        object-fit: cover;
+                        height: 2.5rem;
+                        width: 2.5rem;
+                    }
+                    .notifications {
+                        align-content: center;
+                        justify-content: center;
+                        border-radius: 50%;
+                        background-color: red;
+                        color: white;
+                        font-size: (12rem / 16);
+                        height: 1rem;
+                        width: 1rem;
+                        position: absolute;
+                        bottom: 9px;
+                        right: 6px;
+                    }
+                }
+            }
+        }
+    }
+    .user-menu {
+        background-color: white;
+        color: g.$blk-20;
+        border-radius: 0.5rem;
+        overflow: hidden;
+        align-content: start;
+        position: relative;
+        .close {
+            cursor: pointer;
+            position: absolute;
+            height: 1.5rem;
+            width: 1.5rem;
+            opacity: 0.8;
+            top: 1rem;
+            right: 1rem;
+            z-index: 902;
+            &:hover {
+                opacity: 1;
+            }
+        }
+        .top {
+            grid-template: 10rem 2rem 2rem / 1fr;
+            background-color: white;
+            border-bottom: 4px solid g.$pr-2-v-9;
+            padding: 1.5rem 0 1rem;
+            .img-pre {
+                align-self: center;
+                justify-self: center;
+                border-radius: 50%;
+                overflow: hidden;
+                height: 128px;
+                width: 128px;
+            }
+            p {
+                text-align: center;
+                &.name {
+                    line-height: 2rem;
+                    font-size: (20rem / 16);
+                }
+                &.email {
+                    line-height: 2rem;
+                    font-size: (14rem / 16);
+                    font-weight: bold;
+                    opacity: 0.6;
+                }
+            }
+        }
+        .location {
+            position: relative;
+            height: 12rem;
+            width: 100%;
+            .map-preloader {
+                align-content: center;
+                justify-content: center;
+                background-color: white;
+                position: absolute;
+                height: 100%;
+                width: 100%;
+                z-index: 950;
+            }
+        }
+        .menu {
+            display: grid;
+            grid-template-rows: repeat(2, 2.5rem);
+            padding: 1rem 0 1.5rem;
+            text-align: center;
+            li {
+                height: 2.5rem;
+                line-height: 2.5rem;
+                a {
+                    display: grid;
+                    grid-template-columns: 1.5rem auto;
+                    justify-content: center;
+                    svg {
+                        margin: 0.75rem 0;
+                    }
+                }
+            }
+        }
+    }
+}
+// @media screen and (min-width: g.$screen-size-lg) {
+//     .navbar-viewport-container .navbar .links {
+//         grid-column: 11 / 24;
+//     }
+// }
+// @media screen and (min-width: g.$screen-size-dt) {
+//     .navbar-viewport-container .navbar .links {
+//         grid-column: 11 / 22;
+//     }
+// }

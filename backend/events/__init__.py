@@ -1,0 +1,1 @@
+from .events_notifications import send_notification
