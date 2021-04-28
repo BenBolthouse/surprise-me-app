@@ -12,10 +12,13 @@ class Email(db.Model):
         db.Integer,
         db.ForeignKey('users.id'),
         nullable=False)
-    _value = db.Column(
+    value = db.Column(
         db.String(255),
-        name="value",
         nullable=False)
+    verified = db.Column(
+        db.Boolean,
+        nullable=False,
+        default=False)
     created_at = db.Column(
         db.DateTime,
         server_default=db.func.now())
@@ -23,18 +26,6 @@ class Email(db.Model):
         db.DateTime,
         nullable=True,
         default=None)
-
-    # Properties --------------------------------
-    @property
-    def value(self):
-        return self._value
-
-    @value.setter
-    def value(self, value):
-        self._value = generate_password_hash(value)
-
-    def validate(value):
-        return check_password_hash(self._value, value)
 
     # Constructor -------------------------------
     def __init__(self, value):
