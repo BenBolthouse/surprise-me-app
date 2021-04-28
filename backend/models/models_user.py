@@ -99,5 +99,3 @@ class User(db.Model, UserMixin):
                  email, password):
         self.first_name = first_name
         self.last_name = last_name
-        self.active_email_address = email
-        self.active_password = password
