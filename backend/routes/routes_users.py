@@ -1,5 +1,6 @@
-from flask import Blueprint
+from flask import Blueprint, jsonify, request
 from flask_login import login_required
+from werkzeug.exceptions import BadRequest, InternalServerError
 
 
 from models import db, User
@@ -21,7 +22,29 @@ user_routes = Blueprint("users", __name__, url_prefix="/api/v1/users")
 @user_routes.route("", methods=["POST"])
 @user_validate_on_post()
 def post():
-    raise Exception("Not implemented")
+    try:
+        # Two units of work exist here because a commit to the database is
+        # initially needed in order to get the user ID from the sequence. The
+        # ID is needed to establish a relationship with the newly created user
+        # and the user's email address and password.
+        body = request.json.get
+        user = User(body("first_name"), body("last_name"))
+
+        db.session.add(user)
+        db.session.commit()
+
+        user.active_email_address = body("email")
+        user.active_password = body("password")
+
+        db.session.add(user)
+        db.session.commit()
+
+    except(Exception) as exception:
+        raise InternalServerError("Exception raised while trying to create a new user.")
+
+    return jsonify({
+        "message": "User created successfully",
+    })
 
 
 # GET https://surprise-me.benbolt.house/api/v1/users/<id>
@@ -29,7 +52,27 @@ def post():
 @user_routes.route("/<id>", methods=["GET"])
 @login_required
 def get(id):
-    raise Exception("Not implemented")
+    # First check is if the session user is requesting their own account. A
+    # bit redundant but it's following the RESTful convention of
+    # <collection>/<item_id>.
+    if user.id != current_user.id:
+        raise BadRequest(
+            "This API endpoint only allows retrieval of a user's own profile data. Use the logged in user's ID in the URL for the request.")
+
+    try:
+        user = User.query.get(int(id))
+
+    except(Exception) as exception:
+        raise BadRequest("The user with the provided id was not found.")
+
+    return jsonify({
+        "message": "Success",
+        "data": {
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.active_email_address,
+        }
+    }), 200
 
 
 # PATCH https://surprise-me.benbolt.house/api/v1/users/<id>
@@ -75,4 +118,30 @@ def delete_soft(id):
 @user_routes.route("/<id>/hard", methods=["DELETE"])
 @login_required
 def delete_hard(id):
+    raise Exception("Not implemented")
+
+
+# What are these doing here?!?!
+# These look like connections routes; they actually modify the state of a
+# user's connections collection, more so than they modify any particular
+# connection. Therefore, they exist here. It's more RESTful!
+
+
+# POST https://surprise-me.benbolt.house/api/v1/users/<id>/connections/new/<recipient_id>
+# Creates a new unestablished user connection with another user by
+# recipient ID. In order to leverage connection interactivity the recipient
+# must approve the requested connection beforehand.
+# ...
+# Approval routes are found in the connections router, they aren't here! :)
+@connection_routes.route("/<id>/connections/add/<recipient_id>", methods=["POST"])
+@login_required
+def post(id, recipient_id):
+    raise Exception("Not implemented")
+
+
+# GET https://surprise-me.benbolt.house/api/v1/users/<id>/connections
+# Retrieves all of a logged in user's own pending and approved connections.
+@connection_routes.route("/<id>/connections", methods=["GET"])
+@login_required
+def get(id):
     raise Exception("Not implemented")
