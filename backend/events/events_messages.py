@@ -5,7 +5,7 @@ from flask_socketio import emit, send
 from app import socketio
 
 
-message_events = Blueprint("messages", __name__)
+message_events = Blueprint("message_events", __name__)
 
 
 @socketio.on("join_message_room")

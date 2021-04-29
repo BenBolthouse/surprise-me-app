@@ -5,7 +5,7 @@ from flask_socketio import emit, send
 from app import socketio
 
 
-socket_connection_events = Blueprint("connections", __name__)
+socket_connection_events = Blueprint("socket_connection_events", __name__)
 
 # TODO @socketio.on("connect")
 # get session token from the initial request before upgrading protocols
