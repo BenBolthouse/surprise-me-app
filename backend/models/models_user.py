@@ -13,22 +13,25 @@ class User(db.Model, UserMixin):
     id = db.Column(
         db.Integer,
         primary_key=True)
-    first_name = db.Column(
+    _first_name = db.Column(
         db.String(64),
+        name="last_name",
         nullable=False)
-    last_name = db.Column(
+    _last_name = db.Column(
         db.String(64),
+        name="last_name",
         nullable=False)
-    email = db.Column(
-        db.String(255),
-        nullable=False,
-        unique=True)
     created_at = db.Column(
         db.DateTime,
         server_default=db.func.now())
     updated_at = db.Column(
         db.DateTime,
-        server_default=db.func.now())
+        nullable=True,
+        default=None)
+    deleted_at = db.Column(
+        db.DateTime,
+        nullable=True,
+        default=None)
 
     # Model Relationships -----------------------
     email_addresses = db.relationship(
@@ -49,6 +52,24 @@ class User(db.Model, UserMixin):
 
     # Properties --------------------------------
     @property
+    def first_name(self):
+        return self._first_name
+
+    @first_name.setter(self, value)
+    def first_name(self, value):
+        self._first_name = value
+        self.updated_at = datetime.now()
+
+    @property
+    def last_name(self):
+        return self._last_name
+
+    @last_name.setter(self, value)
+    def last_name(self, value):
+        self._last_name = value
+        self.updated_at = datetime.now()
+
+    @property
     def active_email_address(self):
         return next(x for x in self.email_addresses if x.expired_at is None)
 
@@ -58,6 +79,8 @@ class User(db.Model, UserMixin):
         for x in self.email_addresses:
             if x.expired_at is None:
                 x.expired_at = timestamp
+            if x.value == value:
+                raise Exception("Email address already exists for user and is expired")
         self.email_addresses.append(Email(value))
         self.updated_at = timestamp
 
@@ -87,6 +110,8 @@ class User(db.Model, UserMixin):
         for x in self.passwords:
             if x.expired_at is None:
                 x.expired_at = timestamp
+            if x.value == value:
+                raise Exception("Password already exists for user and is expired")
         self.passwords.append(Password(value))
         self.updated_at = timestamp
 
