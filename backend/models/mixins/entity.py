@@ -121,3 +121,25 @@ class EntityMixin(object):
         Nullify the datetime attribute _deleted_at.
         '''
         self._updated_at = datetime.now()
+
+    def update(self, **kwargs):
+        '''
+        Updates the entity. Kwargs must match the entity's property key and be
+        assigned a value that is compatible with the database schema.
+        '''
+        for k, v in kwargs.items():
+            # Skip any kwargs with None values: ...
+            if v is None:
+                continue
+
+            # The following will try to get the property of the entity
+            # object from the kwargs used. If the property doesn't exist it
+            # skips the loop. If it does exist then the object property
+            # will be updated with the kwarg value. This allows for any
+            # property anywhere to be updated to a new value, which is nice
+            # and dry :)
+            try:
+                attr = getattr(self, k)
+                attr = v
+            except Exception:
+                pass
