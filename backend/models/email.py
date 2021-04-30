@@ -11,7 +11,8 @@ class Email(db.Model, EntityMixin):
         nullable=False)
     value = db.Column(
         db.String(255),
-        nullable=False)
+        nullable=False,
+        unique=True)
     verified = db.Column(
         db.Boolean,
         nullable=False,
