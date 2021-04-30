@@ -12,13 +12,11 @@ from .password import Password
 class User(db.Model, UserMixin, EntityMixin):
     __tablename__ = "users"
 
-    _first_name = db.Column(
+    first_name = db.Column(
         db.String(64),
-        name="first_name",
         nullable=False)
-    _last_name = db.Column(
+    last_name = db.Column(
         db.String(64),
-        name="last_name",
         nullable=False)
 
     email_addresses = db.relationship(
@@ -38,78 +36,68 @@ class User(db.Model, UserMixin, EntityMixin):
         cascade="all, delete")
 
     @property
-    def first_name(self):
-        return self._first_name
-
-    @first_name.setter
-    def first_name(self, value):
-        self._first_name = value
-        self.set_updated_at()
-
-    @property
-    def last_name(self):
-        return self._last_name
-
-    @last_name.setter
-    def last_name(self, value):
-        self._last_name = value
-        self.set_updated_at()
-
-    @property
     def active_email_address(self):
         return next(x for x in self.email_addresses if not x.is_deleted())
 
     def set_active_email_address(self, value):
         for x in self.email_addresses:
-            # Invoking this method soft deletes all existing email
-            # addresses for the user, including the current active email.
-            if x.deleted_at is not None:
-                x.set_deleted_at()
-
             # This prevents users from creating identical email addresses.
             if x.value == value:
-                raise Exception("Email address already exists for user and is expired")
+                raise Exception("Email is expired")
+
+            # Invoking this method soft deletes all existing email
+            # addresses for the user, including the current active email.
+            if not x.is_deleted():
+                x.set_deleted_at()
 
         self.email_addresses.append(Email(value))
         self.set_updated_at()
 
     @property
-    def expired_email_addresses(self):
+    def deleted_email_addresses(self):
         return [x for x in self.email_addresses if x.is_deleted()]
 
-    # @property
-    # def unseen_notifications(self):
-    #     return [x for x in self.notifications if x.seen_at is None]
+    @property
+    def unseen_notifications(self):
+        return [x for x in self.notifications if not x.is_seen()]
 
-    # @property
-    # def seen_notifications(self):
-    #     return [x for x in self.notifications if x.seen_at is not None]
+    @property
+    def seen_notifications(self):
+        return [x for x in self.notifications if x.is_seen()]
 
-    # @property
-    # def dismissed_notifications(self):
-    #     return [x for x in self.notifications if x.dismissed_at is not None]
+    @property
+    def dismissed_notifications(self):
+        return [x for x in self.notifications if x.dismissed_at is not None]
 
-    # @property
-    # def active_password(self):
-    #     return next(x for x in self.passwords if x.expired_at is None)
+    @property
+    def active_password(self):
+        return next(x for x in self.passwords if not x.is_deleted())
 
-    # @active_password.setter
-    # def active_password(self, value):
-    #     timestamp = datetime.now()
-    #     for x in self.passwords:
-    #         if x.expired_at is None:
-    #             x.expired_at = timestamp
-    #         if x.value == value:
-    #             raise Exception("Password already exists for user and is expired")
-    #     self.passwords.append(Password(value))
-    #     self.updated_at = timestamp
+    def set_active_password(self, value):
+        for x in self.passwords: 
+            # This prevents users from creating identical email addresses.
+            if x.validate(value):
+                raise Exception("Password is expired")
 
-    # @property
-    # def expired_passwords(self):
-    #     return [x for x in self.passwords if x.expired_at is not None]
+            # Invoking this method soft deletes all existing passwords for
+            # the user, including the current active password.
+            if not x.is_deleted():
+                x.set_deleted_at()
 
-    # # Constructor -------------------------------
-    # def __init__(self, first_name, last_name,
-    #              email, password):
-    #     self.first_name = first_name
-    #     self.last_name = last_name
+        self.email_addresses.append(Email(value))
+        self.set_updated_at()
+
+    @property
+    def deleted_passwords(self):
+        return [x for x in self.passwords if x.is_deleted()]
+
+    def to_http_response(self):
+        return {
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "email_address": self.active_email_address,
+        }
+
+    def __init__(self, **kwargs):
+        self.first_name = kwargs["first_name"]
+        self.last_name = kwargs["last_name"]
