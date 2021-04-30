@@ -1,14 +1,16 @@
 from flask.cli import AppGroup
 
 
+from .test.users import up as test_users_up
+from .undo.users import down as users_down
+
+
 seed_commands = AppGroup("seed")
 
 
-@seed_commands.command("all")
-def up():
-    pass
+def test():
+    test_users_up()
 
 
-@seed_commands.command("undo")
 def down():
-    pass
+    users_down()
