@@ -14,6 +14,7 @@ class Password(db.Model, EntityMixin):
     user = db.Column(
         db.Integer,
         db.ForeignKey('users.id'),
+        ondelete="CASCADE",
         nullable=False)
     _value = db.Column(
         db.String(255),
