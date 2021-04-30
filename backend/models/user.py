@@ -74,7 +74,7 @@ class User(db.Model, UserMixin, EntityMixin):
         return next(x for x in self.passwords if not x.is_deleted())
 
     def set_active_password(self, value):
-        for x in self.passwords: 
+        for x in self.passwords:
             # This prevents users from creating identical email addresses.
             if x.validate(value):
                 raise Exception("Password is expired")
