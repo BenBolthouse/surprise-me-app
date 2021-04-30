@@ -84,7 +84,7 @@ class User(db.Model, UserMixin, EntityMixin):
             if not x.is_deleted():
                 x.set_deleted_at()
 
-        self.email_addresses.append(Email(value))
+        self.email_addresses.append(Password(value))
         self.set_updated_at()
 
     @property
