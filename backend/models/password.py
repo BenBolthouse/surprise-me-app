@@ -31,4 +31,4 @@ class Password(db.Model, EntityMixin):
         return check_password_hash(self._value, value)
 
     def __init__(self, value):
-        self.value = value
+        self.set_value(value)
