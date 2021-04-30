@@ -13,10 +13,6 @@ class Notification(db.Model, EntityMixin, DismissibleMixin):
         db.Integer,
         db.ForeignKey('users.id'),
         nullable=False)
-    title = db.Column(
-        db.String(64),
-        nullable=False,
-        default="")
     body = db.Column(
         db.String(255),
         nullable=False,
@@ -32,9 +28,19 @@ class Notification(db.Model, EntityMixin, DismissibleMixin):
         "APP",
     }
 
-    def __init__(self, recipient_id, type, title, body, action):
-        self.user = recipient_id
-        self._type = "APP"
-        self.title = title
-        self.body = body
-        self.action = action
+    def to_ws_response(self):
+        return {
+            "status": "ok",
+            "type": "notification",
+            "data": {
+                "type": self.type,
+                "body": self.body,
+                "action": self.action,
+            }
+        }
+
+    def __init__(self, type, **kwargs):
+        self.set_type(type)
+        self.recipient = kwargs["recipient"]
+        self.body = kwargs["body"]
+        self.action = kwargs["action"]
