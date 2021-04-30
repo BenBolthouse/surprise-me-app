@@ -38,7 +38,6 @@ def post():
     user.set_active_email_address(json("email"))
     user.set_active_password(json("password"))
 
-    db.session.add(user)
     db.session.commit()
 
     return jsonify({
@@ -95,10 +94,9 @@ def patch_password():
 
     db.session.commit()
 
-    else:
-        return jsonify({
-            "message": "Password updated successfully",
-        }), 200
+    return jsonify({
+        "message": "Password updated successfully",
+    }), 200
 
 
 # PATCH https://surprise-me.benbolt.house/api/v1/users/email
