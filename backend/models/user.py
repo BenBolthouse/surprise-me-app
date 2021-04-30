@@ -22,18 +22,16 @@ class User(db.Model, UserMixin, EntityMixin):
     email_addresses = db.relationship(
         Email,
         backref="users",
-        foreign_keys=[Email.user],
-        cascade="all, delete")
+        cascade="all,delete")
     notifications = db.relationship(
         Notification,
         backref="users",
         foreign_keys=[Notification.recipient],
-        cascade="all, delete")
+        cascade="all,delete")
     passwords = db.relationship(
         Password,
         backref="users",
-        foreign_keys=[Password.user],
-        cascade="all, delete")
+        cascade="all,delete")
 
     @property
     def active_email_address(self):
@@ -84,7 +82,7 @@ class User(db.Model, UserMixin, EntityMixin):
             if not x.is_deleted():
                 x.set_deleted_at()
 
-        self.email_addresses.append(Password(value))
+        self.passwords.append(Password(value))
         self.set_updated_at()
 
     @property
