@@ -7,8 +7,7 @@ class Email(db.Model, EntityMixin):
 
     user = db.Column(
         db.Integer,
-        db.ForeignKey('users.id'),
-        ondelete="CASCADE",
+        db.ForeignKey('users.id', ondelete="CASCADE"),
         nullable=False)
     value = db.Column(
         db.String(255),
