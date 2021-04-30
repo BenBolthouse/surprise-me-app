@@ -1,5 +1,6 @@
 from datetime import datetime
 from flask_login import UserMixin
+from sqlalchemy.orm import backref
 
 
 from .mixins.entity import EntityMixin
@@ -21,17 +22,14 @@ class User(db.Model, UserMixin, EntityMixin):
 
     email_addresses = db.relationship(
         Email,
-        backref="users",
-        cascade="all,delete")
+        backref=backref("users", cascade="all,delete"))
     notifications = db.relationship(
         Notification,
-        backref="users",
         foreign_keys=[Notification.recipient],
-        cascade="all,delete")
+        backref=backref("users", cascade="all,delete"))
     passwords = db.relationship(
         Password,
-        backref="users",
-        cascade="all,delete")
+        backref=backref("users", cascade="all,delete"))
 
     @property
     def active_email_address(self):
