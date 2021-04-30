@@ -6,6 +6,7 @@ from werkzeug.exceptions import BadRequest, Forbidden
 
 
 from app import socketio
+from config import Config
 from models import db, Connection, Notification, User
 
 
@@ -63,7 +64,7 @@ def post(recipient_id):
             "CONNECTION",
             recipient=recipient.id,
             body=f"{current_user.first_name} {current_user.last_name} wants to connect",
-            action=f"{PUBLIC_URL}/connections/{connection.id}/approve")
+            action=f"{Config.PUBLIC_URL}/connections/{connection.id}/approve")
 
         # Emit a websocket message to the recipient's room if available.
         emit(f"connected_user", notification.to_ws_response(), room=f"user_{recipient.id}")
