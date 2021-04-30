@@ -120,10 +120,9 @@ def patch_email(id):
 
     db.session.commit()
 
-    else:
-        return jsonify({
-            "message": "Email updated successfully",
-        }), 200
+    return jsonify({
+        "message": "Email updated successfully",
+    }), 200
 
 
 # DELETE https://surprise-me.benbolt.house/api/v1/users
