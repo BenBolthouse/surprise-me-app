@@ -5,6 +5,7 @@ from sqlalchemy.orm import backref
 
 from .mixins.entity import EntityMixin
 from .db import db
+from .connection import Connection
 from .email import Email
 from .notification import Notification
 from .password import Password
@@ -19,13 +20,17 @@ class User(db.Model, UserMixin, EntityMixin):
     last_name = db.Column(
         db.String(64),
         nullable=False)
+    _user_engagement_score = db.Column(
+        db.BigInteger,
+        name="user_engagement_score",
+        nullable=False,
+        default=0)
 
     email_addresses = db.relationship(
         Email,
         backref=backref("users", cascade="all,delete"))
     notifications = db.relationship(
         Notification,
-        foreign_keys=[Notification.recipient],
         backref=backref("users", cascade="all,delete"))
     passwords = db.relationship(
         Password,
@@ -86,6 +91,16 @@ class User(db.Model, UserMixin, EntityMixin):
     @property
     def deleted_passwords(self):
         return [x for x in self.passwords if x.is_deleted]
+
+    @property
+    def user_engagement_score(self):
+        return self._user_engagement_score
+
+    def set_user_engagement_score(self, points):
+        self._user_engagement_score += points
+
+        if self._user_engagement_score < 0:
+            self._user_engagement_score = 0
 
     def to_http_response(self):
         return {
