@@ -129,7 +129,7 @@ def test__connections_routes__PATCH__denial_fails_not_recipient(http, headers, l
 
 def test__connections_routes__PATCH__denial(http, headers, login):
     # Assert that connection denial succeeds when user C attempts to deny
-    # a connection between users B and C where user C is the recipient.
+    # a connection between users A and C where user C is the recipient.
 
     # Arrange
     url = "/api/v1/connections/3/deny"
