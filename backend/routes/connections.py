@@ -8,7 +8,7 @@ from werkzeug.exceptions import BadRequest, Forbidden
 
 from app import socketio
 from config import Config
-from models import db, Connection, Notification, User
+from models import db, Connection, Notification, User, ScoredUser
 
 
 connection_routes = Blueprint("connection_routes", __name__, url_prefix="/api/v1/connections")
@@ -52,11 +52,19 @@ def post(recipient_id):
         connection = existing_connection
         connection.rejoin(current_user.id)
 
+        scored_user = ScoredUser.get(current_user.id, int(recipient_id))
+        scored_user.create_connection(current_user)
+
         message = "Existing connection restored"
         status_code = 200
 
     else:
         connection = Connection(current_user.id, int(recipient_id))
+
+        scored_user = ScoredUser(current_user.id, int(recipient_id))
+        scored_user.create_connection(current_user)
+
+        db.session.add(scored_user)
         db.session.add(connection)
         db.session.commit()
 
@@ -104,18 +112,18 @@ def patch_approve(id):
             "message": "User not recipient",
         })
 
-    try:
-        connection.approve()
+    scored_user = ScoredUser(current_user.id, connection.requestor)
+    scored_user.create_connection(current_user)
 
-        db.session.commit()
+    db.session.add(scored_user)
 
-    except(Exception) as exception:
-        raise InternalServerError()
+    connection.approve()
 
-    else:
-        return jsonify({
-            "message": "Connection approved successfully",
-        }), 200
+    db.session.commit()
+
+    return jsonify({
+        "message": "Connection approved successfully",
+    }), 200
 
 
 # PATCH https://surprise-me.benbolt.house/api/v1/connections/<id>/deny
@@ -139,18 +147,13 @@ def patch_deny(id):
             "message": "User not recipient",
         })
 
-    try:
-        connection.deny()
+    connection.deny()
 
-        db.session.commit()
+    db.session.commit()
 
-    except(Exception) as exception:
-        raise InternalServerError()
-
-    else:
-        return jsonify({
-            "message": "Connection denied successfully",
-        }), 200
+    return jsonify({
+        "message": "Connection denied successfully",
+    }), 200
 
 
 # GET https://surprise-me.benbolt.house/api/v1/users/<id>/connections
@@ -187,7 +190,17 @@ def delete_soft(id):
             "message": "User not member",
         })
 
+    scored_users = ScoredUser.query.filter(
+        and_(
+            ScoredUser.user == current_user.id,
+            ScoredUser.user == connection.other_user(current_user.id)))
+
+    for x in scored_users:
+        x.leave_connection()
+
     connection.leave()
+
+    db.session.commit()
 
     return jsonify({
         "message": "Connection deleted successfully",
