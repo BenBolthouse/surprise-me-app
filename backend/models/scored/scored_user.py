@@ -1,4 +1,4 @@
-from sqlalchemy import and_
+from sqlalchemy import and_, or_
 
 
 from ..mixins.scored import ScoredMixin
@@ -37,6 +37,17 @@ class ScoredUser(db.Model, ScoredMixin):
                 ScoredUser.user == user_id,
                 ScoredUser.target_user == target_user_id)).first()
 
+    @staticmethod
+    def get_bidirectional(user_a_id, user_b_id):
+        return ScoredUser.query.filter(
+            or_(
+                and_(
+                    ScoredUser.user == user_a_id,
+                    ScoredUser.target_user == user_b_id),
+                and_(
+                    ScoredUser.user == user_b_id,
+                    ScoredUser.target_user == user_a_id))).all()
+
     def create_connection(self, user):
         user.set_user_engagement_score(CONNECTION_POINTS)
         self.set_grade(user._user_engagement_score, CONNECTION_POINTS)
@@ -58,6 +69,11 @@ class ScoredUser(db.Model, ScoredMixin):
         self.set_grade(user._user_engagement_score, MESSAGE_POINTS)
 
     def __init__(self, user_id, target_user_id):
+        scored_user = ScoredUser.get(user_id, target_user_id)
+
+        if scored_user is not None:
+            return scored_user
+        
         ScoredMixin.__init__(self)
         self.user = user_id
         self.target_user = target_user_id
