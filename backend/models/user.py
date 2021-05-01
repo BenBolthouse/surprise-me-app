@@ -33,7 +33,7 @@ class User(db.Model, UserMixin, EntityMixin):
 
     @property
     def active_email_address(self):
-        return next(x for x in self.email_addresses if not x.is_deleted())
+        return next(x for x in self.email_addresses if not x.is_deleted)
 
     def set_active_email_address(self, value):
         for x in self.email_addresses:
@@ -51,7 +51,7 @@ class User(db.Model, UserMixin, EntityMixin):
 
     @property
     def deleted_email_addresses(self):
-        return [x for x in self.email_addresses if x.is_deleted()]
+        return [x for x in self.email_addresses if x.is_deleted]
 
     @property
     def unseen_notifications(self):
@@ -67,7 +67,7 @@ class User(db.Model, UserMixin, EntityMixin):
 
     @property
     def active_password(self):
-        return next(x for x in self.passwords if not x.is_deleted())
+        return next(x for x in self.passwords if not x.is_deleted)
 
     def set_active_password(self, value):
         for x in self.passwords:
@@ -85,7 +85,7 @@ class User(db.Model, UserMixin, EntityMixin):
 
     @property
     def deleted_passwords(self):
-        return [x for x in self.passwords if x.is_deleted()]
+        return [x for x in self.passwords if x.is_deleted]
 
     def to_http_response(self):
         return {
