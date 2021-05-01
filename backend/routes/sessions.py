@@ -15,9 +15,9 @@ session_routes = Blueprint("session_routes", __name__, url_prefix="/api/v1/sessi
 def post():
     json = request.json.get
 
-    email = Email.query.filter(Email.value == json("email_address")).first()
+    email = Email.query.filter(Email.value == json("email")).first()
 
-    if email.is_deleted():
+    if email.is_deleted:
         raise BadRequest(response={
             "message": "Email is expired",
         })
