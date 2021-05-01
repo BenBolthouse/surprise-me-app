@@ -47,7 +47,7 @@ app.register_blueprint(file_routes)
 app.register_blueprint(session_routes)
 app.register_blueprint(user_routes)
 
-login = LoginManager(app)
+login_manager = LoginManager(app)
 
 # configure seed data cli
 app.cli.add_command(seed_commands)
@@ -72,7 +72,7 @@ def validate_csrf_token():
 
 
 # configure the session user
-@login.user_loader
+@login_manager.user_loader
 def load_session_user(id):
     return User.query.get(int(id))
 
@@ -102,10 +102,7 @@ def serve(path):
 @app.errorhandler(Forbidden)
 @app.errorhandler(Unauthorized)
 def handle_werkzeug_exceptions(exception):
-    return jsonify({
-        "message": exception.name,
-        "data": exception.response["data"] if exception.response else None,
-    }), exception.code
+    return jsonify(exception.response), exception.code
 
 
 # handle 500 range errors and raised exceptions
@@ -116,7 +113,7 @@ def handle_all_other_exceptions(exception):
     trace_array = [t for t in trace.args]
     return jsonify({
         "message": "There was an unexpected internal server error.",
-        "traceback": trace_array
+        "traceback": trace_array,
     }), 500
 
 
