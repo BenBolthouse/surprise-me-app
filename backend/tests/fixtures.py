@@ -1,5 +1,6 @@
 from datetime import datetime
 from flask_migrate import upgrade, downgrade
+from os import path
 import json
 import pytest
 import os
@@ -7,6 +8,7 @@ import os
 from app import app
 from models import db, User, Connection, Message
 from seed import test, down
+import models
 
 
 @pytest.fixture(scope="session")
@@ -14,67 +16,72 @@ def seed():
     '''
     Seeds the test database; scoped to session.
     '''
+    # Get the migration directory because it doesn't exist in the root
+    # directory. Pytest will look at the root directory by default.
+    migrations_directory = path.join(path.dirname(models.__file__), "..", "migrations")
+
     with app.test_client() as client:
         with app.app_context():
-            # First run a seed undo to catch old records from any failed test
-            # runs, ...
+            # Run any available upgrades from models migration, ...
+            upgrade(directory=migrations_directory)
+            # Try to delete all of the records and reset sequences to 1, ...
             try:
                 down()
             except Exception:
                 pass
-
-            upgrade()
-            # Perform any pending migrations before seeding, ...
             # Seed the test database, ...
             test()
-            # Yield with no context, ...
+
             yield
             # Finally, undo all seed data on cleanup.
-            down()
+            # down()
 
 
 @pytest.fixture(scope="session")
-def http_client():
+def http():
     '''
     Sets up a client to which http requests can be sent; scoped to session.
     '''
+    # white tests are running ignore require login
+    app.login_manager.session_protection = None
+
     with app.test_client() as client:
         with app.app_context():
             yield client
 
 
 @pytest.fixture(scope="session")
-def http_headers(http_client):
+def headers(http):
     '''
     Sets headers for http requests, including CSRF protection token; scoped to
     session.
     '''
     # Endpoint should provide a unique CSRF token upon each request.
-    response = http_client.get("/api/csrf")
+    response = http.get("/api/v1/csrf_token")
+
     yield {
         "Content-Type": "application/json",
         "Allow": "application/json",
-        "X-CSRFToken": response.json.get("data")["token"]
+        "X-CSRFToken": response.json.get("data"),
     }
 
 
 @pytest.fixture(scope="session")
-def user_login(http_client, http_headers):
+def login(http, headers):
     '''
     Logs a user in; scoped to session.
     '''
-    def login(user_email):
+    def a(email):
         # Endpoint should allow for a session to be posted with correct user
         # credentials and a valid CSRF token.
-        endpoint = "/api/sessions"
+        endpoint = "/api/v1/sessions"
         data = {
-            "email": user_email,
+            "email": email,
             "password": "Password1234$",
         }
-        http_client.post(
+        http.post(
             endpoint,
             data=json.dumps(data),
-            headers=http_headers
-        )
+            headers=headers)
 
-    yield login
+    yield a
