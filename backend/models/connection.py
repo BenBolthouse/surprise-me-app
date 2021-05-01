@@ -11,11 +11,11 @@ class Connection(db.Model, EntityMixin):
 
     requestor = db.Column(
         db.Integer,
-        db.ForeignKey('users.id'),
+        db.ForeignKey('users.id', ondelete="CASCADE"),
         nullable=False)
     recipient = db.Column(
         db.Integer,
-        db.ForeignKey('users.id'),
+        db.ForeignKey('users.id', ondelete="CASCADE"),
         nullable=False)
     _approved_at = db.Column(
         db.DateTime,
@@ -45,6 +45,15 @@ class Connection(db.Model, EntityMixin):
 
     def leave(self):
         self._deleted_at = datetime.now()
+        self._approved_at = None
+
+    def rejoin(self, user_id):
+        self._deleted_at = None
+        self._approved_at = None
+
+        if user_id != self.requestor:
+            self.recipient = self.other_user(user_id)
+            self.requestor = user_id
 
     def is_pending_approval(self):
         self._approved_at is None
@@ -56,10 +65,10 @@ class Connection(db.Model, EntityMixin):
         '''
         Returns the other user of the connection with a given user ID or raises Exception.
         '''
-        return self.requestor.id if self.recipient.id == user_id else self.recipient.id
+        return self.requestor if self.recipient == user_id else self.recipient
         raise Exception("The user is not in the connection")
 
-    def user_is_in_connection(self, user_id):
+    def user_is_member(self, user_id):
         '''
         Returns true if user is a requestor or recipient or raises Exception.
         '''
