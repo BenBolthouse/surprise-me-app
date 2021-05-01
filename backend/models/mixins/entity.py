@@ -24,8 +24,8 @@ class EntityMixin(object):
     _type = db.Column(
         db.String(32),
         name="type",
-        nullable=False,
-        default="")
+        nullable=True,
+        default=None)
     _created_at = db.Column(
         db.DateTime,
         name="created_at",
@@ -76,7 +76,7 @@ class EntityMixin(object):
         '''
         Returns true if the entity is soft deleted, False if not.
         '''
-        return self._deleted_at is True
+        return self._deleted_at is not None
 
     def set_type(self, value):
         '''
