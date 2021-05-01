@@ -190,13 +190,13 @@ def delete_soft(id):
             "message": "User not member",
         })
 
-    scored_users = ScoredUser.query.filter(
-        and_(
-            ScoredUser.user == current_user.id,
-            ScoredUser.user == connection.other_user(current_user.id)))
+    scored_users = ScoredUser.get_bidirectional(
+        current_user.id,
+        connection.other_user(current_user.id))
 
     for x in scored_users:
-        x.leave_connection()
+        user = User.query.get(x.user)
+        x.leave_connection(user)
 
     connection.leave()
 
