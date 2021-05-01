@@ -27,7 +27,7 @@ class Password(db.Model, EntityMixin):
     def set_value(self, value):
         self._value = generate_password_hash(value)
 
-    def validate(value):
+    def validate(self, value):
         return check_password_hash(self._value, value)
 
     def __init__(self, value):
