@@ -34,7 +34,7 @@ def seed():
 
             yield
             # Finally, undo all seed data on cleanup.
-            # down()
+            down()
 
 
 @pytest.fixture(scope="session")
