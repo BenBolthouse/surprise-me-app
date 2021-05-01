@@ -11,7 +11,7 @@ class Notification(db.Model, EntityMixin, DismissibleMixin):
 
     recipient = db.Column(
         db.Integer,
-        db.ForeignKey('users.id'),
+        db.ForeignKey('users.id', ondelete="CASCADE"),
         nullable=False)
     body = db.Column(
         db.String(255),
