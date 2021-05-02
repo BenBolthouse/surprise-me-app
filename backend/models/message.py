@@ -46,9 +46,9 @@ class Message(db.Model, EntityMixin, DismissibleMixin):
         self._body = value
         self.set_updated_at()
 
-    def __init__(self, connection, sender_id, body):
-        self.connection = connection.id
+    def __init__(self, connection_id, sender_id, recipient_id, body):
+        self.connection = connection_id
         self.sender = sender_id
-        self.recipient = connection.other_user(sender_id).id
+        self.recipient = recipient_id
         self._type = "MESSAGE"
         self._body = body
