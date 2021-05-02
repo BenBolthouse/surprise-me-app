@@ -56,7 +56,7 @@ class Connection(db.Model, EntityMixin):
             self.requestor = user_id
 
     def is_pending_approval(self):
-        self._approved_at is None
+        return self._approved_at is None
 
     def add_message(self, value):
         self._messages.append(value)
@@ -83,7 +83,7 @@ class Connection(db.Model, EntityMixin):
             "id": self.id,
             "pending": self.is_pending_approval(),
             "user": self.other_user(user_id),
-            "since": self.approved_at,
+            "since": self.approved_at.isoformat() if self.approved_at else None,
         }
 
     def __init__(self, requestor_id, recipient_id):
