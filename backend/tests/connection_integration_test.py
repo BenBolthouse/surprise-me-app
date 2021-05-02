@@ -35,7 +35,7 @@ def test__connections_routes__POST___create(seed, client, headers, login):
     notification = Notification.query.filter(Notification.recipient == 3).first()
     assert notification.recipient == 3
     assert notification.body == "UserA UserA wants to connect"
-    assert notification.action == f"{Config.PUBLIC_URL}/connections/3/approval"
+    assert notification.action == f"{Config.PUBLIC_URL}/connections/4/approval"
 
 
 def test__connections_routes__POST___create_fails_existing_active_connection(client, headers, login):
@@ -93,7 +93,7 @@ def test__connections_routes__PATCH__approval_fails_not_recipient(client, header
     # a connection between users A and C.
 
     # Arrange
-    url = "/api/v1/connections/3/approve"
+    url = "/api/v1/connections/4/approve"
 
     # Act
     login("B@email.com")
@@ -122,7 +122,7 @@ def test__connections_routes__PATCH__approval(client, headers, login):
     # a connection between users A and C where user C is the recipient.
 
     # Arrange
-    url = "/api/v1/connections/3/approve"
+    url = "/api/v1/connections/4/approve"
 
     # Act
     login("C@email.com")
@@ -168,7 +168,7 @@ def test__connections_routes__PATCH__denial(client, headers, login):
     # a connection between users A and C where user C is the recipient.
 
     # Arrange
-    url = "/api/v1/connections/3/deny"
+    url = "/api/v1/connections/4/deny"
 
     # Act
     login("C@email.com")
@@ -185,7 +185,7 @@ def test__connections_routes__DELETE__soft_delete_fails_user_not_member(client, 
     # connection between users A and C.
 
     # Arrange
-    url = "/api/v1/connections/3"
+    url = "/api/v1/connections/4"
 
     # Act
     login("B@email.com")
@@ -202,7 +202,7 @@ def test__connections_routes__DELETE__soft_delete(client, headers, login):
     # a connection between users A and C.
 
     # Arrange
-    url = "/api/v1/connections/3"
+    url = "/api/v1/connections/4"
 
     # Act
     login("A@email.com")
@@ -254,4 +254,4 @@ def test__connections_routes__POST___create_restores_deleted_connection(client, 
     notification = Notification.query.filter(Notification.recipient == 1).first()
     assert notification.recipient == 1
     assert notification.body == "UserC UserC wants to connect"
-    assert notification.action == f"{Config.PUBLIC_URL}/connections/3/approval"
+    assert notification.action == f"{Config.PUBLIC_URL}/connections/4/approval"
