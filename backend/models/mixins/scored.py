@@ -28,6 +28,10 @@ class ScoredMixin(object):
         default=0.00)
 
     @property
+    def score(self):
+        return self._score
+
+    @property
     def grade(self):
         return self._grade
 
@@ -48,4 +52,4 @@ class ScoredMixin(object):
 
     def __init__(self):
         self._score = 0
-        self._grade = 0
+        self._grade = 0.00

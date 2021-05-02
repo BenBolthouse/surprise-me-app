@@ -20,11 +20,10 @@ class User(db.Model, UserMixin, EntityMixin):
     last_name = db.Column(
         db.String(64),
         nullable=False)
-    _user_engagement_score = db.Column(
-        db.BigInteger,
-        name="user_engagement_score",
-        nullable=False,
-        default=0)
+    bio = db.Column(
+        db.String(128),
+        nullable=True,
+        default=None)
 
     email_addresses = db.relationship(
         Email,
@@ -92,16 +91,6 @@ class User(db.Model, UserMixin, EntityMixin):
     def deleted_passwords(self):
         return [x for x in self.passwords if x.is_deleted]
 
-    @property
-    def user_engagement_score(self):
-        return self._user_engagement_score
-
-    def set_user_engagement_score(self, points):
-        self._user_engagement_score += points
-
-        if self._user_engagement_score < 0:
-            self._user_engagement_score = 0
-
     def to_http_response(self):
         return {
             "first_name": self.first_name,
@@ -112,3 +101,4 @@ class User(db.Model, UserMixin, EntityMixin):
     def __init__(self, **kwargs):
         self.first_name = kwargs["first_name"]
         self.last_name = kwargs["last_name"]
+        self._user_engagement_score = 0
