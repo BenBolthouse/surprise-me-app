@@ -25,10 +25,7 @@ def seed():
             # Run any available upgrades from models migration, ...
             upgrade(directory=migrations_directory)
             # Try to delete all of the records and reset sequences to 1, ...
-            try:
-                down()
-            except Exception:
-                pass
+            down()
             # Seed the test database, ...
             test()
 
@@ -38,7 +35,7 @@ def seed():
 
 
 @pytest.fixture(scope="session")
-def http():
+def client():
     '''
     Sets up a client to which http requests can be sent; scoped to session.
     '''
@@ -51,13 +48,13 @@ def http():
 
 
 @pytest.fixture(scope="session")
-def headers(http):
+def headers(client):
     '''
     Sets headers for http requests, including CSRF protection token; scoped to
     session.
     '''
     # Endpoint should provide a unique CSRF token upon each request.
-    response = http.get("/api/v1/csrf_token")
+    response = client.get("/api/v1/csrf_token")
 
     yield {
         "Content-Type": "application/json",
@@ -67,7 +64,7 @@ def headers(http):
 
 
 @pytest.fixture(scope="session")
-def login(http, headers):
+def login(client, headers):
     '''
     Logs a user in; scoped to session.
     '''
@@ -79,7 +76,7 @@ def login(http, headers):
             "email": email,
             "password": "Password1234$",
         }
-        http.post(
+        client.post(
             endpoint,
             data=json.dumps(data),
             headers=headers)
