@@ -48,5 +48,3 @@ def up():
 
         user.set_active_email_address(item["email"])
         user.set_active_password(item["password"])
-
-        db.session.commit()

@@ -41,4 +41,3 @@ def up():
             connection.approve()
 
         db.session.add(connection)
-        db.session.commit()
