@@ -6,10 +6,10 @@ from flask_migrate import Migrate
 from flask_socketio import SocketIO, emit
 from flask_wtf.csrf import validate_csrf
 from seed import seed_commands
+from traceback import format_exc, format_tb, format_stack
 from werkzeug.exceptions import BadRequest, NotFound, Forbidden
 from werkzeug.exceptions import InternalServerError, Unauthorized
 import os
-import traceback
 
 
 from config import Config
@@ -109,11 +109,12 @@ def handle_werkzeug_exceptions(exception):
 @app.errorhandler(InternalServerError)
 @app.errorhandler(Exception)
 def handle_all_other_exceptions(exception):
-    trace = exception.with_traceback(exception.__traceback__)
-    trace_array = [t for t in trace.args]
     return jsonify({
-        "message": "There was an unexpected internal server error.",
-        "traceback": trace_array,
+        "message": "There was an unexpected internal server error",
+        "data": {
+            "details": exception.name,
+            "traceback": format_stack(),
+        },
     }), 500
 
 
