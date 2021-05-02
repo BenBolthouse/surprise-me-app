@@ -2,6 +2,7 @@ from models import db, Connection
 
 
 seed = [
+    # Cluster 1
     {
         # UserB --> UserA
         "init": {
@@ -18,6 +19,17 @@ seed = [
         },
         "approve": False,
     },
+
+    # Cluster 2
+    {
+        # UserD --> UserE
+        "init": {
+            "requestor_id": 4,
+            "recipient_id": 5,
+        },
+        "approve": True,
+    },
+
 ]
 
 

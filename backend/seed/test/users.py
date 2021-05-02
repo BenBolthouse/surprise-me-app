@@ -22,24 +22,18 @@ seed = [
         "email": "C@email.com",
         "password": PASSWORD,
     },
+
+    # Cluster 2
     {
         "first_name": "UserD",
         "last_name": "UserD",
         "email": "D@email.com",
         "password": PASSWORD,
     },
-
-    # Cluster 2
     {
         "first_name": "UserE",
         "last_name": "UserE",
         "email": "E@email.com",
-        "password": PASSWORD,
-    },
-    {
-        "first_name": "UserF",
-        "last_name": "UserF",
-        "email": "F@email.com",
         "password": PASSWORD,
     },
 ]
