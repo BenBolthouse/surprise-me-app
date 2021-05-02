@@ -1,9 +1,12 @@
-from .fixtures import seed, http, headers, login
+from datetime import datetime
+
+
+from .__fixtures import seed, client, headers, login
 from config import Config
 from models import Connection, Notification
 
 
-def test__connections_routes__POST___create(seed, http, headers, login):
+def test__connections_routes__POST___create(seed, client, headers, login):
     # Assert that user A can create a connection with user C.
 
     # Arrange
@@ -11,7 +14,7 @@ def test__connections_routes__POST___create(seed, http, headers, login):
 
     # Act
     login = login("A@email.com")
-    response = http.post(url, headers=headers)
+    response = client.post(url, headers=headers)
 
     # Assert from response
     json = response.json.get
@@ -35,7 +38,7 @@ def test__connections_routes__POST___create(seed, http, headers, login):
     assert notification.action == f"{Config.PUBLIC_URL}/connections/3/approval"
 
 
-def test__connections_routes__POST___create_fails_existing_active_connection(http, headers, login):
+def test__connections_routes__POST___create_fails_existing_active_connection(client, headers, login):
     # Assert that user A cannot create a connection with user C if an
     # active connection between the users already exists.
 
@@ -44,7 +47,7 @@ def test__connections_routes__POST___create_fails_existing_active_connection(htt
 
     # Act
     login = login("A@email.com")
-    response = http.post(url, headers=headers)
+    response = client.post(url, headers=headers)
 
     # Assert from response
     json = response.json.get
@@ -52,7 +55,40 @@ def test__connections_routes__POST___create_fails_existing_active_connection(htt
     assert response.status_code == 400
 
 
-def test__connections_routes__PATCH__approval_fails_not_recipient(http, headers, login):
+def test__connections_routes__GET___retrieve(client, headers, login):
+    # Assert that user B can retrieve their connections.
+
+    # Arrange
+    url = "/api/v1/connections"
+
+    # Act
+    login("B@email.com")
+    response = client.get(url, headers=headers)
+
+    # Assert from response
+    json = response.json.get
+    # expected = [
+    #     ("id", 1), ("pending", False), ("user", 1),
+    # ]
+    expected = {
+        0: [("id", 1), ("pending", False), ("user", 1)],
+        1: [("id", 2), ("pending", True), ("user", 3)]
+    }
+    assert json("message") == "Success"
+    assert response.status_code == 200
+
+    # Assert correct data types from response
+    for x in expected.items():
+        key = x[0]
+        props = x[1]
+        connection = json("data")[key]
+        for y in props:
+            prop_key = y[0]
+            prop_val = y[1]
+            assert prop_key in connection and connection[prop_key] == prop_val
+
+
+def test__connections_routes__PATCH__approval_fails_not_recipient(client, headers, login):
     # Assert that connection approval fails when user B attempts to approve
     # a connection between users A and C.
 
@@ -61,7 +97,7 @@ def test__connections_routes__PATCH__approval_fails_not_recipient(http, headers,
 
     # Act
     login("B@email.com")
-    response = http.patch(url, headers=headers)
+    response = client.patch(url, headers=headers)
 
     # Assert from response
     json = response.json.get
@@ -73,7 +109,7 @@ def test__connections_routes__PATCH__approval_fails_not_recipient(http, headers,
 
     # Act
     login("A@email.com")
-    response = http.patch(url, headers=headers)
+    response = client.patch(url, headers=headers)
 
     # Assert from response
     json = response.json.get
@@ -81,7 +117,7 @@ def test__connections_routes__PATCH__approval_fails_not_recipient(http, headers,
     assert response.status_code == 403
 
 
-def test__connections_routes__PATCH__approval(http, headers, login):
+def test__connections_routes__PATCH__approval(client, headers, login):
     # Assert that connection approval succeeds when user C attempts to approve
     # a connection between users A and C where user C is the recipient.
 
@@ -90,7 +126,7 @@ def test__connections_routes__PATCH__approval(http, headers, login):
 
     # Act
     login("C@email.com")
-    response = http.patch(url, headers=headers)
+    response = client.patch(url, headers=headers)
 
     # Assert from response
     json = response.json.get
@@ -98,7 +134,7 @@ def test__connections_routes__PATCH__approval(http, headers, login):
     assert response.status_code == 200
 
 
-def test__connections_routes__PATCH__denial_fails_not_recipient(http, headers, login):
+def test__connections_routes__PATCH__denial_fails_not_recipient(client, headers, login):
     # Assert that connection approval fails when user A attempts to deny
     # a connection between users B and C.
 
@@ -107,7 +143,7 @@ def test__connections_routes__PATCH__denial_fails_not_recipient(http, headers, l
 
     # Act
     login("A@email.com")
-    response = http.patch(url, headers=headers)
+    response = client.patch(url, headers=headers)
 
     # Assert from response
     json = response.json.get
@@ -119,7 +155,7 @@ def test__connections_routes__PATCH__denial_fails_not_recipient(http, headers, l
 
     # Act
     login("B@email.com")
-    response = http.patch(url, headers=headers)
+    response = client.patch(url, headers=headers)
 
     # Assert from response
     json = response.json.get
@@ -127,7 +163,7 @@ def test__connections_routes__PATCH__denial_fails_not_recipient(http, headers, l
     assert response.status_code == 403
 
 
-def test__connections_routes__PATCH__denial(http, headers, login):
+def test__connections_routes__PATCH__denial(client, headers, login):
     # Assert that connection denial succeeds when user C attempts to deny
     # a connection between users A and C where user C is the recipient.
 
@@ -136,7 +172,7 @@ def test__connections_routes__PATCH__denial(http, headers, login):
 
     # Act
     login("C@email.com")
-    response = http.patch(url, headers=headers)
+    response = client.patch(url, headers=headers)
 
     # Assert from response
     json = response.json.get
@@ -144,7 +180,7 @@ def test__connections_routes__PATCH__denial(http, headers, login):
     assert response.status_code == 200
 
 
-def test__connections_routes__DELETE__soft_delete_fails_user_not_member(http, headers, login):
+def test__connections_routes__DELETE__soft_delete_fails_user_not_member(client, headers, login):
     # Assert that connection deletion fails when user B attempts to deny a
     # connection between users A and C.
 
@@ -153,7 +189,7 @@ def test__connections_routes__DELETE__soft_delete_fails_user_not_member(http, he
 
     # Act
     login("B@email.com")
-    response = http.delete(url, headers=headers)
+    response = client.delete(url, headers=headers)
 
     # Assert from response
     json = response.json.get
@@ -161,7 +197,7 @@ def test__connections_routes__DELETE__soft_delete_fails_user_not_member(http, he
     assert response.status_code == 403
 
 
-def test__connections_routes__DELETE__soft_delete(http, headers, login):
+def test__connections_routes__DELETE__soft_delete(client, headers, login):
     # Assert that connection deletion succeeds when user A attempts to deny
     # a connection between users A and C.
 
@@ -170,7 +206,7 @@ def test__connections_routes__DELETE__soft_delete(http, headers, login):
 
     # Act
     login("A@email.com")
-    response = http.delete(url, headers=headers)
+    response = client.delete(url, headers=headers)
 
     # Assert from response
     json = response.json.get
@@ -185,7 +221,7 @@ def test__connections_routes__DELETE__soft_delete(http, headers, login):
     assert connection.approved_at is None
 
 
-def test__connections_routes__POST___create_restores_deleted_connection(http, headers, login):
+def test__connections_routes__POST___create_restores_deleted_connection(client, headers, login):
     # Assert that user C can restore a connection with user A that has
     # previously been deleted, and C now becomes the requestor of the
     # connection.
@@ -195,7 +231,7 @@ def test__connections_routes__POST___create_restores_deleted_connection(http, he
 
     # Act
     login = login("C@email.com")
-    response = http.post(url, headers=headers)
+    response = client.post(url, headers=headers)
 
     # Assert from response
     json = response.json.get
