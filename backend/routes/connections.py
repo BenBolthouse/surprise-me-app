@@ -8,7 +8,7 @@ from werkzeug.exceptions import BadRequest, Forbidden
 
 from app import socketio
 from config import Config
-from models import db, Connection, Notification, User, ScoredUser
+from models import db, Connection, Notification, User
 
 
 connection_routes = Blueprint("connection_routes", __name__, url_prefix="/api/v1/connections")
@@ -52,19 +52,12 @@ def post(recipient_id):
         connection = existing_connection
         connection.rejoin(current_user.id)
 
-        scored_user = ScoredUser.get(current_user.id, int(recipient_id))
-        scored_user.create_connection(current_user)
-
         message = "Existing connection restored"
         status_code = 200
 
     else:
         connection = Connection(current_user.id, int(recipient_id))
 
-        scored_user = ScoredUser(current_user.id, int(recipient_id))
-        scored_user.create_connection(current_user)
-
-        db.session.add(scored_user)
         db.session.add(connection)
         db.session.commit()
 
@@ -91,6 +84,27 @@ def post(recipient_id):
     }), status_code
 
 
+# GET https://surprise-me.benbolt.house/api/v1/users/<id>/connections
+# Retrieves all of a logged in user's own pending and approved connections.
+@connection_routes.route("", methods=["GET"])
+@login_required
+def get():
+    connections = Connection.query.filter(
+        or_(
+            Connection.requestor == current_user.id,
+            Connection.recipient == current_user.id)
+    ).order_by(
+        Connection._approved_at.asc(),
+        Connection._created_at.desc()).all()
+
+    connections = [x.to_http_response(current_user.id) for x in connections]
+
+    return jsonify({
+        "message": "Success",
+        "data": connections,
+    }), 200
+
+
 # PATCH https://surprise-me.benbolt.house/api/v1/connections/<id>/approve
 # Updates an unestablished connection to an established state via recipient
 # approval. The user must be the recipient of the connection.
@@ -111,11 +125,6 @@ def patch_approve(id):
         raise Forbidden(response={
             "message": "User not recipient",
         })
-
-    scored_user = ScoredUser(current_user.id, connection.requestor)
-    scored_user.create_connection(current_user)
-
-    db.session.add(scored_user)
 
     connection.approve()
 
@@ -156,23 +165,6 @@ def patch_deny(id):
     }), 200
 
 
-# GET https://surprise-me.benbolt.house/api/v1/users/<id>/connections
-# Retrieves all of a logged in user's own pending and approved connections.
-@connection_routes.route("", methods=["GET"])
-@login_required
-def get(id):
-    connections = Connection.query.filter(
-        or_(Connection.requestor == current_user.id),
-        or_(Connection.recipient == current_user.id))
-
-    connections = [x.to_http_response() for x in connections]
-
-    return jsonify({
-        "message": "Success",
-        "data": connections,
-    }), 200
-
-
 # DELETE https://surprise-me.benbolt.house/api/v1/users/<user_id>/connections/<id>
 # Performs a soft delete of the connection in the database.
 @ connection_routes.route("/<id>", methods=["DELETE"])
@@ -189,14 +181,6 @@ def delete_soft(id):
         raise Forbidden(response={
             "message": "User not member",
         })
-
-    scored_users = ScoredUser.get_bidirectional(
-        current_user.id,
-        connection.other_user(current_user.id))
-
-    for x in scored_users:
-        user = User.query.get(x.user)
-        x.leave_connection(user)
 
     connection.leave()
 
