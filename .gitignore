@@ -170,3 +170,7 @@ gunicorn.conf.py
 
 # React's linter cache
 *.eslintcache
+
+# I added some utility scripts to handle tasks in my dev environment and I
+# don't necessarily want other to have access.
+scripts
