@@ -161,7 +161,7 @@ class EntityMixin(object):
         return {
             "id": self._id,
             "type": self._type,
-            "created_at": self._created_at.isoformat(),
-            "updated_at": self._updated_at.isoformat(),
-            "deleted_at": self._deleted_at.isoformat(),
+            "created_at": self._created_at.isoformat() if self._created_at else None,
+            "updated_at": self._updated_at.isoformat() if self._updated_at else None,
+            "deleted_at": self._deleted_at.isoformat() if self._deleted_at else None,
         }

@@ -52,8 +52,8 @@ class DismissibleMixin(object):
 
     def _dismissible_to_dict(self):
         return {
-            "seen_at": self._seen_at.isoformat(),
-            "dismissed_at": self._dismissed_at.isoformat(),
+            "seen_at": self._seen_at.isoformat() if self._seen_at else None,
+            "dismissed_at": self._dismissed_at.isoformat() if self._dismissed_at else None,
         }
 
     def _set_dismissed_at(self):
