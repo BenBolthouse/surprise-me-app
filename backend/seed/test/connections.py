@@ -7,7 +7,7 @@ seed = [
         # UserB --> UserA
         "init": {
             "requestor_id": 2,
-            "recipient_id": 1,
+            "approver_id": 1,
         },
         "approve": True,
     },
@@ -15,7 +15,7 @@ seed = [
         # UserB --> UserC
         "init": {
             "requestor_id": 2,
-            "recipient_id": 3,
+            "approver_id": 3,
         },
         "approve": False,
     },
@@ -25,7 +25,7 @@ seed = [
         # UserD --> UserE
         "init": {
             "requestor_id": 4,
-            "recipient_id": 5,
+            "approver_id": 5,
         },
         "approve": True,
     },
@@ -41,3 +41,5 @@ def up():
             connection.approve()
 
         db.session.add(connection)
+    
+    db.session.commit()

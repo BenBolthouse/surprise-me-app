@@ -251,3 +251,5 @@ def up():
         message._created_at = datetime.fromisoformat(f"2021-10-10T12:{minutes}:00.000000")
 
         db.session.add(message)
+    
+    db.session.commit()

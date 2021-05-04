@@ -15,14 +15,14 @@ session_routes = Blueprint("session_routes", __name__, url_prefix="/api/v1/sessi
 def post():
     json = request.json.get
 
-    email = Email.query.filter(Email.value == json("email")).first()
+    email = Email.query.filter(Email._value == json("email")).first()
 
     if email.is_deleted:
         raise BadRequest(response={
             "message": "Email is expired",
         })
 
-    user = User.query.get(email.user)
+    user = User.query.get(email._user_id)
 
     password_is_valid = user.active_password.validate(json("password"))
 

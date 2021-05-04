@@ -18,12 +18,8 @@ def test():
     test_connections_up()
     test_messages_up()
 
-    db.session.commit()
-
 
 def down():
     messages_down()
     connections_down()
     users_down()
-
-    db.session.commit()
