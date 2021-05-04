@@ -3,39 +3,40 @@ from datetime import datetime
 
 from .mixins.entity import EntityMixin
 from .db import db
+from .user import User
 from .message import Message
 
 
 class Connection(db.Model, EntityMixin):
     __tablename__ = "connections"
 
-    requestor = db.Column(
+    _requestor_id = db.Column(
         db.Integer,
         db.ForeignKey('users.id', ondelete="CASCADE"),
+        name="requestor_id",
         nullable=False)
-    recipient = db.Column(
+    _approver_id = db.Column(
         db.Integer,
         db.ForeignKey('users.id', ondelete="CASCADE"),
+        name="approver_id",
         nullable=False)
     _approved_at = db.Column(
         db.DateTime,
         nullable=True,
+        name="approved_at",
         default=None)
 
-    _messages = db.relationship(
-        Message,
-        backref="connections",
-        foreign_keys=[Message.connection],
-        cascade="all, delete")
+    @property
+    def requestor_id(self):
+        return self._requestor_id
+
+    @property
+    def approver_id(self):
+        return self._approver_id
 
     @property
     def approved_at(self):
         return self._approved_at
-
-    @property
-    def messages(self):
-        # only get messages that are not soft deleted
-        return [x for x in self._messages if not x.is_deleted()]
 
     def approve(self):
         self._approved_at = datetime.now()
@@ -51,41 +52,38 @@ class Connection(db.Model, EntityMixin):
         self._deleted_at = None
         self._approved_at = None
 
-        if user_id != self.requestor:
-            self.recipient = self.other_user(user_id)
-            self.requestor = user_id
-
-    def is_pending_approval(self):
-        return self._approved_at is None
-
-    def add_message(self, value):
-        self._messages.append(value)
+        if user_id != self.requestor_id:
+            self._approver_id = self.requestor_id
+            self._requestor_id = user_id
 
     def other_user(self, user_id):
         '''
         Returns the other user of the connection with a given user ID or raises Exception.
         '''
-        return self.requestor if self.recipient == user_id else self.recipient
+        other_user_id = self.requestor_id if self.approver_id == user_id else self.approver_id
+
+        return User.query.get(other_user_id).to_public_dict()
+
         raise Exception("The user is not in the connection")
 
     def user_is_member(self, user_id):
         '''
-        Returns true if user is a requestor or recipient or raises Exception.
+        Returns true if user is a requestor or approver or raises Exception.
         '''
-        return user_id == self.requestor.id or self.recipient.id
+        return user_id == self.requestor_id or self.approver_id
+
         raise Exception("The user is not in the connection")
 
-    def to_http_response(self, user_id):
+    def to_dict(self, user_id):
         '''
-        Returns http-ready data in the context of the current user.
+        Returns dictionary representation in the context of the current user.
         '''
         return {
-            "id": self.id,
-            "pending": self.is_pending_approval(),
-            "user": self.other_user(user_id),
-            "since": self.approved_at.isoformat() if self.approved_at else None,
+            **self._entity_to_dict(),
+            "other_user": self.other_user(user_id),
+            "approved_at": self.approved_at.isoformat() if self.approved_at else None,
         }
 
-    def __init__(self, requestor_id, recipient_id):
-        self.requestor = requestor_id
-        self.recipient = recipient_id
+    def __init__(self, requestor_id, approver_id):
+        self._requestor_id = requestor_id
+        self._approver_id = approver_id

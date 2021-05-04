@@ -5,18 +5,32 @@ from .db import db
 class Email(db.Model, EntityMixin):
     __tablename__ = "email_addresses"
 
-    user = db.Column(
+    _user_id = db.Column(
         db.Integer,
         db.ForeignKey('users.id', ondelete="CASCADE"),
+        name="user_id",
         nullable=False)
-    value = db.Column(
+    _value = db.Column(
         db.String(255),
+        name="value",
         nullable=False,
         unique=True)
-    verified = db.Column(
+    _verified = db.Column(
         db.Boolean,
+        name="verified",
         nullable=False,
         default=False)
 
-    def __init__(self, value):
-        self.value = value
+    @property
+    def value(self):
+        return self._value
+    
+    def to_dict(self):
+        return {
+            **self._entity_to_dict(),
+            "value": self._value,
+        }
+
+    def __init__(self, user_id, value):
+        self._user_id = user_id
+        self._value = value

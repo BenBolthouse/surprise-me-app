@@ -18,8 +18,9 @@ class EntityMixin(object):
     Base class provides all of the basic functionality for application
     entities.
     '''
-    id = db.Column(
+    _id = db.Column(
         db.Integer,
+        name="id",
         primary_key=True)
     _type = db.Column(
         db.String(32),
@@ -40,6 +41,13 @@ class EntityMixin(object):
         name="deleted_at",
         nullable=True,
         default=None)
+
+    @property
+    def id(self):
+        '''
+        Get the database id of the entity.
+        '''
+        return self._id
 
     @property
     def type(self):
@@ -78,7 +86,7 @@ class EntityMixin(object):
         '''
         return self._deleted_at is not None
 
-    def set_type(self, value):
+    def _set_type(self, value):
         '''
         Set the type of the entity. Type must be a string member of the set
         attribute _types.
@@ -102,27 +110,27 @@ class EntityMixin(object):
         except Exception as exception:
             raise Exception(exception.args)
 
-    def set_updated_at(self):
+    def _set_updated_at(self):
         '''
         Update the datetime attribute _updated_at to the current application
         datetime.
         '''
         self._updated_at = datetime.now()
 
-    def set_deleted_at(self):
+    def _set_deleted_at(self):
         '''
         Update the datetime attribute _deleted_at to the current application
         datetime.
         '''
         self._updated_at = datetime.now()
 
-    def unset_deleted_at(self):
+    def _unset_deleted_at(self):
         '''
         Nullify the datetime attribute _deleted_at.
         '''
-        self._updated_at = datetime.now()
+        self._deleted_at = None
 
-    def update(self, **kwargs):
+    def _update(self, **kwargs):
         '''
         Updates the entity. Kwargs must match the entity's property key and be
         assigned a value that is compatible with the database schema.
@@ -143,3 +151,17 @@ class EntityMixin(object):
                 attr = v
             except Exception:
                 pass
+
+        self._updated_at = datetime.now()
+
+    def _entity_to_dict(self):
+        '''
+        Returns a dictionary of the entity's state.
+        '''
+        return {
+            "id": self._id,
+            "type": self._type,
+            "created_at": self._created_at.isoformat(),
+            "updated_at": self._updated_at.isoformat(),
+            "deleted_at": self._deleted_at.isoformat(),
+        }
