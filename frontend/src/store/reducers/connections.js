@@ -1,134 +1,78 @@
-import { fetch } from "../../services/fetch";
-import { normalize } from "../../services/normalize";
+import { fetch } from "../fetch";
+import { Connection, ConnectionsCollection } from "../models/connection";
 
-// State template
-const stateTemplate = {
-  timestamp: null,
-  established: {},
-  pending: {},
-  awaiting: {},
-  notifications: {},
+const connections = new ConnectionsCollection();
+
+const POST_CONNECTION = "connections ———————> POST_CONNECTION";
+const GET_CONNECTIONS = "connections ———————> GET_CONNECTIONS";
+const APPROVE_CONNECTION = "connections ———————> APPROVE_CONNECTION";
+const DENY_CONNECTION = "connections ———————> DENY_CONNECTION";
+const LEAVE_CONNECTION = "connections ———————> DENY_CONNECTION";
+
+export const postConnection = (id) => async (dispatch) => {
+  const body = { "approver_id": id }
+  const { data } = await fetch(connections.endpoint, { method: "POST", body });
+  dispatch(() => ({ type: POST_CONNECTION, payload: data }));
+  return true;
 };
 
-// ** «««««««««««««««««««««««« Actions »»»»»»»»»»»»»»»»»»»»»»»» **
-
-const GET_CONNECTIONS = "connections/getConnections";
 export const getConnections = () => async (dispatch) => {
-  const res = await fetch("/api/connections");
-  const { data } = res.data;
-  dispatch(
-    ((payload) => ({
-      type: GET_CONNECTIONS,
-      payload,
-    }))(data)
-  );
-  return res;
+  const { data } = await fetch(connections.endpoint, { method: "GET" });
+  dispatch(() => ({ type: GET_CONNECTIONS, payload: data }));
+  return true;
 };
 
-const SPOOF_MESSAGE_CONNECTION = "chat/spoofMsgConnection";
-export const spoofMessageConnection = (connId) => ({
-  type: SPOOF_MESSAGE_CONNECTION,
-  payload: connId,
-});
-
-const GET_CHAT_NOTIFICATIONS = "chat/getChatNotifications";
-export const getChatNotifications = () => async (dispatch) => {
-  const url = "/api/chat_notifications";
-  const res = await fetch(url);
-  let { data } = res.data;
-  data = normalize(data, "userConnectionId");
-  dispatch(
-    ((payload) => ({
-      type: GET_CHAT_NOTIFICATIONS,
-      payload,
-    }))(data)
-  );
-  return res;
+export const approveConnection = (id) => async (dispatch) => {
+  const endpoint = `${connections.endpoint}/${id}/approve`;
+  const { data } = await fetch(endpoint, { method: "PATCH" });
+  dispatch(() => ({ type: APPROVE_CONNECTION, payload: data }));
+  return true;
 };
 
-const UPDATE_CHAT_NOTIFICATION = "chat/updateChatNotification";
-export const updateChatNotification = (notification) => ({
-  type: UPDATE_CHAT_NOTIFICATION,
-  payload: notification,
-});
-
-const CLEAR_CHAT_NOTIFICATION = "chat/clearChatNotification";
-export const clearChatNotification = (connId) => async (dispatch) => {
-  const url = `/api/chat_notifications/${connId}`;
-  const res = await fetch(url, {
-    method: "DELETE",
-  });
-  dispatch(
-    ((payload) => ({
-      type: CLEAR_CHAT_NOTIFICATION,
-      payload,
-    }))(connId)
-  );
-  return res;
+export const denyConnection = (id) => async (dispatch) => {
+  const endpoint = `${connections.endpoint}/${id}/deny`;
+  const { data } = await fetch(endpoint, { method: "PATCH" });
+  dispatch(() => ({ type: DENY_CONNECTION, payload: data }));
+  return true;
 };
 
-// ** «««««««««««««««««««««««« Reducer »»»»»»»»»»»»»»»»»»»»»»»» **
+export const leaveConnection = (id) => async (dispatch) => {
+  const endpoint = `${connections.endpoint}/${id}`;
+  const { data } = await fetch(endpoint, { method: "DELETE" });
+  dispatch(() => ({ type: LEAVE_CONNECTION, payload: data }));
+  return true;
+};
 
-const reducer = (state = stateTemplate, { type, payload }) => {
+const reducer = (state = connections, { type, payload }) => {
+  let connectionsCopy = { ...state };
+  let connection;
+
   switch (type) {
-    // ********************
+    case POST_CONNECTION:
+      connection = new Connection();
+      connection.populate(payload);
+      connectionsCopy.add(connection);
+      return connectionsCopy;
+
     case GET_CONNECTIONS:
-      const estConnections = payload.filter((c) => {
-        if (c.establishedAt !== null) return c;
-        return false;
-      });
-      const pendingConnections = payload.filter((c) => {
-        if (c.establishedAt === null) return c;
-        return false;
-      });
-      return {
-        ...state,
-        timestamp: new Date().toISOString(),
-        established: normalize(estConnections),
-        pending: normalize(pendingConnections),
-      };
-    // ********************
-    case SPOOF_MESSAGE_CONNECTION:
-      return {
-        ...state,
-        established: {
-          ...state.established,
-          [payload]: {
-            ...state.established[payload],
-            lastMessage: {
-              body: "",
-              createdAt: new Date().toUTCString(),
-              sender: {
-                id: null,
-              },
-            },
-          },
-        },
-      };
-    // ********************
-    case GET_CHAT_NOTIFICATIONS:
-      return {
-        ...state,
-        notifications: payload,
-      };
-    // ********************
-    case UPDATE_CHAT_NOTIFICATION:
-      return {
-        ...state,
-        notifications: {
-          ...state.notifications,
-          [payload.userConnectionId]: payload,
-        },
-      };
-    // ********************
-    case CLEAR_CHAT_NOTIFICATION:
-      let notificationsCopy = {...state.notifications};
-      delete notificationsCopy[payload];
-      return {
-        ...state,
-        notifications: notificationsCopy,
-      };
-    // ********************
+      connectionsCopy.populate(payload);
+      return connectionsCopy;
+
+    case APPROVE_CONNECTION:
+      connection = connectionsCopy.filter(x => x.id === payload.id)
+      connection.populate(payload);
+      return connectionsCopy;
+
+    case DENY_CONNECTION:
+      connection = connectionsCopy.filter(x => x.id === payload.id)
+      connection.populate(payload);
+      return connectionsCopy;
+
+    case LEAVE_CONNECTION:
+      connection = connectionsCopy.filter(x => x.id === payload.id)
+      connection.populate(payload);
+      return connectionsCopy;
+
     default:
       return state;
   }
