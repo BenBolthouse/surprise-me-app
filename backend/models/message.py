@@ -1,4 +1,5 @@
 from datetime import datetime
+from sqlalchemy.orm import backref
 
 
 from .mixins.entity import EntityMixin
@@ -46,7 +47,8 @@ class Message(db.Model, EntityMixin, DismissibleMixin):
 
     _sender = db.relationship(
         "User",
-        backref=backref("users", cascade="all,delete"))
+        foreign_keys=[_sender_id],
+        backref=backref("messages", cascade="all,delete"))
 
     @property
     def body(self):
