@@ -1,4 +1,5 @@
 from datetime import datetime
+import json
 
 
 from .__fixtures import seed, client, headers, login
@@ -10,21 +11,24 @@ def test__connections_routes__POST___create(seed, client, headers, login):
     # Assert that user A can create a connection with user C.
 
     # Arrange
-    url = "/api/v1/connections/add/3"
+    url = "/api/v1/connections"
+    body = {
+        "approver_id": 3,
+    }
 
     # Act
     login = login("A@email.com")
-    response = client.post(url, headers=headers)
+    response = client.post(url, data=json.dumps(body), headers=headers)
 
     # Assert from response
-    json = response.json.get
-    assert json("message") == "Connection created successfully"
+    get = response.json.get
+    assert get("message") == "Connection created successfully"
     assert response.status_code == 201
 
     # Assert from database
     connection = Connection.query.filter(
-        Connection.requestor == 1,
-        Connection.recipient == 3).first()
+        Connection._requestor_id == 1,
+        Connection._approver_id == 3).first()
     assert connection is not None
     assert connection.approved_at is None
 
@@ -32,8 +36,8 @@ def test__connections_routes__POST___create(seed, client, headers, login):
     # attempts to connect.
 
     # Assert from database
-    notification = Notification.query.filter(Notification.recipient == 3).first()
-    assert notification.recipient == 3
+    notification = Notification.query.filter(Notification._recipient_id == 3).first()
+    assert notification.recipient.id == 3
     assert notification.body == "UserA UserA wants to connect"
     assert notification.action == f"{Config.PUBLIC_URL}/connections/4/approval"
 
@@ -43,15 +47,18 @@ def test__connections_routes__POST___create_fails_existing_active_connection(cli
     # active connection between the users already exists.
 
     # Arrange
-    url = "/api/v1/connections/add/3"
+    url = "/api/v1/connections"
+    body = {
+        "approver_id": 3
+    }
 
     # Act
     login = login("A@email.com")
-    response = client.post(url, headers=headers)
+    response = client.post(url, data=json.dumps(body), headers=headers)
 
     # Assert from response
-    json = response.json.get
-    assert json("message") == "Connection already exists"
+    get = response.json.get
+    assert get("message") == "Connection already exists"
     assert response.status_code == 400
 
 
@@ -66,22 +73,25 @@ def test__connections_routes__GET___retrieve(client, headers, login):
     response = client.get(url, headers=headers)
 
     # Assert from response
-    json = response.json.get
-    # expected = [
-    #     ("id", 1), ("pending", False), ("user", 1),
-    # ]
+    get = response.json.get
     expected = {
-        0: [("id", 1), ("pending", False), ("user", 1)],
-        1: [("id", 2), ("pending", True), ("user", 3)]
+        0: [("id", 1), ("other_user", {
+            "first_name": "UserA",
+            "last_name": "UserA",
+        })],
+        1: [("id", 2), ("other_user", {
+            "first_name": "UserC",
+            "last_name": "UserC",
+        })]
     }
-    assert json("message") == "Success"
+    assert get("message") == "Success"
     assert response.status_code == 200
 
     # Assert correct data types from response
     for x in expected.items():
         key = x[0]
         props = x[1]
-        connection = json("data")[key]
+        connection = get("data")[key]
         for y in props:
             prop_key = y[0]
             prop_val = y[1]
@@ -100,8 +110,8 @@ def test__connections_routes__PATCH__approval_fails_not_recipient(client, header
     response = client.patch(url, headers=headers)
 
     # Assert from response
-    json = response.json.get
-    assert json("message") == "User not recipient"
+    get = response.json.get
+    assert get("message") == "User not approver"
     assert response.status_code == 403
 
     # Assert that connection approval fails when user A attempts to approve
@@ -112,8 +122,8 @@ def test__connections_routes__PATCH__approval_fails_not_recipient(client, header
     response = client.patch(url, headers=headers)
 
     # Assert from response
-    json = response.json.get
-    assert json("message") == "User not recipient"
+    get = response.json.get
+    assert get("message") == "User not approver"
     assert response.status_code == 403
 
 
@@ -129,8 +139,8 @@ def test__connections_routes__PATCH__approval(client, headers, login):
     response = client.patch(url, headers=headers)
 
     # Assert from response
-    json = response.json.get
-    assert json("message") == "Connection approved successfully"
+    get = response.json.get
+    assert get("message") == "Connection approved successfully"
     assert response.status_code == 200
 
 
@@ -146,8 +156,8 @@ def test__connections_routes__PATCH__denial_fails_not_recipient(client, headers,
     response = client.patch(url, headers=headers)
 
     # Assert from response
-    json = response.json.get
-    assert json("message") == "User not recipient"
+    get = response.json.get
+    assert get("message") == "User not approver"
     assert response.status_code == 403
 
     # Assert that connection approval fails when user B attempts to approve
@@ -158,8 +168,8 @@ def test__connections_routes__PATCH__denial_fails_not_recipient(client, headers,
     response = client.patch(url, headers=headers)
 
     # Assert from response
-    json = response.json.get
-    assert json("message") == "User not recipient"
+    get = response.json.get
+    assert get("message") == "User not approver"
     assert response.status_code == 403
 
 
@@ -175,8 +185,8 @@ def test__connections_routes__PATCH__denial(client, headers, login):
     response = client.patch(url, headers=headers)
 
     # Assert from response
-    json = response.json.get
-    assert json("message") == "Connection denied successfully"
+    get = response.json.get
+    assert get("message") == "Connection denied successfully"
     assert response.status_code == 200
 
 
@@ -192,8 +202,8 @@ def test__connections_routes__DELETE__soft_delete_fails_user_not_member(client, 
     response = client.delete(url, headers=headers)
 
     # Assert from response
-    json = response.json.get
-    assert json("message") == "User not member"
+    get = response.json.get
+    assert get("message") == "User not member"
     assert response.status_code == 403
 
 
@@ -209,14 +219,14 @@ def test__connections_routes__DELETE__soft_delete(client, headers, login):
     response = client.delete(url, headers=headers)
 
     # Assert from response
-    json = response.json.get
-    assert json("message") == "Connection deleted successfully"
+    get = response.json.get
+    assert get("message") == "Connection deleted successfully"
     assert response.status_code == 200
 
     # Assert from database
     connection = Connection.query.filter(
-        Connection.requestor == 1,
-        Connection.recipient == 3).first()
+        Connection._requestor_id == 1,
+        Connection._approver_id == 3).first()
     assert connection.deleted_at is not None
     assert connection.approved_at is None
 
@@ -227,31 +237,34 @@ def test__connections_routes__POST___create_restores_deleted_connection(client, 
     # connection.
 
     # Arrange
-    url = "/api/v1/connections/add/1"
+    url = "/api/v1/connections"
+    body = {
+        "approver_id": 1,
+    }
 
     # Act
     login = login("C@email.com")
-    response = client.post(url, headers=headers)
+    response = client.post(url, data=json.dumps(body), headers=headers)
 
     # Assert from response
-    json = response.json.get
-    assert json("message") == "Existing connection restored"
+    get = response.json.get
+    assert get("message") == "Existing connection restored"
     assert response.status_code == 200
 
     # Assert from database
     connection = Connection.query.filter(
-        Connection.requestor == 3,
-        Connection.recipient == 1).first()
+        Connection._requestor_id == 3,
+        Connection._approver_id == 1).first()
     assert connection.deleted_at is None
     assert connection.approved_at is None
-    assert connection.requestor == 3
-    assert connection.recipient == 1
+    assert connection.requestor_id == 3
+    assert connection.approver_id == 1
 
     # Assert that user A receives a connection notification when user C
     # attempts to connect.
 
     # Assert from database
-    notification = Notification.query.filter(Notification.recipient == 1).first()
-    assert notification.recipient == 1
+    notification = Notification.query.filter(Notification._recipient_id == 1).first()
+    assert notification.recipient.id == 1
     assert notification.body == "UserC UserC wants to connect"
     assert notification.action == f"{Config.PUBLIC_URL}/connections/4/approval"
