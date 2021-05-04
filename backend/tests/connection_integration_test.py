@@ -76,10 +76,12 @@ def test__connections_routes__GET___retrieve(client, headers, login):
     get = response.json.get
     expected = {
         0: [("id", 1), ("other_user", {
+            "id": 1,
             "first_name": "UserA",
             "last_name": "UserA",
         })],
         1: [("id", 2), ("other_user", {
+            "id": 3,
             "first_name": "UserC",
             "last_name": "UserC",
         })]
