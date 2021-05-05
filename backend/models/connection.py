@@ -80,6 +80,7 @@ class Connection(db.Model, EntityMixin):
         '''
         return {
             **self._entity_to_dict(),
+            "requestor_id": self._requestor_id,
             "other_user": self.other_user(user_id),
             "approved_at": self.approved_at.isoformat() if self.approved_at else None,
         }
