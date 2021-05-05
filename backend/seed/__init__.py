@@ -4,6 +4,7 @@ from flask.cli import AppGroup
 
 from .production.users import up as production_users_up
 from .production.connections import up as production_connections_up
+from .production.messages import up as production_messages_up
 
 from .test.connections import up as test_connections_up
 from .test.messages import up as test_messages_up
@@ -35,6 +36,7 @@ def down():
 def cli_all():
     production_users_up()
     production_connections_up()
+    production_messages_up()
 
 
 @cmd.cli.command("undo")
