@@ -113,11 +113,10 @@ def get():
 @connection_routes.route("/<id>/approve", methods=["PATCH"])
 @login_required
 def patch_approve(id):
-    try:
-        # handle requests for non-existent connections
-        connection = Connection.query.get(int(id))
+    # handle requests for non-existent connections
+    connection = Connection.query.get(int(id))
 
-    except(Exception) as exception:
+    if connection is None:
         raise BadRequest(response={
             "message": "Connection does not exist",
         })
@@ -126,6 +125,12 @@ def patch_approve(id):
     if connection.approver_id != current_user.id:
         raise Forbidden(response={
             "message": "User not approver",
+        })
+
+    # handle requests for connections that are already approved
+    if connection.approved_at is not None:
+        raise BadRequest(response={
+            "message": "Connection already approved",
         })
 
     connection.approve()
@@ -144,14 +149,14 @@ def patch_approve(id):
 @connection_routes.route("/<id>/deny", methods=["PATCH"])
 @login_required
 def patch_deny(id):
-    try:
-        # handle requests for non-existent connections
-        connection = Connection.query.get(int(id))
+    # handle requests for non-existent connections
+    connection = Connection.query.get(int(id))
 
-    except(Exception) as exception:
+    if connection is None:
         raise BadRequest(response={
             "message": "Connection does not exist",
         })
+
 
     # handle requests for connections for which the user isn't approver
     if connection.approver_id != current_user.id:
@@ -192,6 +197,7 @@ def delete_soft(id):
 
     return jsonify({
         "message": "Connection deleted successfully",
+        "data": connection.to_dict(current_user),
     }), 200
 
 
