@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, make_response, request
-from flask_login import login_required, login_user
+from flask_login import current_user, login_required, login_user
 from werkzeug.exceptions import BadRequest
 
 
@@ -16,6 +16,11 @@ def post():
     json = request.json.get
 
     email = Email.query.filter(Email._value == json("email")).first()
+
+    if not email:
+        raise BadRequest(response={
+            "message": "Invalid email",
+        })
 
     if email.is_deleted:
         raise BadRequest(response={
@@ -35,7 +40,25 @@ def post():
 
     return jsonify({
         "message": "Success",
+        "data": user.to_dict(),
     }), 201
+
+
+# GET https://surprise-me.benbolt.house/api/v1/session Retrieves session
+# data and sends to the client if authenticated, otherwise sends an OK
+# response without data. This prevents error code responses if the user
+# isn't logged in.
+@session_routes.route("", methods=["GET"])
+def get():
+    if current_user.is_active:
+        data = current_user.to_dict()
+    else:
+        data = {}
+
+    return jsonify({
+        "message": "Success",
+        "data": data,
+    }), 200
 
 
 # DELETE https://surprise-me.benbolt.house/api/v1/session
