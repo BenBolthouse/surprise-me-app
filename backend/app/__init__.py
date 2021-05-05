@@ -34,6 +34,7 @@ from events import socket_connection_events
 from routes import connection_routes
 from routes import csrf_routes
 from routes import file_routes
+from routes import message_routes
 from routes import session_routes
 from routes import user_routes
 from seed import cmd
@@ -44,6 +45,7 @@ app.register_blueprint(socket_connection_events)
 app.register_blueprint(connection_routes)
 app.register_blueprint(csrf_routes)
 app.register_blueprint(file_routes)
+app.register_blueprint(message_routes)
 app.register_blueprint(session_routes)
 app.register_blueprint(user_routes)
 app.register_blueprint(cmd)
