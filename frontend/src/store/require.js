@@ -8,7 +8,7 @@ import { store } from "../index";
 export function requireSession() {
   const session = store.getState().session;
 
-  if (!session._id) {
+  if (!session.id) {
     throw new Error("A session is required to utilize this reducer.");
   }
   
@@ -20,7 +20,7 @@ export function requireSession() {
  * error if not found.
  */
 export function requireCsrf() {
-  const token = store.getState().session._csrfToken;
+  const token = store.getState().session.csrfToken;
 
   if (!token) {
     throw new Error("A csrf token is required to send this request.");
