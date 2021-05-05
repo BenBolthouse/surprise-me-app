@@ -11,5 +11,7 @@ csrf_routes = Blueprint("csrf_routes", __name__, url_prefix="/api/v1/csrf_token"
 def post():
     return jsonify({
         "message": "Success",
-        "data": generate_csrf(),
+        "data": {
+            "token": generate_csrf(),
+        },
     }), 200
