@@ -109,7 +109,7 @@ class User(db.Model, UserMixin, EntityMixin):
             **self._entity_to_dict(),
             "first_name": self.first_name,
             "last_name": self.last_name,
-            "email_address": self.active_email_address.to_dict(),
+            "email": self.active_email_address.value,
         }
 
     def to_public_dict(self):
