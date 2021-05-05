@@ -5,7 +5,6 @@ from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_socketio import SocketIO, emit
 from flask_wtf.csrf import validate_csrf
-from seed import seed_commands
 from traceback import format_exc, format_tb, format_stack
 from werkzeug.exceptions import BadRequest, NotFound, Forbidden
 from werkzeug.exceptions import InternalServerError, Unauthorized
@@ -37,6 +36,7 @@ from routes import csrf_routes
 from routes import file_routes
 from routes import session_routes
 from routes import user_routes
+from seed import cmd
 app.register_blueprint(error_events)
 app.register_blueprint(message_events)
 app.register_blueprint(notification_events)
@@ -46,11 +46,10 @@ app.register_blueprint(csrf_routes)
 app.register_blueprint(file_routes)
 app.register_blueprint(session_routes)
 app.register_blueprint(user_routes)
+app.register_blueprint(cmd)
+
 
 login_manager = LoginManager(app)
-
-# configure seed data cli
-app.cli.add_command(seed_commands)
 
 
 db.init_app(app)
