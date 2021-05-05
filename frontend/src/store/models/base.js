@@ -2,25 +2,15 @@
  * Represents a collection of entities.
  */
 export class CollectionBase {
-  constructor(entity, endpoint) {
-    this._entity = entity;
-    this._endpoint = endpoint;
-    this._collection = {};
-  }
-
-  get Entity() {
-    return this._entity;
-  }
-  get endpoint() {
-    return this._endpoint;
-  }
-  get collection() {
-    return this._collection;
+  constructor(Entity, endpoint) {
+    this.Entity = Entity;
+    this.endpoint = endpoint;
+    this.collection = {};
   }
 
   populateCollection(responseData) {
     responseData.forEach((item) => {
-      const entity = new this.Entity(this._endpoint);
+      const entity = new this.Entity(this.endpoint);
       entity.populateEntity(item);
       this.add(entity);
     });
@@ -28,8 +18,8 @@ export class CollectionBase {
 
   filter(...predicates) {
     const out = {};
-    for (const key in this._collection) {
-      let prop = this._collection[key];
+    for (const key in this.collection) {
+      let prop = this.collection[key];
       let result = true;
       predicates.forEach((predicate) => {
         result = result ? predicate(prop) : false;
@@ -40,7 +30,7 @@ export class CollectionBase {
   }
 
   add(entity) {
-    this._collection[entity.id] = entity;
+    this.collection[entity.id] = entity;
   }
 
   state() {
@@ -53,34 +43,12 @@ export class CollectionBase {
  */
 export class EntityBase {
   constructor(endpoint) {
-    this._endpoint = endpoint;
-    this._id = null;
-    this._type = null;
-    this._createdAt = null;
-    this._updatedAt = null;
-    this._deletedAt = null;
-  }
-
-  get endpoint() {
-    return this._endpoint;
-  }
-  get id() {
-    return this._id;
-  }
-  get type() {
-    return this._type;
-  }
-  get createdAt() {
-    return new Date(this._createdAt);
-  }
-  get updatedAt() {
-    return new Date(this._updatedAt);
-  }
-  get deletedAt() {
-    return new Date(this._deletedAt);
-  }
-  get isDeleted() {
-    return this._deletedAt !== null;
+    this.endpoint = endpoint;
+    this.id = null;
+    this.type = null;
+    this.createdAt = null;
+    this.updatedAt = null;
+    this.deletedAt = null;
   }
 
   populateEntity(responsePayload) {
@@ -101,11 +69,11 @@ export class EntityBase {
       this.populateDismissible(responsePayload);
     }
 
-    this._id = id || this._id;
-    this._type = type || this._type;
-    this._createdAt = created_at || this._createdAt;
-    this._updatedAt = updated_at || this._updatedAt;
-    this._deletedAt = deleted_at || this._deletedAt;
+    this.id = id || this.id;
+    this.type = type || this.type;
+    this.createdAt = created_at || this.createdAt;
+    this.updatedAt = updated_at || this.updatedAt;
+    this.deletedAt = deleted_at || this.deletedAt;
   }
 
   state() {
@@ -119,25 +87,12 @@ export class EntityBase {
 export class DismissibleBase extends EntityBase {
   constructor() {
     super();
-    this._seenAt = null;
-    this._dismissedAt = null;
-  }
-
-  get seenAt() {
-    return new Date(this._seenAt);
-  }
-  get isSeen() {
-    return this._seenAt !== null;
-  }
-  get dismissedAt() {
-    return new Date(this._dismissedAt);
-  }
-  get isDismissed() {
-    return this._dismissedAt !== null;
+    this.seenAt = null;
+    this.dismissedAt = null;
   }
 
   populateDismissible({ seen_at, dismissed_at }) {
-    this._seenAt = seen_at || this._createdAt;
-    this._dismissedAt = dismissed_at || this._dismissedAt;
+    this.seenAt = seen_at || this.createdAt;
+    this.dismissedAt = dismissed_at || this.dismissedAt;
   }
 }

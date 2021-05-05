@@ -3,32 +3,16 @@ import { EntityBase } from "./base";
 export class Session extends EntityBase {
   constructor(endpoint, csrfEndpoint) {
     super(endpoint);
-    this._csrfEndpoint = csrfEndpoint;
-    this._csrfToken = null;
-    this._firstName = null;
-    this._lastName = null;
-    this._email = null;
-    this._bio = null;
-  }
-
-  get csrfEndpoint() {
-    return this._csrfEndpoint;
-  }
-  get csrfToken() {
-    return this._csrfToken;
-  }
-  get firstName() {
-    return this._firstName;
-  }
-  get lastName() {
-    return this._lastName;
-  }
-  get email() {
-    return this._email;
+    this.csrfEndpoint = csrfEndpoint;
+    this.csrfToken = null;
+    this.firstName = null;
+    this.lastName = null;
+    this.email = null;
+    this.bio = null;
   }
   
   setCsrfToken({ token }) {
-    this._csrfToken = token;
+    this.csrfToken = token;
   }
 
   /**
@@ -37,9 +21,9 @@ export class Session extends EntityBase {
    * @param {object} responseData 
    */
   populate({ first_name, last_name, email, bio }) {
-    this._firstName = first_name;
-    this._lastName = last_name;
-    this._email = email;
-    this._bio = bio;
+    this.firstName = first_name;
+    this.lastName = last_name;
+    this.email = email;
+    this.bio = bio;
   }
 }
