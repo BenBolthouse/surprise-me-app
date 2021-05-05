@@ -9,6 +9,7 @@ import App from "./App.jsx";
 import configureStore from "./store";
 
 import * as connectionsActions from "./store/reducers/connections";
+import * as messagesActions from "./store/reducers/messages";
 import * as sessionActions from "./store/reducers/session";
 
 export const store = configureStore();
@@ -17,6 +18,7 @@ export const store = configureStore();
 if (process.env.NODE_ENV !== 'production') {
   window.store = store;
   window.connectionsActions = connectionsActions;
+  window.messagesActions = messagesActions;
   window.sessionActions = sessionActions;
 }
 
