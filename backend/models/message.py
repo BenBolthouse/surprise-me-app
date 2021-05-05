@@ -51,6 +51,10 @@ class Message(db.Model, EntityMixin, DismissibleMixin):
         backref=backref("messages", cascade="all,delete"))
 
     @property
+    def connection_id(self):
+        return self._connection_id
+
+    @property
     def body(self):
         return self._body
 
