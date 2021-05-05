@@ -157,7 +157,6 @@ def patch_deny(id):
             "message": "Connection does not exist",
         })
 
-
     # handle requests for connections for which the user isn't approver
     if connection.approver_id != current_user.id:
         raise Forbidden(response={
