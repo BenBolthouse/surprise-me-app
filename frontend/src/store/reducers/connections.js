@@ -4,11 +4,15 @@ import { requires } from "../index";
 
 const connections = new ConnectionsCollection();
 
+// http actions
 const POST_CONNECTION = "connections ———————> POST_CONNECTION";
 const GET_CONNECTIONS = "connections ———————> GET_CONNECTIONS";
 const APPROVE_CONNECTION = "connections ———————> APPROVE_CONNECTION";
 const DENY_CONNECTION = "connections ———————> DENY_CONNECTION";
 const LEAVE_CONNECTION = "connections ———————> LEAVE_CONNECTION";
+
+// event actions
+const COMPOSING_MESSAGE = "connections ———————> COMPOSING_MESSAGE";
 
 /**
  * Posts a new connection and adds the connection to requested collection.
@@ -100,6 +104,13 @@ export const leaveConnection = ({ id }) => async (dispatch) => {
 
 const leaveConnectionAction = (payload) => ({ type: LEAVE_CONNECTION, payload });
 
+/**
+ * Socketio event other user composing.
+ * 
+ * @param {Object} payload Message object from event
+ */
+export const composingMessage = (payload) => ({ type: COMPOSING_MESSAGE, payload });
+
 const reducer = (state = connections.state(), { type, payload }) => {
   let connection;
 
@@ -126,6 +137,11 @@ const reducer = (state = connections.state(), { type, payload }) => {
 
     case LEAVE_CONNECTION:
       connections.removeFromAllCollections(payload);
+      return connections.state();
+
+    case COMPOSING_MESSAGE:
+      connection = connections.filter((x) => x.id === payload.id)[payload.id];
+      connection.populateEntity(payload);
       return connections.state();
 
     default:
