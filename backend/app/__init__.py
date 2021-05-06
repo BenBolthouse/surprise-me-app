@@ -5,9 +5,6 @@ from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_socketio import SocketIO, emit
 from flask_wtf.csrf import validate_csrf
-from traceback import format_exc, format_tb, format_stack
-from werkzeug.exceptions import BadRequest, NotFound, Forbidden
-from werkzeug.exceptions import InternalServerError, Unauthorized
 import os
 
 
@@ -29,19 +26,19 @@ socketio = SocketIO(
 # blueprints
 from routes import connection_routes
 from routes import csrf_routes
-from routes import error_routes
 from routes import file_routes
 from routes import message_routes
 from routes import session_routes
 from routes import user_routes
+from routes import error_routes
 from seed import cmd
 app.register_blueprint(connection_routes)
 app.register_blueprint(csrf_routes)
-app.register_blueprint(error_routes)
 app.register_blueprint(file_routes)
 app.register_blueprint(message_routes)
 app.register_blueprint(session_routes)
 app.register_blueprint(user_routes)
+app.register_blueprint(error_routes)
 app.register_blueprint(cmd)
 
 
@@ -82,6 +79,7 @@ def https_redirect():
             return redirect(url, code=code)
 
 
+# send static files and react entrypoint
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def serve(path):
@@ -89,28 +87,6 @@ def serve(path):
         return send_from_directory(app.static_folder, path)
     else:
         return send_from_directory(app.static_folder, "index.html")
-
-
-# handle 400 range API errors
-@app.errorhandler(BadRequest)
-@app.errorhandler(NotFound)
-@app.errorhandler(Forbidden)
-@app.errorhandler(Unauthorized)
-def handle_werkzeug_exceptions(exception):
-    return jsonify(exception.response), exception.code
-
-
-# handle 500 range errors and raised exceptions
-@app.errorhandler(InternalServerError)
-@app.errorhandler(Exception)
-def handle_all_other_exceptions(exception):
-    return jsonify({
-        "message": "There was an unexpected internal server error",
-        "data": {
-            "details": exception.name,
-            "traceback": format_stack(),
-        },
-    }), 500
 
 
 # run flask webserver via socketio (development only)
