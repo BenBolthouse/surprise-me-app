@@ -1,4 +1,4 @@
-from flask import Blueprint
+from flask import Blueprint, jsonify
 from flask_socketio import send
 from traceback import format_exc, format_tb, format_stack
 from werkzeug.exceptions import BadRequest, NotFound, Forbidden
