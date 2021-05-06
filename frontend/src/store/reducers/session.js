@@ -1,6 +1,6 @@
-import { fetch } from "../fetch";
-import { Session } from "../models/session";
-import { requireCsrf } from "../require";
+import { fetch } from "../utilities/fetch";
+import { Session } from "../models/Session";
+import { requires, socket } from "../index";
 
 const session = new Session("/api/v1/sessions", "/api/v1/csrf_token");
 
@@ -20,7 +20,7 @@ const getCsrfTokenAction = (payload) => ({
 });
 
 export const postSession = ({ email, password }) => async (dispatch) => {
-  requireCsrf();
+  requires.csrf();
 
   const body = { email, password };
   const { data } = await fetch(session.endpoint, { method: "POST", body });
@@ -45,8 +45,9 @@ const getSessionAction = (payload) => ({
 });
 
 export const deleteSession = () => async (dispatch) => {
-  requireCsrf();
-  
+  requires.csrf();
+  socket.disconnect();
+
   await fetch(session.endpoint, { method: "DELETE" });
 
   dispatch(deleteSessionAction());
