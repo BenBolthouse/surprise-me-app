@@ -1,10 +1,10 @@
 from datetime import datetime
 
 
-from .mixins.entity import EntityMixin
+from .mixins.Entity import EntityMixin
 from .db import db
-from .user import User
-from .message import Message
+from .User import User
+from .Message import Message
 
 
 class Connection(db.Model, EntityMixin):

@@ -1,4 +1,4 @@
-from .mixins.entity import EntityMixin
+from .mixins.Entity import EntityMixin
 from .db import db
 
 

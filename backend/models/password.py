@@ -1,7 +1,7 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
-from .mixins.entity import EntityMixin
+from .mixins.Entity import EntityMixin
 from .db import db
 
 

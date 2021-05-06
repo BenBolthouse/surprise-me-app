@@ -3,10 +3,10 @@ from flask_login import UserMixin
 from sqlalchemy.orm import backref
 
 
-from .mixins.entity import EntityMixin
+from .mixins.Entity import EntityMixin
 from .db import db
-from .email import Email
-from .password import Password
+from .Email import Email
+from .Password import Password
 
 
 class User(db.Model, UserMixin, EntityMixin):

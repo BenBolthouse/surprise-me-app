@@ -2,8 +2,8 @@ from datetime import datetime
 from sqlalchemy.orm import backref
 
 
-from .mixins.entity import EntityMixin
-from .mixins.dismissible import DismissibleMixin
+from .mixins.Entity import EntityMixin
+from .mixins.Dismissible import DismissibleMixin
 from .db import db
 
 
