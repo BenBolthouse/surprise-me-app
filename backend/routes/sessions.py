@@ -1,8 +1,11 @@
-from flask import Blueprint, jsonify, make_response, request
+from flask import current_app, Blueprint, jsonify, make_response, request
 from flask_login import current_user, login_required, login_user
+from flask_socketio import send
+from socketio.exceptions import ConnectionRefusedError
 from werkzeug.exceptions import BadRequest
 
-
+from .utilities.decode_session_cookie import decode_session_cookie
+from app import socketio
 from models import Email, User
 
 
@@ -70,3 +73,18 @@ def delete():
     response = make_response({"message": "Success"})
     response.delete_cookie("session")
     return response
+
+
+# EVENT connect
+# Creates a socket connection with the server. Connection event will be
+# rejected if a session cannot be decoded.
+@socketio.on("connect")
+def connect():
+    cookie = request.cookies.get("session")
+
+    try:
+        decode_session_cookie(cookie)
+    except Exception:
+        raise ConnectionRefusedError("Session is invalid")
+
+    send("Client connected successfully")
