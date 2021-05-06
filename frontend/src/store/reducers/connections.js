@@ -1,6 +1,6 @@
-import { Connection, ConnectionsCollection } from "../models/connection";
-import { fetch } from "../fetch";
-import { requireSession, requireCsrf } from "../require";
+import { Connection, ConnectionsCollection } from "../models/Connection";
+import { fetch } from "../utilities/fetch";
+import { requires } from "../index";
 
 const connections = new ConnectionsCollection();
 
@@ -10,9 +10,14 @@ const APPROVE_CONNECTION = "connections ———————> APPROVE_CONNECTIO
 const DENY_CONNECTION = "connections ———————> DENY_CONNECTION";
 const LEAVE_CONNECTION = "connections ———————> LEAVE_CONNECTION";
 
+/**
+ * Posts a new connection and adds the connection to requested collection.
+ *
+ * @param {Object} config
+ */
 export const postConnection = ({ approverId }) => async (dispatch) => {
-  requireCsrf();
-  requireSession();
+  requires.session();
+  requires.csrf();
 
   const body = { approver_id: approverId };
   const { data } = await fetch(connections.endpoint, { method: "POST", body });
@@ -20,27 +25,30 @@ export const postConnection = ({ approverId }) => async (dispatch) => {
   dispatch(postConnectionAction(data));
 };
 
-const postConnectionAction = (payload) => ({
-  type: POST_CONNECTION,
-  payload,
-});
+const postConnectionAction = (payload) => ({ type: POST_CONNECTION, payload });
 
+/**
+ * Gets all connections and adds connections to related collections.
+ */
 export const getConnections = () => async (dispatch) => {
-  connections.userId = requireSession()._id;
+  connections.userId = requires.session().id;
 
   let { data } = await fetch(connections.endpoint, { method: "GET" });
 
   dispatch(getConnectionsAction(data));
 };
 
-const getConnectionsAction = (payload) => ({
-  type: GET_CONNECTIONS,
-  payload,
-});
+const getConnectionsAction = (payload) => ({ type: GET_CONNECTIONS, payload });
 
+/**
+ * Approves a pending connection and moves the connection to the approved
+ * collection.
+ *
+ * @param {Object} config
+ */
 export const approveConnection = ({ id }) => async (dispatch) => {
-  requireCsrf();
-  requireSession();
+  requires.session();
+  requires.csrf();
 
   const endpoint = `${connections.endpoint}/${id}/approve`;
 
@@ -50,14 +58,17 @@ export const approveConnection = ({ id }) => async (dispatch) => {
   return true;
 };
 
-const approveConnectionAction = (payload) => ({
-  type: APPROVE_CONNECTION,
-  payload,
-});
+const approveConnectionAction = (payload) => ({ type: APPROVE_CONNECTION, payload });
 
+/**
+ * Denies a pending connection and removes the connection from all
+ * collections.
+ *
+ * @param {Object} config
+ */
 export const denyConnection = ({ id }) => async (dispatch) => {
-  requireCsrf();
-  requireSession();
+  requires.session();
+  requires.csrf();
 
   const endpoint = `${connections.endpoint}/${id}/deny`;
 
@@ -67,14 +78,17 @@ export const denyConnection = ({ id }) => async (dispatch) => {
   return true;
 };
 
-const denyConnectionAction = (payload) => ({
-  type: DENY_CONNECTION,
-  payload,
-});
+const denyConnectionAction = (payload) => ({ type: DENY_CONNECTION, payload });
 
+/**
+ * Leaves an approved connection and removes the connection from all
+ * collections.
+ *
+ * @param {Object} config
+ */
 export const leaveConnection = ({ id }) => async (dispatch) => {
-  requireCsrf();
-  requireSession();
+  requires.session();
+  requires.csrf();
 
   const endpoint = `${connections.endpoint}/${id}`;
 
@@ -84,10 +98,7 @@ export const leaveConnection = ({ id }) => async (dispatch) => {
   return true;
 };
 
-const leaveConnectionAction = (payload) => ({
-  type: LEAVE_CONNECTION,
-  payload,
-});
+const leaveConnectionAction = (payload) => ({ type: LEAVE_CONNECTION, payload });
 
 const reducer = (state = connections.state(), { type, payload }) => {
   let connection;
