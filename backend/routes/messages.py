@@ -58,10 +58,64 @@ def post(connection_id):
     return jsonify(response), 201
 
 
+# PATCH https://surprise-me.benbolt.house/api/v1/connections/<connection_id>/messages/<id>
+# Updates a specific message for the given connection and handles emitting the
+# message to connected parties.
+@message_routes.route("/<connection_id>/messages/<id>", methods=["PATCH"])
+@login_required
+def patch(connection_id, id):
+    get = request.json.get
+
+    body = get("body")
+    updated_at = get("updated_at")
+
+    connection = Connection.query.filter(
+        and_(
+            or_(
+                Connection._requestor_id == current_user.id,
+                Connection._approver_id == current_user.id),
+            Connection._id == int(connection_id))).first()
+
+    # handle bad requests for non-member users
+    if not connection or connection._deleted_at:
+        raise BadRequest(response={
+            "message": "User not connected to recipient user",
+        })
+
+    other_user = connection.other_user(current_user.id)
+    recipient_id = other_user["id"]
+
+    message_room_name = f"message_room_{recipient_id}"
+
+    message = Message.query.filter(
+        and_(
+            Message._id == int(id),
+            Message._connection_id == int(connection_id),
+            Message._sender_id == current_user.id)).first()
+
+    # handle requests for non-existend messages
+    if not message or message._deleted_at:
+        raise BadRequest(response={
+            "message": "Message does not exist",
+        })
+
+    message._update(_body=body, _updated_at=updated_at)
+
+    db.session.commit()
+
+    return jsonify({
+        "message": "Success",
+        "data": {
+            "connection_id": int(connection_id),
+            "messages": [message.to_dict()],
+        }
+    }), 200
+
+
 # GET https://surprise-me.benbolt.house/api/v1/connections/<connection_id>/messages
 # Retrieves a set and offset quantity of messages based on url queries.
-@ message_routes.route("/<connection_id>/messages", methods=["GET"])
-@ login_required
+@message_routes.route("/<connection_id>/messages", methods=["GET"])
+@login_required
 def get(connection_id):
     offset = request.args.get("ofs")
     limit = request.args.get("lim")
@@ -80,7 +134,7 @@ def get(connection_id):
             Connection._id == int(connection_id))).first()
 
     # handle bad requests for non-member users
-    if not connection:
+    if not connection or connection._deleted_at:
         raise Forbidden(response={
             "message": "User not member",
         })
