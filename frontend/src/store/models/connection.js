@@ -113,6 +113,7 @@ export class Connection extends EntityBase {
     this.requestorId = null;
     this.otherUser = null;
     this.approvedAt = null;
+    this.otherUserComposing = false;
   }
 
   /**
@@ -120,9 +121,10 @@ export class Connection extends EntityBase {
    *
    * @param {object} responseData
    */
-  populate({ requestor_id, other_user, approved_at }) {
+  populate({ requestor_id, other_user, approved_at, user_composing }) {
     this.requestorId = requestor_id || this.requestorId;
     this.otherUser = other_user || this.otherUser;
     this.approvedAt = approved_at || this.approvedAt;
+    this.otherUserComposing = user_composing !== undefined ? user_composing : this.otherUserComposing;
   }
 }
