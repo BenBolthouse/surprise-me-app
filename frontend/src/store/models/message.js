@@ -18,7 +18,6 @@ export class MessageManager extends CollectionBase {
    * collection's offset using the offset argument.
    *
    * @param {Number} connectionId
-   * @param {Number} offset Offset of messages for response
    * @return {MessagesCollection | null} Message collection if found by ID or null if undefined.
    */
   getOrCreateMessageCollection(connectionId) {
@@ -28,6 +27,10 @@ export class MessageManager extends CollectionBase {
       this.collection[connectionId] = collection;
     }
     return collection;
+  }
+
+  getMessageCollection(connectionId) {
+    return this.collection[connectionId];
   }
 
   /**
@@ -72,6 +75,10 @@ export class MessagesCollection extends CollectionBase {
   add(message) {
     message.connectionId = this.connectionId;
     this.collection[message.id] = message;
+  }
+
+  getMessage(messageId) {
+    return this.collection[messageId];
   }
 }
 
