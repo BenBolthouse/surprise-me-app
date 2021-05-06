@@ -4,6 +4,7 @@ from sqlalchemy.orm import backref
 
 from .mixins.entity import EntityMixin
 from .mixins.dismissible import DismissibleMixin
+from .user import User
 from .db import db
 
 
@@ -45,11 +46,6 @@ class Message(db.Model, EntityMixin, DismissibleMixin):
         "MESSAGE",
     }
 
-    _sender = db.relationship(
-        "User",
-        foreign_keys=[_sender_id],
-        backref=backref("messages", cascade="all,delete"))
-
     @property
     def connection_id(self):
         return self._connection_id
@@ -60,7 +56,12 @@ class Message(db.Model, EntityMixin, DismissibleMixin):
 
     @property
     def sender(self):
-        return self._sender.to_public_dict()
+        user = User.query.get(self._sender_id)
+
+        if not user:
+            raise Error("User does not exist")
+
+        return user.to_public_dict()
 
     def to_dict(self):
         return {
