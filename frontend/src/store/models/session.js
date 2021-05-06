@@ -1,4 +1,4 @@
-import { EntityBase } from "./base";
+import { EntityBase } from "./Entity";
 
 export class Session extends EntityBase {
   constructor(endpoint, csrfEndpoint) {
