@@ -29,6 +29,7 @@ socketio = SocketIO(
 # blueprints
 from routes import connection_routes
 from routes import csrf_routes
+from routes import error_routes
 from routes import file_routes
 from routes import message_routes
 from routes import session_routes
@@ -36,6 +37,7 @@ from routes import user_routes
 from seed import cmd
 app.register_blueprint(connection_routes)
 app.register_blueprint(csrf_routes)
+app.register_blueprint(error_routes)
 app.register_blueprint(file_routes)
 app.register_blueprint(message_routes)
 app.register_blueprint(session_routes)
