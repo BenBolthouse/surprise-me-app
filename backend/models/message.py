@@ -57,6 +57,13 @@ class Message(db.Model, EntityMixin, DismissibleMixin):
             "body": self.body,
         }
 
+    def to_deleted_dict(self):
+        return {
+            **self.entity_to_dict(),
+            **self.dismissible_to_dict(),
+            "sender": self.sender.to_public_dict(),
+        }
+
     def __init__(self, connection_id, sender_id, recipient_id, body):
         self.connection_id = connection_id
         self.sender_id = sender_id
