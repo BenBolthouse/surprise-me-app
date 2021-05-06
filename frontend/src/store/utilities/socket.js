@@ -2,7 +2,8 @@
 
 import { io } from "socket.io-client";
 import { store } from "../../index";
-import { receiveMessage, amendMessage } from "../reducers/messages";
+import { composingMessage } from "../reducers/connections";
+import { receiveMessage, amendMessage, discardMessage } from "../reducers/messages";
 
 const DEBUG = process.env.NODE_ENV === "development";
 
@@ -77,6 +78,12 @@ function _init() {
 
   client.on("deliver_message", (payload) => store.dispatch(receiveMessage(payload)));
   client.on("amend_message", (payload) => store.dispatch(amendMessage(payload)));
+  client.on("discard_message", (payload) => store.dispatch(discardMessage(payload)));
+  client.on("composing_message", (payload) => store.dispatch(composingMessage(payload)));
+
+  client.composeMessage = function (connectionId, composing) {
+    client.emit("composing_message", { connection_id: connectionId, composing })
+  }
 
   return client;
 }
