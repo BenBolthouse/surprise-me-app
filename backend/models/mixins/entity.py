@@ -147,8 +147,7 @@ class EntityMixin(object):
             # property anywhere to be updated to a new value, which is nice
             # and dry :)
             try:
-                attr = getattr(self, k)
-                attr = v
+                attr = setattr(self, k, v)
             except Exception:
                 pass
 
