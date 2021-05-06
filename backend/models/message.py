@@ -53,6 +53,10 @@ class Message(db.Model, EntityMixin, DismissibleMixin):
     @property
     def body(self):
         return self._body
+    
+    @body.setter
+    def body(self, value):
+        self._body = value
 
     @property
     def sender(self):
