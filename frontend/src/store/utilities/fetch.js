@@ -1,4 +1,4 @@
-import { store } from "../index";
+import { store } from "../../index";
 
 const defaults = {
   method: "GET",
@@ -20,7 +20,7 @@ export const fetch = async (url, options = {}) => {
   // Following attempts to find the csrf token in the Redux state with
   // every state-changing API request (POST, PATCH, PUT, DELETE). If the
   // csrf token returns null then the function throws an error.
-  const csrfToken = store.getState().session._csrfToken;
+  const csrfToken = store.getState().session.csrfToken;
 
   if (request.method.toUpperCase() !== "GET") {
     // Throw an exception if the Redux state does not have a valid csrf
