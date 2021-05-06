@@ -18,119 +18,77 @@ class EntityMixin(object):
     Base class provides all of the basic functionality for application
     entities.
     '''
-    _id = db.Column(
+    id = db.Column(
         db.Integer,
-        name="id",
         primary_key=True)
-    _type = db.Column(
+    type = db.Column(
         db.String(32),
-        name="type",
         nullable=True,
         default=None)
-    _created_at = db.Column(
+    created_at = db.Column(
         db.DateTime,
-        name="created_at",
         server_default=db.func.now())
-    _updated_at = db.Column(
+    updated_at = db.Column(
         db.DateTime,
-        name="updated_at",
         nullable=True,
         default=None)
-    _deleted_at = db.Column(
+    deleted_at = db.Column(
         db.DateTime,
-        name="deleted_at",
         nullable=True,
         default=None)
-
-    @property
-    def id(self):
-        '''
-        Get the database id of the entity.
-        '''
-        return self._id
-
-    @property
-    def type(self):
-        '''
-        Get the type of the entity or None if the type is not defined.
-        '''
-        if self._type == "":
-            return None
-        return self._type
-
-    @property
-    def created_at(self):
-        '''
-        Get the datetime that the entity was created in the database.
-        '''
-        return self._created_at
-
-    @property
-    def updated_at(self):
-        '''
-        Get the datetime that the entity was last updated in the application.
-        '''
-        return self._updated_at
-
-    @property
-    def deleted_at(self):
-        '''
-        Get the datetime that the entity was soft deleted in the application.
-        '''
-        return self._deleted_at
 
     @property
     def is_deleted(self):
         '''
         Returns true if the entity is soft deleted, False if not.
         '''
-        return self._deleted_at is not None
+        return self.deleted_at is not None
 
-    def _set_type(self, value):
+    def set_type(self, value):
         '''
         Set the type of the entity. Type must be a string member of the set
-        attribute _types.
+        attribute types.
         '''
         try:
-            # The following checks if _types is implemented, which is
+            # The following checks if types is implemented, which is
             # required if set_type is invoked.
-            if not isinstance(self._types, set):
+            if not isinstance(self.types, set):
                 raise AttributeError(
-                    "Inheritance classes of BaseMixin using type properties and methods must implement set attribute _types.")
+                    "Inheritance classes of BaseMixin using type properties and methods must implement set attribute types.")
 
             # Below the _types attribute is looped to check if all members
             # are strings, since an entity type is represented by a string.
-            for x in self._types:
+            for x in self.types:
                 if not isinstance(x, str):
-                    raise AttributeError("Members of set attribute _types can only be strings.")
+                    raise AttributeError("Members of set attribute types can only be strings.")
 
-            if value not in self._types:
+            if value not in self.types:
                 raise AttributeError("Value not a member of set attribute _types.")
 
         except Exception as exception:
             raise Exception(exception.args)
 
-    def _set_updated_at(self):
+    def set_updated_at(self):
         '''
-        Update the datetime attribute _updated_at to the current application
+        Update the datetime attribute updated_at to the current application
         datetime.
         '''
-        self._updated_at = datetime.now()
+        self.updated_at = datetime.now()
 
-    def _set_deleted_at(self):
+    def set_deleted_at(self):
         '''
-        Update the datetime attribute _deleted_at to the current application
+        Update the datetime attribute updated_at to the current application
         datetime.
         '''
-        self._updated_at = datetime.now()
+        self.deleted_at = datetime.now()
 
-    def _unset_deleted_at(self):
+    def unset_deleted_at(self):
         '''
-        Nullify the datetime attribute _deleted_at.
+        Nullify the datetime attribute deleted_at.
         '''
-        self._deleted_at = None
+        self.deleted_at = None
 
-    def _update(self, **kwargs):
+    def update(self, **kwargs):
         '''
         Updates the entity. Kwargs must match the entity's property key and be
         assigned a value that is compatible with the database schema.
@@ -151,16 +109,16 @@ class EntityMixin(object):
             except Exception:
                 pass
 
-        self._updated_at = datetime.now()
+        self.updated_at = datetime.now()
 
-    def _entity_to_dict(self):
+    def entity_to_dict(self):
         '''
         Returns a dictionary of the entity's state.
         '''
         return {
-            "id": self._id,
-            "type": self._type,
-            "created_at": self._created_at.isoformat() if self._created_at else None,
-            "updated_at": self._updated_at.isoformat() if self._updated_at else None,
-            "deleted_at": self._deleted_at.isoformat() if self._deleted_at else None,
+            "id": self.id,
+            "type": self.type,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+            "deleted_at": self.deleted_at.isoformat() if self.deleted_at else None,
         }

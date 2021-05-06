@@ -27,8 +27,8 @@ def test__connections_routes__POST___create(seed, client, headers, login):
 
     # Assert from database
     connection = Connection.query.filter(
-        Connection._requestor_id == 1,
-        Connection._approver_id == 3).first()
+        Connection.requestor_id == 1,
+        Connection.approver_id == 3).first()
     assert connection is not None
     assert connection.approved_at is None
 
@@ -36,7 +36,7 @@ def test__connections_routes__POST___create(seed, client, headers, login):
     # attempts to connect.
 
     # Assert from database
-    notification = Notification.query.filter(Notification._recipient_id == 3).first()
+    notification = Notification.query.filter(Notification.recipient_id == 3).first()
     assert notification.recipient.id == 3
     assert notification.body == "UserA UserA wants to connect"
     assert notification.action == f"{Config.PUBLIC_URL}/connections/4/approval"
@@ -227,8 +227,8 @@ def test__connections_routes__DELETE__soft_delete(client, headers, login):
 
     # Assert from database
     connection = Connection.query.filter(
-        Connection._requestor_id == 1,
-        Connection._approver_id == 3).first()
+        Connection.requestor_id == 1,
+        Connection.approver_id == 3).first()
     assert connection.deleted_at is not None
     assert connection.approved_at is None
 
@@ -255,8 +255,8 @@ def test__connections_routes__POST___create_restores_deleted_connection(client, 
 
     # Assert from database
     connection = Connection.query.filter(
-        Connection._requestor_id == 3,
-        Connection._approver_id == 1).first()
+        Connection.requestor_id == 3,
+        Connection.approver_id == 1).first()
     assert connection.deleted_at is None
     assert connection.approved_at is None
     assert connection.requestor_id == 3
@@ -266,7 +266,7 @@ def test__connections_routes__POST___create_restores_deleted_connection(client, 
     # attempts to connect.
 
     # Assert from database
-    notification = Notification.query.filter(Notification._recipient_id == 1).first()
+    notification = Notification.query.filter(Notification.recipient_id == 1).first()
     assert notification.recipient.id == 1
     assert notification.body == "UserC UserC wants to connect"
     assert notification.action == f"{Config.PUBLIC_URL}/connections/4/approval"

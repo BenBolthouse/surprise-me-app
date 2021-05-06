@@ -24,9 +24,9 @@ def post(connection_id):
     connection = Connection.query.filter(
         and_(
             or_(
-                Connection._requestor_id == current_user.id,
-                Connection._approver_id == current_user.id),
-            Connection._id == int(connection_id))).first()
+                Connection.requestor_id == current_user.id,
+                Connection.approver_id == current_user.id),
+            Connection.id == int(connection_id))).first()
 
     # handle bad requests for non-member users
     if not connection:
@@ -35,7 +35,7 @@ def post(connection_id):
         })
 
     other_user = connection.other_user(current_user.id)
-    recipient_id = other_user["id"]
+    recipient_id = other_user.id
 
     message_room_name = f"message_room_{recipient_id}"
 
@@ -72,34 +72,34 @@ def patch(connection_id, id):
     connection = Connection.query.filter(
         and_(
             or_(
-                Connection._requestor_id == current_user.id,
-                Connection._approver_id == current_user.id),
-            Connection._id == int(connection_id))).first()
+                Connection.requestor_id == current_user.id,
+                Connection.approver_id == current_user.id),
+            Connection.id == int(connection_id))).first()
 
     # handle bad requests for non-member users
-    if not connection or connection._deleted_at:
+    if not connection or connection.is_deleted:
         raise BadRequest(response={
             "message": "User not connected to recipient user",
         })
 
     other_user = connection.other_user(current_user.id)
-    recipient_id = other_user["id"]
+    recipient_id = other_user.id
 
     message_room_name = f"message_room_{recipient_id}"
 
     message = Message.query.filter(
         and_(
-            Message._id == int(id),
-            Message._connection_id == int(connection_id),
-            Message._sender_id == current_user.id)).first()
+            Message.id == int(id),
+            Message.connection_id == int(connection_id),
+            Message.sender_id == current_user.id)).first()
 
     # handle requests for non-existend messages
-    if not message or message._deleted_at:
+    if not message or message.is_deleted:
         raise BadRequest(response={
             "message": "Message does not exist",
         })
 
-    message._update(_body=body, _updated_at=updated_at)
+    message.update(body=body, updated_at=updated_at)
 
     db.session.commit()
 
@@ -129,19 +129,19 @@ def get(connection_id):
     connection = Connection.query.filter(
         and_(
             or_(
-                Connection._requestor_id == current_user.id,
-                Connection._approver_id == current_user.id),
-            Connection._id == int(connection_id))).first()
+                Connection.requestor_id == current_user.id,
+                Connection.approver_id == current_user.id),
+            Connection.id == int(connection_id))).first()
 
     # handle bad requests for non-member users
-    if not connection or connection._deleted_at:
+    if not connection or connection.is_deleted:
         raise Forbidden(response={
             "message": "User not member",
         })
 
     # get offset limit of messages and format for json response
-    messages = Message.query.filter(Message._connection_id == int(connection_id))\
-        .order_by(Message._id.desc())\
+    messages = Message.query.filter(Message.connection_id == int(connection_id))\
+        .order_by(Message.id.desc())\
         .offset(offset)\
         .limit(limit)\
         .all()

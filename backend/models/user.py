@@ -12,17 +12,14 @@ from .Password import Password
 class User(db.Model, UserMixin, EntityMixin):
     __tablename__ = "users"
 
-    _first_name = db.Column(
+    first_name = db.Column(
         db.String(64),
-        name="first_name",
         nullable=False)
-    _last_name = db.Column(
+    last_name = db.Column(
         db.String(64),
-        name="last_name",
         nullable=False)
-    _bio = db.Column(
+    bio = db.Column(
         db.String(128),
-        name="bio",
         nullable=True,
         default=None)
 
@@ -37,25 +34,13 @@ class User(db.Model, UserMixin, EntityMixin):
         backref=backref("users", cascade="all,delete"))
 
     @property
-    def first_name(self):
-        return self._first_name
-
-    @property
-    def last_name(self):
-        return self._last_name
-
-    @property
-    def bio(self):
-        return self._bio
-
-    @property
     def active_email_address(self):
         return next(x for x in self._email_addresses if not x.is_deleted)
 
     def set_active_email_address(self, value):
         for x in self._email_addresses:
             # This prevents users from creating identical email addresses.
-            if x._value == value:
+            if x.value == value:
                 raise Exception("Email is expired")
 
             # Invoking this method soft deletes all existing email
@@ -64,7 +49,7 @@ class User(db.Model, UserMixin, EntityMixin):
                 x._set_deleted_at()
 
         self._email_addresses.append(Email(self.id, value))
-        self._set_updated_at()
+        self.set_updated_at()
 
     @property
     def deleted_email_addresses(self):
@@ -98,7 +83,7 @@ class User(db.Model, UserMixin, EntityMixin):
                 x._set_deleted_at()
 
         self._passwords.append(Password(self.id, value))
-        self._set_updated_at()
+        self.set_updated_at()
 
     @property
     def deleted_passwords(self):
@@ -106,7 +91,7 @@ class User(db.Model, UserMixin, EntityMixin):
 
     def to_dict(self):
         return {
-            **self._entity_to_dict(),
+            **self.entity_to_dict(),
             "first_name": self.first_name,
             "last_name": self.last_name,
             "email": self.active_email_address.value,
@@ -114,11 +99,11 @@ class User(db.Model, UserMixin, EntityMixin):
 
     def to_public_dict(self):
         return {
-            "id": self._id,
+            "id": self.id,
             "first_name": self.first_name,
             "last_name": self.last_name,
         }
 
     def __init__(self, first_name, last_name):
-        self._first_name = first_name
-        self._last_name = last_name
+        self.first_name = first_name
+        self.last_name = last_name

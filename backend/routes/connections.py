@@ -28,10 +28,10 @@ def post():
     approver = User.query.get(approver_id)
     existing_connection = Connection.query.filter(
         or_(
-            and_(Connection._requestor_id == approver_id,
-                 Connection._approver_id == current_user.id),
-            and_(Connection._approver_id == approver_id,
-                 Connection._requestor_id == current_user.id))).first()
+            and_(Connection.requestor_id == approver_id,
+                 Connection.approver_id == current_user.id),
+            and_(Connection.approver_id == approver_id,
+                 Connection.requestor_id == current_user.id))).first()
 
     # handle requests for non-existent approvers
     if approver is None or approver.is_deleted:
@@ -93,11 +93,11 @@ def post():
 def get():
     connections = Connection.query.filter(
         or_(
-            Connection._requestor_id == current_user.id,
-            Connection._approver_id == current_user.id)
+            Connection.requestor_id == current_user.id,
+            Connection.approver_id == current_user.id)
     ).order_by(
-        Connection._approved_at.asc(),
-        Connection._created_at.desc()).all()
+        Connection.approved_at.asc(),
+        Connection.created_at.desc()).all()
 
     connections = [x.to_dict(current_user.id) for x in connections]
 
@@ -180,10 +180,10 @@ def patch_deny(id):
 def delete_soft(id):
     connection = Connection.query.filter(
         or_(
-            and_(Connection._requestor_id == current_user.id,
-                 Connection._id == int(id)),
-            and_(Connection._approver_id == current_user.id,
-                 Connection._id == int(id)))).first()
+            and_(Connection.requestor_id == current_user.id,
+                 Connection.id == int(id)),
+            and_(Connection.approver_id == current_user.id,
+                 Connection.id == int(id)))).first()
 
     if connection is None:
         raise Forbidden(response={
