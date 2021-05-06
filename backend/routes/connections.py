@@ -2,6 +2,7 @@ from datetime import datetime
 from flask import Blueprint, jsonify, request
 from flask_login import current_user, login_required
 from flask_socketio import emit
+from socketio.exceptions import SocketIOError
 from sqlalchemy import and_, or_
 from werkzeug.exceptions import BadRequest, Forbidden
 
@@ -206,3 +207,37 @@ def delete_soft(id):
 @ login_required
 def delete_hard(user_id, id):
     raise Exception("Not implemented")
+
+
+# EVENT composing_message
+# Notifies the other user of a connection of when the user is composing or
+# has abandoned a new message for this connection.
+@socketio.on("composing_message")
+def handle_composing_message(payload):
+    connection_id = payload["connection_id"]
+    composing = payload["composing"]
+
+    connection = Connection.query.filter(
+        or_(
+            and_(Connection.requestor_id == current_user.id,
+                 Connection.id == connection_id),
+            and_(Connection.approver_id == current_user.id,
+                 Connection.id == connection_id))).first()
+
+    # handle requests for non-existent connections
+    if not connection or connection.is_deleted:
+        raise SocketIOError("Connection not found")
+
+    other_user = connection.other_user(current_user.id)
+
+    recipient_id = other_user.id
+
+    message_room_name = f"message_room_{recipient_id}"
+
+    response = {
+        "id": connection_id,
+        "user_composing": composing,
+    }
+
+    # emit to user's message room
+    socketio.emit("composing_message", response, to=message_room_name)
