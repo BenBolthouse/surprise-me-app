@@ -1,6 +1,6 @@
 from flask import current_app, Blueprint, jsonify, make_response, request
 from flask_login import current_user, login_required, login_user
-from flask_socketio import send
+from flask_socketio import join_room, leave_room, send
 from socketio.exceptions import ConnectionRefusedError
 from werkzeug.exceptions import BadRequest
 
@@ -88,3 +88,25 @@ def connect():
         raise ConnectionRefusedError("Session is invalid")
 
     send("Client connected successfully")
+
+
+# EVENT join
+# Joins a user to a room.
+@socketio.on("join")
+def connect(payload):
+    room_id = payload["room_id"]
+
+    join_room(room_id)
+
+    send(f"Client joined room '{room_id}'")
+
+
+# EVENT leave
+# Removes a user to a room.
+@socketio.on("leave")
+def connect(payload):
+    room_id = payload["room_id"]
+
+    join_room(room_id)
+
+    send(f"Client left room '{room_id}'")
