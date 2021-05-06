@@ -2,7 +2,7 @@
 
 import { io } from "socket.io-client";
 import { store } from "../../index";
-import { receiveMessageAction } from "../reducers/messages";
+import { receiveMessage, amendMessage } from "../reducers/messages";
 
 const DEBUG = process.env.NODE_ENV === "development";
 
@@ -75,10 +75,8 @@ function _init() {
   client.emit("join", { room_id: `message_room_${userId}` });
   client.emit("join", { room_id: `notifications_room_${userId}` });
 
-  client.on(
-    "deliver_message",
-    (payload) => store.dispatch(receiveMessageAction(payload))
-  );
+  client.on("deliver_message", (payload) => store.dispatch(receiveMessage(payload)));
+  client.on("amend_message", (payload) => store.dispatch(amendMessage(payload)));
 
   return client;
 }
