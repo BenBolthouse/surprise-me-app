@@ -102,7 +102,7 @@ def connect(payload):
 
 
 # EVENT leave
-# Removes a user to a room.
+# Removes a user from a room.
 @socketio.on("leave")
 def connect(payload):
     room_id = payload["room_id"]
