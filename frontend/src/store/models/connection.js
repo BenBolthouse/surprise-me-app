@@ -1,4 +1,4 @@
-import { CollectionBase, EntityBase } from "./base";
+import { CollectionBase, EntityBase } from "./Entity";
 
 /**
  * Represents a collection of connection entities.
@@ -121,8 +121,8 @@ export class Connection extends EntityBase {
    * @param {object} responseData
    */
   populate({ requestor_id, other_user, approved_at }) {
-    this.requestorId = requestor_id;
-    this.otherUser = other_user;
-    this.approvedAt = approved_at;
+    this.requestorId = requestor_id || this.requestorId;
+    this.otherUser = other_user || this.otherUser;
+    this.approvedAt = approved_at || this.approvedAt;
   }
 }
