@@ -13,14 +13,10 @@ class Password(db.Model, EntityMixin):
         db.ForeignKey('users.id', ondelete="CASCADE"),
         nullable=False)
     value = db.Column(
-        db.String(255),
+        db.String,
         nullable=False)
 
-    @property
-    def value(self):
-        return self.value
-
-    def setvalue(self, value):
+    def set_value(self, value):
         return generate_password_hash(value)
 
     def validate(self, value):
@@ -28,4 +24,4 @@ class Password(db.Model, EntityMixin):
 
     def __init__(self, user_id, value):
         self.user_id = user_id
-        self.value = self.setvalue(value)
+        self.value = self.set_value(value)

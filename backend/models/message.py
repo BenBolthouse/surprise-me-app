@@ -31,7 +31,7 @@ class Message(db.Model, EntityMixin, DismissibleMixin):
         db.String(255),
         nullable=True,
         default=None)
-    visibility.Column(
+    visibility = db.Column(
         db.Boolean,
         nullable=False,
         default=True)
@@ -53,7 +53,7 @@ class Message(db.Model, EntityMixin, DismissibleMixin):
         return {
             **self.entity_to_dict(),
             **self.dismissible_to_dict(),
-            "sender": self.sender,
+            "sender": self.sender.to_public_dict(),
             "body": self.body,
         }
 

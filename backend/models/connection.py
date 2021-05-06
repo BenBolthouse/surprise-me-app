@@ -48,6 +48,7 @@ class Connection(db.Model, EntityMixin):
         other_user_id = self.requestor_id if self.approver_id == user_id else self.approver_id
 
         return User.query.get(other_user_id)
+
     def user_is_member(self, user_id):
         '''
         Returns true if user is a requestor or approver.
@@ -61,7 +62,7 @@ class Connection(db.Model, EntityMixin):
         return {
             **self.entity_to_dict(),
             "requestor_id": self.requestor_id,
-            "other_user": self.other_user(user_id),
+            "other_user": self.other_user(user_id).to_public_dict(),
             "approved_at": self.approved_at.isoformat() if self.approved_at else None,
         }
 
