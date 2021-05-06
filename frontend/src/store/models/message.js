@@ -1,4 +1,4 @@
-import { CollectionBase, DismissibleBase } from "./base";
+import { CollectionBase, DismissibleBase } from "./Entity";
 
 /**
  * Extension of base collection class contains message collections hashed
@@ -14,17 +14,19 @@ export class MessageManager extends CollectionBase {
   }
 
   /**
-   * Finds a message collection with a given ID and updates the
-   * collection's offset
+   * Finds a message collection with a given ID and optionally updates the
+   * collection's offset using the offset argument.
    *
    * @param {Number} connectionId
    * @param {Number} offset Offset of messages for response
    * @return {MessagesCollection | null} Message collection if found by ID or null if undefined.
    */
-  syncCollectionOffset(connectionId, offset) {
+  getOrCreateMessageCollection(connectionId) {
     let collection = this.collection[connectionId];
-    if (!collection) return null;
-    collection.offset += offset;
+    if (!collection) {
+      collection = new MessagesCollection(connectionId);
+      this.collection[connectionId] = collection;
+    }
     return collection;
   }
 
@@ -95,10 +97,11 @@ export class Message extends DismissibleBase {
    *
    * @param {object} responseData
    */
-  populate({ sender, body, action, visibility }) {
+  populate({ sender, body, action, visibility, pending }) {
     this.sender = sender || this.sender;
     this.body = body || this.body;
     this.action = action || this.action;
     this.visibility = visibility || this.visibility;
+    this.pending = pending || this.pending;
   }
 }
