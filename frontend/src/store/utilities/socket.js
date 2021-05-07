@@ -14,11 +14,10 @@ export default class Socket {
     if (created) throw new Error("Cannot create instance of singleton class");
 
     this.connected = false;
+
     this.client = null;
 
     created = true;
-
-    if (DEBUG) window.socketioClient = this;
   }
 
   /**
@@ -26,6 +25,7 @@ export default class Socket {
    */
   connect() {
     this.connected = true;
+
     this.client = _init();
   }
 
@@ -36,6 +36,7 @@ export default class Socket {
     if (DEBUG) console.log("SocketIO client: Client has disconnected");
 
     this.connected = false;
+
     this.client = this.client.disconnect();
   }
 
@@ -64,23 +65,30 @@ export default class Socket {
  * @returns {object} client
  */
 function _init() {
-  const PREFIX = "SocketIO host: ";
-
   const client = io("");
+
   const userId = store.getState().session.id;
 
-  client.on("message", (message) => {
-    if (DEBUG) console.log(PREFIX + message);
-  });
+  // Following section handles configuring this service for use in a
+  // debugging environment.
+  if (DEBUG) {
+    window.socketioClient = client;
 
+    client.on("message", (message) => console.log("SocketIO host: " + message));
+  }
+
+  // User's default rooms on joining a session.
   client.emit("join", { room_id: `message_room_${userId}` });
   client.emit("join", { room_id: `notifications_room_${userId}` });
 
+  // Listeners for events trigger Redux reducer actions, and are all listed here.
   client.on("deliver_message", (payload) => store.dispatch(receiveMessage(payload)));
   client.on("amend_message", (payload) => store.dispatch(amendMessage(payload)));
   client.on("discard_message", (payload) => store.dispatch(discardMessage(payload)));
   client.on("composing_message", (payload) => store.dispatch(composingMessage(payload)));
 
+  // Event emitters are also loaded onto the Socketio client object and are
+  // callable by importing the client into app components.
   client.composeMessage = function (connectionId, composing) {
     client.emit("composing_message", { connection_id: connectionId, composing })
   }
