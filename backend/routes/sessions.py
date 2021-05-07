@@ -22,12 +22,12 @@ def post():
 
     if not email:
         raise BadRequest(response={
-            "message": "Invalid email",
+            "message": "Invalid email address.",
         })
 
     if email.is_deleted:
         raise BadRequest(response={
-            "message": "Email is expired",
+            "message": "Email address is expired.",
         })
 
     user = User.query.get(email.user_id)
@@ -36,7 +36,7 @@ def post():
 
     if not password_is_valid:
         raise BadRequest(response={
-            "message": "Email is expired",
+            "message": "Password is invalid. Please try again.",
         })
 
     login_user(user)
