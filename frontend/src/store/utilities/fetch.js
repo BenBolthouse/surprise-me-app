@@ -1,5 +1,7 @@
 import { store } from "../../index";
+import { FatalError, WarningError } from "./error-handler";
 
+// prettier-ignore
 const defaults = {
   method: "GET",
   headers: {
@@ -9,10 +11,17 @@ const defaults = {
 };
 
 /**
- * Base fetch API customized for connection to the service API.
+ * REST fetch a resource from the API, or change backend state. The world
+ * is your oyster. Formats responses in a predictable way, which is
+ * fundamental for excellent backend/frontend state synchrony.
+ *
+ * Returns a message/data object in the format of `{message: string, data?:
+ * object}`. Data should be an object literal, also super important for
+ * Redux.
  *
  * @param {String} url URL for the request
- * @param {object} options Config object for fetch API function
+ * @param {object} options Config object for the OG fetch API
+ * @return {Promise<{message: String, data: object}>}
  */
 export const fetch = async (url, options = {}) => {
   const request = { ...defaults, ...options };
@@ -25,18 +34,26 @@ export const fetch = async (url, options = {}) => {
   if (request.method.toUpperCase() !== "GET") {
     // Throw an exception if the Redux state does not have a valid csrf
     // token.
-    if (!csrfToken) {
-      throw Error("Invalid or missing security token.");
-    }
+    if (!csrfToken) throw new WarningError();
+
     request.body = JSON.stringify(options.body);
+
     request.headers["X-CSRFToken"] = csrfToken;
   }
 
   const response = await window.fetch(url, request);
+
   const body = await response.json();
+
   const { message, data } = body;
 
-  if (response.status >= 400) throw response;
+  if (response.status >= 400 && response.status < 500) {
+    throw new WarningError(message);
+  }
+
+  if (response.status >= 500) {
+    throw new FatalError(message);
+  }
 
   return { message, data };
 };
