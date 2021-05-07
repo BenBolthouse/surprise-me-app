@@ -11,11 +11,13 @@ export const socket = new Socket();
 import connections from "./reducers/connections";
 import messages from "./reducers/messages";
 import session from "./reducers/session";
+import uiNotifications from "./reducers/ui-notifications";
 
 const rootReducer = combineReducers({
   session,
   connections,
   messages,
+  uiNotifications,
 });
 
 const configureStore = (preloadedState) =>
