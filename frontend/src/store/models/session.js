@@ -10,15 +10,12 @@ export class Session extends EntityBase {
     this.email = null;
     this.bio = null;
   }
-  
-  setCsrfToken({ token }) {
-    this.csrfToken = token;
-  }
 
   /**
-   * Method required by base class for populating data from api responses.
+   * Method required by base class.
    *
-   * @param {object} responseData 
+   * @param {object} responseObject
+   * @return {null} `null`
    */
   populate({ first_name, last_name, email, bio }) {
     this.firstName = first_name;
