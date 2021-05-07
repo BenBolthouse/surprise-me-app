@@ -1,6 +1,7 @@
 import { fetch } from "../utilities/fetch";
 import { MessageManager } from "../models/Message";
 import { requires, socket } from "../index";
+import handler from "../utilities/error-handler";
 
 const messagesManager = new MessageManager();
 
@@ -22,7 +23,7 @@ const DISCARD_MESSAGE = "messages ——————————> DISCARD_MESSAG
  * 
  * @param {Object} config
  */
-export const postMessage = ({ connectionId, type, body: msgBody }) => async (dispatch) => {
+export const postMessage = ({ connectionId, type, body: msgBody }) => (dispatch) => handler(async () => {
   requires.session();
   requires.csrf();
   socket.require();
@@ -40,7 +41,7 @@ export const postMessage = ({ connectionId, type, body: msgBody }) => async (dis
   const { data } = await fetch(collection.endpoint, { method: "POST", body });
 
   dispatch(postMessageAction(data));
-};
+});
 
 const postMessageAction = (payload) => ({ type: POST_MESSAGE, payload });
 
@@ -49,7 +50,7 @@ const postMessageAction = (payload) => ({ type: POST_MESSAGE, payload });
  * 
  * @param {Object} config
  */
-export const getMessages = ({ connectionId }) => async (dispatch) => {
+export const getMessages = ({ connectionId }) => (dispatch) => handler(async () => {
   requires.session().id;
 
   const collection = messagesManager.getOrCreateMessageCollection(connectionId);
@@ -63,7 +64,7 @@ export const getMessages = ({ connectionId }) => async (dispatch) => {
   const { data } = await fetch(endpoint, { method: "GET" });
 
   dispatch(getMessagesAction(data));
-};
+});
 
 const getMessagesAction = (payload) => ({ type: GET_MESSAGES, payload });
 
@@ -72,7 +73,7 @@ const getMessagesAction = (payload) => ({ type: GET_MESSAGES, payload });
  * 
  * @param {Object} config
  */
-export const patchMessage = ({ connectionId, id, type, body: msgBody }) => async (dispatch) => {
+export const patchMessage = ({ connectionId, id, type, body: msgBody }) => (dispatch) => handler(async () => {
   requires.session();
   requires.csrf();
   socket.require();
@@ -90,7 +91,7 @@ export const patchMessage = ({ connectionId, id, type, body: msgBody }) => async
   const { data } = await fetch(endpoint, { method: "PATCH", body });
 
   dispatch(patchMessageAction(data));
-};
+});
 
 const patchMessageAction = (payload) => ({ type: PATCH_MESSAGE, payload });
 
@@ -99,7 +100,7 @@ const patchMessageAction = (payload) => ({ type: PATCH_MESSAGE, payload });
  * 
  * @param {Object} config
  */
-export const deleteMessage = ({ connectionId, id }) => async (dispatch) => {
+export const deleteMessage = ({ connectionId, id }) => (dispatch) => handler(async () => {
   requires.session();
   requires.csrf();
   socket.require();
@@ -111,7 +112,7 @@ export const deleteMessage = ({ connectionId, id }) => async (dispatch) => {
   const { data } = await fetch(endpoint, { method: "DELETE" });
 
   dispatch(deleteMessageAction(data));
-};
+});
 
 const deleteMessageAction = (payload) => ({ type: DELETE_MESSAGE, payload });
 

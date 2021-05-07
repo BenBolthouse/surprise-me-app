@@ -1,6 +1,7 @@
 import { Connection, ConnectionsCollection } from "../models/Connection";
 import { fetch } from "../utilities/fetch";
 import { requires } from "../index";
+import handler from "../utilities/error-handler";
 
 const connections = new ConnectionsCollection();
 
@@ -19,7 +20,7 @@ const COMPOSING_MESSAGE = "connections ———————> COMPOSING_MESSAGE"
  *
  * @param {Object} config
  */
-export const postConnection = ({ approverId }) => async (dispatch) => {
+export const postConnection = ({ approverId }) => (dispatch) => handler(async () => {
   requires.session();
   requires.csrf();
 
@@ -27,20 +28,20 @@ export const postConnection = ({ approverId }) => async (dispatch) => {
   const { data } = await fetch(connections.endpoint, { method: "POST", body });
 
   dispatch(postConnectionAction(data));
-};
+});
 
 const postConnectionAction = (payload) => ({ type: POST_CONNECTION, payload });
 
 /**
  * Gets all connections and adds connections to related collections.
  */
-export const getConnections = () => async (dispatch) => {
+export const getConnections = () => (dispatch) => handler(async () => {
   connections.userId = requires.session().id;
 
   let { data } = await fetch(connections.endpoint, { method: "GET" });
 
   dispatch(getConnectionsAction(data));
-};
+});
 
 const getConnectionsAction = (payload) => ({ type: GET_CONNECTIONS, payload });
 
@@ -50,7 +51,7 @@ const getConnectionsAction = (payload) => ({ type: GET_CONNECTIONS, payload });
  *
  * @param {Object} config
  */
-export const approveConnection = ({ id }) => async (dispatch) => {
+export const approveConnection = ({ id }) => (dispatch) => handler(async () => {
   requires.session();
   requires.csrf();
 
@@ -60,7 +61,7 @@ export const approveConnection = ({ id }) => async (dispatch) => {
   dispatch(approveConnectionAction(data));
 
   return true;
-};
+});
 
 const approveConnectionAction = (payload) => ({ type: APPROVE_CONNECTION, payload });
 
@@ -70,7 +71,7 @@ const approveConnectionAction = (payload) => ({ type: APPROVE_CONNECTION, payloa
  *
  * @param {Object} config
  */
-export const denyConnection = ({ id }) => async (dispatch) => {
+export const denyConnection = ({ id }) => async (dispatch) => handler(async () => {
   requires.session();
   requires.csrf();
 
@@ -80,7 +81,7 @@ export const denyConnection = ({ id }) => async (dispatch) => {
   dispatch(denyConnectionAction(data));
 
   return true;
-};
+});
 
 const denyConnectionAction = (payload) => ({ type: DENY_CONNECTION, payload });
 
@@ -90,7 +91,7 @@ const denyConnectionAction = (payload) => ({ type: DENY_CONNECTION, payload });
  *
  * @param {Object} config
  */
-export const leaveConnection = ({ id }) => async (dispatch) => {
+export const leaveConnection = ({ id }) => async (dispatch) => handler(async () => {
   requires.session();
   requires.csrf();
 
@@ -100,7 +101,7 @@ export const leaveConnection = ({ id }) => async (dispatch) => {
   dispatch(leaveConnectionAction(data));
 
   return true;
-};
+});
 
 const leaveConnectionAction = (payload) => ({ type: LEAVE_CONNECTION, payload });
 

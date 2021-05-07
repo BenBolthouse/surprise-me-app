@@ -1,6 +1,7 @@
 import { fetch } from "../utilities/fetch";
 import { Session } from "../models/Session";
 import { requires, socket } from "../index";
+import handler from "../utilities/error-handler";
 
 const sessionManager = new Session("/api/v1/sessions", "/api/v1/csrf_token");
 
@@ -12,18 +13,18 @@ const DELETE_SESSION = "session ———————————> DELETE_SESSIO
 /**
  * Retrieves and saves a new CSRF security token.
  */
-export const getCsrfToken = () => async (dispatch) => {
+export const getCsrfToken = ()  => (dispatch) => handler(async () => {
   const { data } = await fetch(sessionManager.csrfEndpoint, { method: "GET" });
 
-  dispatch(getCsrfTokenAction(data));
-};
+  dispatch(getCsrfTokenAction(data.token));
+});
 
 const getCsrfTokenAction = (payload) => ({ type: GET_CSRF_TOKEN, payload });
 
 /**
  * Creates a new session and saves session user data to state.
  */
-export const postSession = ({ email, password }) => async (dispatch) => {
+export const postSession = ({ email, password }) => (dispatch) => handler(async () => {
   requires.csrf();
 
   const body = { email, password };
@@ -31,18 +32,18 @@ export const postSession = ({ email, password }) => async (dispatch) => {
   const { data } = await fetch(sessionManager.endpoint, { method: "POST", body });
 
   dispatch(postSessionAction(data));
-};
+});
 
 const postSessionAction = (payload) => ({ type: POST_SESSION, payload });
 
 /**
  * Gets new and saves session user data to state. Authentication required.
  */
-export const getSession = () => async (dispatch) => {
+export const getSession = () => (dispatch) => handler(async () => {
   const { data } = await fetch(sessionManager.endpoint, { method: "GET" });
 
   dispatch(getSessionAction(data));
-};
+});
 
 const getSessionAction = (payload) => ({ type: GET_SESSION, payload });
 
@@ -50,14 +51,14 @@ const getSessionAction = (payload) => ({ type: GET_SESSION, payload });
  * Removes session cookie and session user data from state. Also
  * disconnects the client socket.
  */
-export const deleteSession = () => async (dispatch) => {
+export const deleteSession = () => (dispatch) => handler(async () => {
   requires.csrf();
   socket.disconnect();
 
   await fetch(sessionManager.endpoint, { method: "DELETE" });
 
   dispatch(deleteSessionAction());
-};
+});
 
 const deleteSessionAction = (payload) => ({ type: DELETE_SESSION, payload });
 
