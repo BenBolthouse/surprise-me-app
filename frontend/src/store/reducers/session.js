@@ -2,75 +2,78 @@ import { fetch } from "../utilities/fetch";
 import { Session } from "../models/Session";
 import { requires, socket } from "../index";
 
-const session = new Session("/api/v1/sessions", "/api/v1/csrf_token");
+const sessionManager = new Session("/api/v1/sessions", "/api/v1/csrf_token");
 
 const GET_CSRF_TOKEN = "session ———————————> GET_CSRF_TOKEN";
 const POST_SESSION = "session ———————————> POST_SESSION";
 const GET_SESSION = "session ———————————> GET_SESSION";
 const DELETE_SESSION = "session ———————————> DELETE_SESSION";
 
+/**
+ * Retrieves and saves a new CSRF security token.
+ */
 export const getCsrfToken = () => async (dispatch) => {
-  const { data } = await fetch(session.csrfEndpoint, { method: "GET" });
+  const { data } = await fetch(sessionManager.csrfEndpoint, { method: "GET" });
+
   dispatch(getCsrfTokenAction(data));
 };
 
-const getCsrfTokenAction = (payload) => ({
-  type: GET_CSRF_TOKEN,
-  payload,
-});
+const getCsrfTokenAction = (payload) => ({ type: GET_CSRF_TOKEN, payload });
 
+/**
+ * Creates a new session and saves session user data to state.
+ */
 export const postSession = ({ email, password }) => async (dispatch) => {
   requires.csrf();
 
   const body = { email, password };
-  const { data } = await fetch(session.endpoint, { method: "POST", body });
+
+  const { data } = await fetch(sessionManager.endpoint, { method: "POST", body });
 
   dispatch(postSessionAction(data));
 };
 
-const postSessionAction = (payload) => ({
-  type: POST_SESSION,
-  payload,
-});
+const postSessionAction = (payload) => ({ type: POST_SESSION, payload });
 
+/**
+ * Gets new and saves session user data to state. Authentication required.
+ */
 export const getSession = () => async (dispatch) => {
-  const { data } = await fetch(session.endpoint, { method: "GET" });
+  const { data } = await fetch(sessionManager.endpoint, { method: "GET" });
 
   dispatch(getSessionAction(data));
 };
 
-const getSessionAction = (payload) => ({
-  type: GET_SESSION,
-  payload,
-});
+const getSessionAction = (payload) => ({ type: GET_SESSION, payload });
 
+/**
+ * Removes session cookie and session user data from state. Also
+ * disconnects the client socket.
+ */
 export const deleteSession = () => async (dispatch) => {
   requires.csrf();
   socket.disconnect();
 
-  await fetch(session.endpoint, { method: "DELETE" });
+  await fetch(sessionManager.endpoint, { method: "DELETE" });
 
   dispatch(deleteSessionAction());
 };
 
-const deleteSessionAction = (payload) => ({
-  type: DELETE_SESSION,
-  payload,
-});
+const deleteSessionAction = (payload) => ({ type: DELETE_SESSION, payload });
 
-const reducer = (state = session.state(), { type, payload }) => {
+const reducer = (state = sessionManager.state(), { type, payload }) => {
   switch (type) {
     case GET_CSRF_TOKEN:
-      session.setCsrfToken(payload);
-      return session.state();
+      sessionManager.csrfToken = payload;
+      return sessionManager.state();
 
     case POST_SESSION:
-      session.populateEntity(payload);
-      return session.state();
+      sessionManager.populateEntity(payload);
+      return sessionManager.state();
 
     case GET_SESSION:
-      session.populateEntity(payload);
-      return session.state();
+      sessionManager.populateEntity(payload);
+      return sessionManager.state();
 
     default:
       return state;
