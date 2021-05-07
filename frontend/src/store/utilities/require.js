@@ -1,8 +1,18 @@
 import { store } from "../../index";
+import { FatalError, WarningError } from "./error-handler";
 
 let created = false;
 
+/**
+ * Singleton service class provides checkpoints for required state
+ * components in order to proceed compiling code. Invoke methods ahead of
+ * compiling Redux actions and thunks. Require methods can be thought of as
+ * "decorators" for Redux.
+ */
 export default class Require {
+  /**
+   * Invoke constructor in store index module as singleton service.
+   */
   constructor() {
     if (created) throw new Error("Cannot create instance of singleton class");
 
@@ -22,7 +32,7 @@ export default class Require {
     const session = this.state.session;
 
     if (!session.id) {
-      throw new Error("Session is required");
+      throw new WarningError("You must be logged in to do this. Please log in and try again.");
     }
 
     return session;
@@ -36,7 +46,7 @@ export default class Require {
     const token = this.state.session.csrfToken;
 
     if (!token) {
-      throw new Error("Security token is missing");
+      throw new FatalError();
     }
 
     return true;

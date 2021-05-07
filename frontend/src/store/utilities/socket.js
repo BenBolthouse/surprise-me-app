@@ -9,7 +9,13 @@ const DEBUG = process.env.NODE_ENV === "development";
 
 let created = false;
 
+/**
+ * Singleton service class provides access to the socketio client.
+ */
 export default class Socket {
+  /**
+   * Invoke constructor in store index module as singleton service.
+   */
   constructor() {
     if (created) throw new Error("Cannot create instance of singleton class");
 
@@ -60,7 +66,7 @@ export default class Socket {
 }
 
 /**
- * Configures the socket client and adds event listeners.
+ * Private function configures the socket client and adds event listeners.
  *
  * @returns {object} client
  */
