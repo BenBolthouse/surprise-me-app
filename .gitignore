@@ -174,3 +174,6 @@ gunicorn.conf.py
 # I added some utility scripts to handle tasks in my dev environment and I
 # don't necessarily want other to have access.
 scripts
+
+# Ignore the jsdocs out directory.
+*out
