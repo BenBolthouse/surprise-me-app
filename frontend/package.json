@@ -36,6 +36,7 @@
   "proxy": "http://localhost:5000",
   "dependencies": {
     "@react-google-maps/api": "^2.1.1",
+    "camelcase-keys": "^6.2.2",
     "http-proxy-middleware": "^1.0.6",
     "loaders.css": "^0.1.2",
     "lodash": "^4.17.21",
@@ -49,6 +50,7 @@
     "redux": "^4.0.5",
     "redux-logger": "^3.0.6",
     "redux-thunk": "^2.3.0",
+    "snakecase-keys": "^4.0.2",
     "socket.io-client": "^4.0.0",
     "validate.js": "^0.13.1"
   },
