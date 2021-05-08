@@ -1,5 +1,13 @@
 /* eslint-disable no-undef */
 
+import ErrorHandler from "./services/ErrorHandler";
+import Fetch from "./services/Fetch";
+import Socket from "./services/Socket";
+
+export const handler = new ErrorHandler().handler;
+export const api = new Fetch();
+export const socket = new Socket();
+
 import React from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter } from "react-router-dom";
@@ -16,7 +24,7 @@ import * as uiNotificationActions from "./store/reducers/ui-notifications";
 export const store = configureStore();
 
 // Make Redux available on window only in development
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== "production") {
   window.store = store;
   window.connectionsActions = connectionsActions;
   window.messagesActions = messagesActions;
