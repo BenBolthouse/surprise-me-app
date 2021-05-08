@@ -1,80 +1,154 @@
-import { fetch } from "../utilities/fetch";
 import { Session } from "../models/Session";
-import { requires, socket } from "../index";
-import handler from "../utilities/error-handler";
+import { api, handler, socket } from "../../index";
 
-const sessionManager = new Session("/api/v1/sessions", "/api/v1/csrf_token");
+export const sessionManager = new Session("/api/v1/sessions", "/api/v1/csrf_token");
 
 const GET_CSRF_TOKEN = "session ———————————> GET_CSRF_TOKEN";
-const POST_SESSION = "session ———————————> POST_SESSION";
-const GET_SESSION = "session ———————————> GET_SESSION";
-const DELETE_SESSION = "session ———————————> DELETE_SESSION";
+
+// session management actions
+const SIGN_IN = "session ———————————> SIGN_IN";
+const SIGN_OUT = "session ———————————> SIGN_OUT";
+const FETCH = "session ———————————> FETCH";
+
+// user management actions
+const VALIDATE = "session ———————————> VALIDATE";
+const RESET_VALIDATION = "session ———————————> RESET_VALIDATION";
+const POST_PATCH = "session ———————————> POST_PATCH";
 
 /**
- * Retrieves and saves a new CSRF security token.
+ * Retrieves a new CSRF token.
+ * @returns {true}
  */
-export const getCsrfToken = ()  => (dispatch) => handler(async () => {
-  const { data } = await fetch(sessionManager.csrfEndpoint, { method: "GET" });
+export const getCsrfToken = () => (dispatch) => handler(async () => {
+  const action = (payload) => ({ type: GET_CSRF_TOKEN, payload });
 
-  dispatch(getCsrfTokenAction(data.token));
+  const { data } = await api.get(sessionManager.csrfEndpoint);
+
+  api.setCsrfToken(data.token);
+
+  dispatch(action(data.token));
 });
-
-const getCsrfTokenAction = (payload) => ({ type: GET_CSRF_TOKEN, payload });
 
 /**
- * Creates a new session and saves session user data to state.
+ * Retrieves a new session cookie for authentication and produces the
+ * session state with user data.<br>
+ * 
+ * signIn:<br>
+ * 
+ * `{email, password}`
+ * @param {object} signIn
+ * @returns {type}
  */
-export const postSession = ({ email, password }) => (dispatch) => handler(async () => {
-  requires.csrf();
+export const signIn = (signIn) => (dispatch) => handler(async () => {
+  const action = (payload) => ({ type: SIGN_IN, payload });
 
-  const body = { email, password };
+  const { data } = await api.post(sessionManager.endpoint, signIn);
 
-  const { data } = await fetch(sessionManager.endpoint, { method: "POST", body });
+  dispatch(action(data));
 
-  dispatch(postSessionAction(data));
+  return true;
 });
-
-const postSessionAction = (payload) => ({ type: POST_SESSION, payload });
 
 /**
  * Gets new and saves session user data to state. Authentication required.
+ * @returns {true}
  */
 export const getSession = () => (dispatch) => handler(async () => {
-  const { data } = await fetch(sessionManager.endpoint, { method: "GET" });
+  const action = (payload) => ({ type: FETCH, payload });
+  
+  const { data } = await api.get(sessionManager.endpoint);
 
-  dispatch(getSessionAction(data));
+  dispatch(action(data));
+
+  return true;
 });
-
-const getSessionAction = (payload) => ({ type: GET_SESSION, payload });
 
 /**
  * Removes session cookie and session user data from state. Also
  * disconnects the client socket.
+ * @returns {true}
  */
-export const deleteSession = () => (dispatch) => handler(async () => {
-  requires.csrf();
+export const logOut = () => (dispatch) => handler(async () => {
+  const action = () => ({ type: SIGN_OUT });
+  
   socket.disconnect();
 
-  await fetch(sessionManager.endpoint, { method: "DELETE" });
+  await api.delete(sessionManager.endpoint);
 
-  dispatch(deleteSessionAction());
+  dispatch(action());
+
+  return true;
 });
 
-const deleteSessionAction = (payload) => ({ type: DELETE_SESSION, payload });
+/**
+ * Runs validation on the session object with the provided props.<br>
+ * 
+ * user:<br>
+ * 
+ * `{ firstName, lastName, email, password, confirmPassword }`
+ * @param {object} user
+ * @returns Redux action for reducer
+ */
+export const updateUserValidate = (user) => ({
+  type: VALIDATE,
+  payload: user,
+});
 
-const reducer = (state = sessionManager.state(), { type, payload }) => {
+/**
+ * Resets the state of validation for the session object.
+ * @returns Redux action for reducer
+ */
+export const resetUserValidate = () => ({
+  type: RESET_VALIDATION,
+  payload: {},
+});
+
+/**
+ * Creates an application user or updates an existing user. Returns false
+ * if session user validation fails.
+ * @returns {true}
+ */
+export const postPatchUser = (user) => (dispatch) => handler(async () => {
+  const action = (payload) => ({ type: FETCH, payload });
+  
+  sessionManager.produceEntityFrom(user);
+
+  if (!sessionManager.validationResult) return false;
+  
+  const { data } = await api.post(sessionManager.endpoint, user);
+  
+  dispatch(action(data));
+
+  return true;
+})
+
+const reducer = (state = sessionManager.copy(), { type, payload }) => {
   switch (type) {
     case GET_CSRF_TOKEN:
       sessionManager.csrfToken = payload;
-      return sessionManager.state();
+      return sessionManager.copy();
 
-    case POST_SESSION:
-      sessionManager.populateEntity(payload);
-      return sessionManager.state();
+    case SIGN_IN:
+      sessionManager.produceEntityFrom(payload);
+      return sessionManager.copy();
 
-    case GET_SESSION:
-      sessionManager.populateEntity(payload);
-      return sessionManager.state();
+    case FETCH:
+      sessionManager.produceEntityFrom(payload);
+      return sessionManager.copy();
+
+    case VALIDATE:
+      sessionManager.setValidationErrorsVisible(true);
+      sessionManager.produceEntityFrom(payload);
+      return sessionManager.copy();
+
+    case RESET_VALIDATION:
+      sessionManager.resetValidation();
+      sessionManager.produceEntityFrom(payload);
+      return sessionManager.copy();
+
+    case POST_PATCH:
+      sessionManager.produceEntityFrom(payload);
+      return sessionManager.copy();
 
     default:
       return state;

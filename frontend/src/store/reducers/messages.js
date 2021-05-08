@@ -1,9 +1,10 @@
-import { fetch } from "../utilities/fetch";
-import { MessageManager } from "../models/Message";
-import { requires, socket } from "../index";
-import handler from "../utilities/error-handler";
+/** @module store/reducers/messages */
 
-const messagesManager = new MessageManager();
+import { MessageManager } from "../models/Message";
+import { api, handler, socket } from "../../index";
+import { sessionManager } from "./session";
+
+export const messagesManager = new MessageManager();
 
 const LIMIT = 20;
 
@@ -19,41 +20,47 @@ const AMEND_MESSAGE = "messages ——————————> AMEND_MESSAGE";
 const DISCARD_MESSAGE = "messages ——————————> DISCARD_MESSAGE";
 
 /**
- * Posts a new message.
+ * Posts a new message.<br>
  * 
- * @param {Object} config
+ * message:<br>
+ * 
+ * `{type, connectionId, body}`
+ * @param {Object} message
+ * @returns {true}
  */
-export const postMessage = ({ connectionId, type, body: msgBody }) => (dispatch) => handler(async () => {
-  requires.session();
-  requires.csrf();
+export const postMessage = (message) => (dispatch) => handler(async () => {
+  sessionManager.requireSession();
   socket.require();
 
-  const collection = messagesManager.getOrCreateMessageCollection(connectionId);
+  const action = (payload) => ({ type: POST_MESSAGE, payload });
+
+  const { type, connectionId, body: msgBody } = message;
+
+  const collection = messagesManager.getOrCreateMessagesCollection(connectionId);
 
   collection.offset ++;
   
-  const body = {
-    type,
-    connection_id: connectionId,
-    body: msgBody,
-  }
+  const body = { type, connectionId, body: msgBody }
 
-  const { data } = await fetch(collection.endpoint, { method: "POST", body });
+  const { data } = await api.post(collection.endpoint, body);
 
-  dispatch(postMessageAction(data));
+  dispatch(action(data));
+
+  return true;
 });
-
-const postMessageAction = (payload) => ({ type: POST_MESSAGE, payload });
 
 /**
  * Gets new messages by offset limit.
- * 
- * @param {Object} config
+ * @param {Number} connectionId
+ * @returns {true}
  */
-export const getMessages = ({ connectionId }) => (dispatch) => handler(async () => {
-  requires.session().id;
+export const getMessages = (connectionId) => (dispatch) => handler(async () => {
+  sessionManager.requireSession();
+  socket.require();
 
-  const collection = messagesManager.getOrCreateMessageCollection(connectionId);
+  const action = (payload) => ({ type: GET_MESSAGES, payload });
+
+  const collection = messagesManager.getOrCreateMessagesCollection(connectionId);
 
   const query = `?ofs=${collection.offset}&lim=${LIMIT}`;
 
@@ -61,68 +68,78 @@ export const getMessages = ({ connectionId }) => (dispatch) => handler(async () 
   
   const endpoint = collection.endpoint + query;
 
-  const { data } = await fetch(endpoint, { method: "GET" });
+  const { data } = await api.get(endpoint);
 
-  dispatch(getMessagesAction(data));
+  dispatch(action(data));
+
+  return true;
 });
 
-const getMessagesAction = (payload) => ({ type: GET_MESSAGES, payload });
-
 /**
- * Updates a message.
+ * Updates a message.<br>
  * 
- * @param {Object} config
+ * message:<br>
+ * 
+ * `{ connectionId, id, body }`
+ * @param {object} message
+ * @returns {true}
  */
-export const patchMessage = ({ connectionId, id, type, body: msgBody }) => (dispatch) => handler(async () => {
-  requires.session();
-  requires.csrf();
+export const patchMessage = (message) => (dispatch) => handler(async () => {
+  sessionManager.requireSession();
   socket.require();
 
-  const collection = messagesManager.getOrCreateMessageCollection(connectionId);
+  const action = (payload) => ({ type: PATCH_MESSAGE, payload });
   
-  const body = {
-    type,
-    body: msgBody,
-    updated_at: new Date().toISOString(),
-  }
+  const { connectionId, id, body: msgBody } = message;
+  
+  const collection = messagesManager.getOrCreateMessagesCollection(connectionId);
+  
+  const body = { body: msgBody }
 
   const endpoint = `${collection.endpoint}/${id}`
   
-  const { data } = await fetch(endpoint, { method: "PATCH", body });
+  const { data } = await api.patch(endpoint, body);
 
-  dispatch(patchMessageAction(data));
+  dispatch(action(data));
+
+  return true;
 });
-
-const patchMessageAction = (payload) => ({ type: PATCH_MESSAGE, payload });
 
 /**
  * Deletes a message.
  * 
- * @param {Object} config
+ * message:<br>
+ * 
+ * `{ connectionId, id }`
+ * @param {object} message
+ * @returns {true}
  */
-export const deleteMessage = ({ connectionId, id }) => (dispatch) => handler(async () => {
-  requires.session();
-  requires.csrf();
+export const deleteMessage = (message) => (dispatch) => handler(async () => {
+  sessionManager.requireSession();
   socket.require();
 
-  const collection = messagesManager.getOrCreateMessageCollection(connectionId);
+  const action = (payload) => ({ type: DELETE_MESSAGE, payload });
+  
+  const { connectionId, id } = message;
+
+  const collection = messagesManager.getOrCreateMessagesCollection(connectionId);
 
   const endpoint = `${collection.endpoint}/${id}`
   
-  const { data } = await fetch(endpoint, { method: "DELETE" });
+  const { data } = await api.delete(endpoint);
 
-  dispatch(deleteMessageAction(data));
+  dispatch(action(data));
+
+  return true;
 });
-
-const deleteMessageAction = (payload) => ({ type: DELETE_MESSAGE, payload });
 
 /**
  * Socketio event receive new message.
- * 
  * @param {Object} payload Message object from event
+ * @returns Redux action for reducer
  */
 export const receiveMessage = ({ data }) => {
-  const collection = messagesManager.getMessageCollection(data.connection_id);
+  const collection = messagesManager.getMessagesCollections(data.connection_id);
 
   collection.offset ++;
   
@@ -131,68 +148,64 @@ export const receiveMessage = ({ data }) => {
 
 /**
  * Socketio event receive updates to existing message.
- * 
  * @param {Object} payload Message object from event
+ * @returns Redux action for reducer
  */
 export const amendMessage = ({ data }) => {
-  const collection = messagesManager.getMessageCollection(data.connection_id);
+  const collection = messagesManager.getMessagesCollections(data.connection_id);
   
-  const message = collection ? collection.getMessage(data.messages[0].id) : null;
+  const message = collection.getMessage(data.messages[0].id);
 
-  if (message) {
-    return { type: AMEND_MESSAGE, payload: data }
-  }
+  if (message) return { type: AMEND_MESSAGE, payload: data };
 
   return { type: "messages ——————————> NO_OP" }
 };
 
 /**
  * Socketio event delete and remove a message.
- * 
  * @param {Object} payload Message object from event
+ * @returns Redux action for reducer
  */
 export const discardMessage = ({ data }) => {
-  const collection = messagesManager.getMessageCollection(data.connection_id);
+  const collection = messagesManager.getMessagesCollections(data.connection_id);
   
-  const message = collection ? collection.getMessage(data.messages[0].id) : null;
+  const message = collection.getMessage(data.messages[0].id);
 
-  if (message) {
-    return { type: DISCARD_MESSAGE, payload: data }
-  }
+  if (message) return { type: DISCARD_MESSAGE, payload: data }
 
   return { type: "messages ——————————> NO_OP" }
 };
 
-const reducer = (state = messagesManager.state(), { type, payload }) => {
+const reducer = (state = messagesManager.copy(), { type, payload }) => {
   
   switch (type) {
     case POST_MESSAGE:
-      messagesManager.populateCollection(payload);
-      return messagesManager.state();
+      messagesManager.produceFrom(payload);
+      return messagesManager.copy();
 
     case PATCH_MESSAGE:
-      messagesManager.populateCollection(payload);
-      return messagesManager.state();
+      messagesManager.produceFrom(payload);
+      return messagesManager.copy();
 
     case GET_MESSAGES:
-      messagesManager.populateCollection(payload);
-      return messagesManager.state();
+      messagesManager.produceFrom(payload);
+      return messagesManager.copy();
 
     case DELETE_MESSAGE:
-      messagesManager.populateCollection(payload);
-      return messagesManager.state();
+      messagesManager.produceFrom(payload);
+      return messagesManager.copy();
 
     case RECEIVE_MESSAGE:
-      messagesManager.populateCollection(payload);
-      return messagesManager.state();
+      messagesManager.produceFrom(payload);
+      return messagesManager.copy();
 
     case AMEND_MESSAGE:
-      messagesManager.populateCollection(payload);
-      return messagesManager.state();
+      messagesManager.produceFrom(payload);
+      return messagesManager.copy();
 
     case DISCARD_MESSAGE:
-      messagesManager.populateCollection(payload);
-      return messagesManager.state();
+      messagesManager.produceFrom(payload);
+      return messagesManager.copy();
 
     default:
       return state;

@@ -1,6 +1,6 @@
 import { UINotificationCollection } from "../models/UINotification";
 
-const notificationManager = new UINotificationCollection();
+export const notificationManager = new UINotificationCollection();
 
 const ADD_NOTIFICATION = "uiNotifications ———> ADD_NOTIFICATION";
 const REMOVE_NOTIFICATION = "uiNotifications ———> REMOVE_NOTIFICATION";
@@ -27,17 +27,17 @@ export const removeUINotification = ({ id }) => ({
   payload: { id },
 });
 
-const reducer = (state = notificationManager.state(), { type, payload }) => {
+const reducer = (state = notificationManager.copy(), { type, payload }) => {
   switch (type) {
     case ADD_NOTIFICATION:
       notificationManager.add(payload);
       notificationManager.syncToLocalStorage();
-      return notificationManager.state();
+      return notificationManager.copy();
 
     case REMOVE_NOTIFICATION:
       notificationManager.remove(payload);
       notificationManager.syncToLocalStorage();
-      return notificationManager.state();
+      return notificationManager.copy();
 
     default:
       return state;

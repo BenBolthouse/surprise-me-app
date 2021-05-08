@@ -1,9 +1,10 @@
-import { Connection, ConnectionsCollection } from "../models/Connection";
-import { fetch } from "../utilities/fetch";
-import { requires } from "../index";
-import handler from "../utilities/error-handler";
+/** @module store/reducers/connections */
 
-const connections = new ConnectionsCollection();
+import { Connection, ConnectionsCollection } from "../models/Connection";
+import { api, handler } from "../../index";
+import { sessionManager } from "./session";
+
+export const connections = new ConnectionsCollection();
 
 // http actions
 const POST_CONNECTION = "connections ———————> POST_CONNECTION";
@@ -17,133 +18,138 @@ const COMPOSING_MESSAGE = "connections ———————> COMPOSING_MESSAGE"
 
 /**
  * Posts a new connection and adds the connection to requested collection.
- *
- * @param {Object} config
+ * @param {object} config
+ * @returns {true}
  */
-export const postConnection = ({ approverId }) => (dispatch) => handler(async () => {
-  requires.session();
-  requires.csrf();
+export const postConnection = (id) => (dispatch) => handler(async () => {
+  sessionManager.requireSession();
 
-  const body = { approver_id: approverId };
-  const { data } = await fetch(connections.endpoint, { method: "POST", body });
+  const action = (payload) => ({ type: POST_CONNECTION, payload });
 
-  dispatch(postConnectionAction(data));
+  const body = { approverId: id };
+
+  const { data } = await api.post(connections.endpoint, body);
+
+  dispatch(action(data));
+
+  return true;
 });
-
-const postConnectionAction = (payload) => ({ type: POST_CONNECTION, payload });
 
 /**
  * Gets all connections and adds connections to related collections.
+ * @returns {true}
  */
 export const getConnections = () => (dispatch) => handler(async () => {
-  connections.userId = requires.session().id;
+  const action = (payload) => ({ type: GET_CONNECTIONS, payload });
 
-  let { data } = await fetch(connections.endpoint, { method: "GET" });
+  connections.userId = sessionManager.requireSession().id;
 
-  dispatch(getConnectionsAction(data));
+  const { data } = await api.get(connections.endpoint);
+
+  dispatch(action(data));
+
+  return true;
 });
-
-const getConnectionsAction = (payload) => ({ type: GET_CONNECTIONS, payload });
 
 /**
  * Approves a pending connection and moves the connection to the approved
  * collection.
- *
- * @param {Object} config
+ * @param {object} id
+ * @returns {true}
  */
-export const approveConnection = ({ id }) => (dispatch) => handler(async () => {
-  requires.session();
-  requires.csrf();
+export const approveConnection = (id) => (dispatch) => handler(async () => {
+  sessionManager.requireSession();
+  
+  const action = (payload) => ({ type: APPROVE_CONNECTION, payload });
 
   const endpoint = `${connections.endpoint}/${id}/approve`;
 
-  const { data } = await fetch(endpoint, { method: "PATCH" });
-  dispatch(approveConnectionAction(data));
+  const { data } = await api.patch(endpoint);
+
+  dispatch(action(data));
 
   return true;
 });
-
-const approveConnectionAction = (payload) => ({ type: APPROVE_CONNECTION, payload });
 
 /**
  * Denies a pending connection and removes the connection from all
  * collections.
- *
- * @param {Object} config
+ * @param {Number} id
+ * @returns {true}
  */
-export const denyConnection = ({ id }) => async (dispatch) => handler(async () => {
-  requires.session();
-  requires.csrf();
+export const denyConnection = (id) => async (dispatch) => handler(async () => {
+  sessionManager.requireSession();
+
+  const action = (payload) => ({ type: DENY_CONNECTION, payload });
 
   const endpoint = `${connections.endpoint}/${id}/deny`;
 
-  const { data } = await fetch(endpoint, { method: "PATCH" });
-  dispatch(denyConnectionAction(data));
+  const { data } = await api.patch(endpoint);
+
+  dispatch(action(data));
 
   return true;
 });
-
-const denyConnectionAction = (payload) => ({ type: DENY_CONNECTION, payload });
 
 /**
  * Leaves an approved connection and removes the connection from all
  * collections.
- *
- * @param {Object} config
+ * @param {Number} id
+ * @returns {true}
  */
-export const leaveConnection = ({ id }) => async (dispatch) => handler(async () => {
-  requires.session();
-  requires.csrf();
+export const leaveConnection = (id) => async (dispatch) => handler(async () => {
+  sessionManager.requireSession();
+
+  const action = (payload) => ({ type: LEAVE_CONNECTION, payload });
 
   const endpoint = `${connections.endpoint}/${id}`;
 
-  const { data } = await fetch(endpoint, { method: "DELETE" });
-  dispatch(leaveConnectionAction(data));
+  const { data } = await api.delete(endpoint);
+
+  dispatch(action(data));
 
   return true;
 });
 
-const leaveConnectionAction = (payload) => ({ type: LEAVE_CONNECTION, payload });
 
 /**
  * Socketio event other user composing.
- * 
- * @param {Object} payload Message object from event
+ * @param {object} payload Message object from event
  */
 export const composingMessage = (payload) => ({ type: COMPOSING_MESSAGE, payload });
 
-const reducer = (state = connections.state(), { type, payload }) => {
+const reducer = (state = connections.copy(), { type, payload }) => {
   let connection;
 
   switch (type) {
     case POST_CONNECTION:
       connection = new Connection(connections.endpoint);
-      connection.populateEntity(payload);
+      connection.produceEntityFrom(payload);
       connections.addRequested(connection);
-      return connections.state();
+      return connections.copy();
 
     case GET_CONNECTIONS:
-      connections.populateCollection(payload);
-      return connections.state();
+      connections.produceFrom(payload);
+      return connections.copy();
 
     case APPROVE_CONNECTION:
-      connection = connections.filter((x) => x.id === payload.id)[payload.id];
-      connection.populateEntity(payload);
+      connection = connections.filter((x) => x.id === payload.id);
+      connection.produceEntityFrom(payload);
       connections.movePendingToApproved(payload);
-      return connections.state();
+      return connections.copy();
 
     case DENY_CONNECTION:
       connections.removeFromAllCollections(payload);
-      return connections.state();
+      return connections.copy();
 
     case LEAVE_CONNECTION:
       connections.removeFromAllCollections(payload);
-      return connections.state();
+      return connections.copy();
 
     case COMPOSING_MESSAGE:
-      connection = connections.filter((x) => x.id === payload.id)[payload.id];
-      connection.populateEntity(payload);
-      return connections.state();
+      connection = connections.filter((x) => x.id === payload.id);
+      connection.produceEntityFrom(payload);
+      return connections.copy();
 
     default:
       return state;
