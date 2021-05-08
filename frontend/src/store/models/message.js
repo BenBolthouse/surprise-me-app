@@ -1,94 +1,119 @@
-import { CollectionBase, DismissibleBase } from "./Entity";
+/** @module store/models/message */
+
+import { EntityCollectionBase, EntityDismissibleBase } from "./Entity";
 
 /**
- * Extension of base collection class contains message collections hashed
- * by collection id.
+ * @class
+ * @abstract
+ * @classdesc Represents a managed collection of message collections.
  */
-export class MessageManager extends CollectionBase {
-  /**
-   * Extension of base collection class contains message collections hashed
-   * by collection id.
-   */
+export class MessageManager extends EntityCollectionBase {
+  /** @returns {this} */
   constructor() {
     super(MessagesCollection, "/api/v1/connections");
+
+    return this;
   }
 
   /**
-   * Finds a message collection with a given ID and optionally updates the
-   * collection's offset using the offset argument.
-   *
+   * Returns a message collection or creates one by default.
    * @param {Number} connectionId
-   * @return {MessagesCollection | null} Message collection if found by ID or null if undefined.
+   * @return {MessagesCollection | true}
    */
-  getOrCreateMessageCollection(connectionId) {
+  getOrCreateMessagesCollection(connectionId) {
     let collection = this.collection[connectionId];
+
     if (!collection) {
       collection = new MessagesCollection(connectionId);
+
       this.collection[connectionId] = collection;
     }
-    return collection;
-  }
 
-  getMessageCollection(connectionId) {
-    return this.collection[connectionId];
+    return collection || true;
   }
 
   /**
-   * Override to base class `populateCollection` to account for nested
-   * collection.
-   *
-   * @param {object} responseData
+   * Returns a message collection or false if not found.
+   * @param {Number} connectionId
+   * @return {MessagesCollection | false}
    */
-  populateCollection(responseData) {
-    // Rather than running populate update on the message manager, the override
-    // will search the collection for a message collection and run populate
-    // on the message collection. If not found then will create a new
-    // message collection and populate it.
-    const { connection_id, messages } = responseData;
-    let collection = this.collection[connection_id];
+  getMessagesCollection(connectionId) {
+    return this.collection[connectionId] || false;
+  }
+
+  /**
+   * Override to base class method produceFrom searches collection for a message
+   * collection and then runs the collection's init method using the data
+   * argument. If the message collection is not found then the collection
+   * will be created first before running the init method.
+   * @param {object} data
+   * @returns {MessagesCollection} The found or created collection
+   */
+  produceFrom(data) {
+    const { connectionId, messages } = data;
+
+    let collection = this.collection[connectionId];
+
     if (!collection) {
-      collection = new MessagesCollection(connection_id);
-      this.collection[connection_id] = collection;
+      collection = new MessagesCollection(connectionId);
+
+      this.collection[connectionId] = collection;
     }
-    collection.populateCollection(messages);
+
+    collection.produceFrom(messages);
+
+    return collection;
   }
 }
 
 /**
- * Represents a collection of message entities.
+ * @class
+ * @classdesc Represents a collection of message entities.
  */
-export class MessagesCollection extends CollectionBase {
+export class MessagesCollection extends EntityCollectionBase {
   /**
-   * Represents a collection of message entities.
+   * @param {Number} connectionId
+   * @returns {this}
    */
   constructor(connectionId) {
     super(Message, `/api/v1/connections/${connectionId}/messages`);
     this.connectionId = connectionId;
     this.offset = 0;
+
+    return this;
   }
 
   /**
-   * Override to base class `add` the adds the connectionId to the message.
-   *
+   * Adds a message to the collection.
    * @param {Message} message
+   * @returns {true}
    */
   add(message) {
     message.connectionId = this.connectionId;
+
     this.collection[message.id] = message;
+
+    return true;
   }
 
+  /**
+   * Gets a message by ID or returns false.
+   * @param {Number} messageId
+   * @returns {Message | false}
+   */
   getMessage(messageId) {
-    return this.collection[messageId];
+    const message = this.collection[messageId];
+
+    return message || false;
   }
 }
 
 /**
- * Represents a message entity.
+ * @class
+ * @classdesc Represents a message entity.
  */
-export class Message extends DismissibleBase {
-  /**
-   * Represents a message entity.
-   */
+export class Message extends EntityDismissibleBase {
+  /** @returns {this} */
   constructor() {
     super();
     this.connectionId = null;
@@ -97,18 +122,22 @@ export class Message extends DismissibleBase {
     this.action = null;
     this.visibility = null;
     this.pending = false;
+
+    return this;
   }
 
   /**
-   * Method required by base class for populating data from api responses.
-   *
-   * @param {object} responseData
+   * Updates a message from a data object with mappable key value pairs.
+   * @param {object} data
+   * @returns {this}
    */
-  populate({ sender, body, action, visibility, pending }) {
+  update({ sender, body, action, visibility, pending }) {
     this.sender = sender || this.sender;
     this.body = body || this.body;
     this.action = action || this.action;
     this.visibility = visibility || this.visibility;
     this.pending = pending || this.pending;
+
+    return this
   }
 }

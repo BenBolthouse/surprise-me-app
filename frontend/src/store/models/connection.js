@@ -1,12 +1,12 @@
-import { CollectionBase, EntityBase } from "./Entity";
+/** @module store/models/connection */
+
+import { EntityCollectionBase, EntityBase } from "./Entity";
 
 /**
- * Represents a collection of connection entities.
+ * @class
+ * @classdesc Represents a collection of connections.
  */
-export class ConnectionsCollection extends CollectionBase {
-  /**
-   * Represents a collection of connection entities.
-   */
+export class ConnectionsCollection extends EntityCollectionBase {
   constructor() {
     super(Connection, "/api/v1/connections");
     this.userId = null;
@@ -16,60 +16,66 @@ export class ConnectionsCollection extends CollectionBase {
   }
 
   /**
-   * Override to base class `populateCollection` that adds connections to
+   * Override to base class method produceFrom that adds connections to
    * collections.
-   *
-   * @param {object} responseData
+   * @param {object} data
+   * @returns {this}
    */
-  populateCollection(responseData) {
-    responseData.forEach((item) => {
-      const entity = new this.Entity(this.endpoint);
-      entity.populateEntity(item);
-      this.add(entity);
+  produceFrom(data) {
+    data.forEach((item) => {
+      this.add(new this.Entity(this.endpoint).produceEntityFrom(item));
     });
+
     this.pending = this.filter(
       (x) => x.requestorId !== this.userId,
       (x) => x.approvedAt === null
     );
+
     this.requested = this.filter(
       (x) => x.requestorId === this.userId,
       (x) => x.approvedAt === null
     );
+
     this.approved = this.filter((x) => x.approvedAt !== null);
+
+    return this;
   }
 
   /**
    * Adds a connection to the requested collection.
-   *
    * @param {Connection} connection
+   * @returns {true}
    */
   addRequested(connection) {
     this.add(connection);
     this.requested[connection.id] = connection;
+
+    return true;
   }
 
   /**
    * Adds a connection to the pending collection.
-   *
    * @param {Connection} connection
+   * @returns {true}
    */
   addPending(connection) {
     this.add(connection);
     this.pending[connection.id] = connection;
+
+    return true;
   }
 
   /**
-   * Searches the pending collection for the connection. If found then
-   * removes the connection from pending and adds it to the approved
-   * collection. If not found then adds the connection to the base class
-   * collection and the approved collection.
-   *
+   * Moves a pending connection to approved. If the connection is not found
+   * in pending then the connection will automatically be created in both
+   * the default and approved collections.
    * @param {Connection} connection
+   * @returns {true | false} Returns true if the connection was found and
+   * moved from pending to approved and returns false if the connection was
+   * not found and was instead created in the default and approved
+   * collections.
    */
   movePendingToApproved(connection) {
-    // Method first searches the pending collection for the connection. If
-    // not found then the method adds the connection argument to both the
-    // base class collection and the approved collection.
     const pending = this.pending[connection.id];
 
     if (pending) {
@@ -80,13 +86,14 @@ export class ConnectionsCollection extends CollectionBase {
 
     this.add(connection);
     this.approved[connection.id] = connection;
+
+    return pending ? true : false;
   }
 
   /**
-   * Removes a connection from the base class collection and all other
-   * collections.
-   *
+   * Removes a connection from all collections.
    * @param {Connection} connection
+   * @returns {true}
    */
   removeFromAllCollections(connection) {
     const collection = this.collection[connection.id];
@@ -98,16 +105,16 @@ export class ConnectionsCollection extends CollectionBase {
     if (pending) delete this.pending[connection.id];
     if (requested) delete this.requested[connection.id];
     if (approved) delete this.approved[connection.id];
+
+    return true;
   }
 }
 
 /**
- * Represents a connection entity.
+ * @class
+ * @classdesc Represents a connection entity.
  */
 export class Connection extends EntityBase {
-  /**
-   * Represents a connection entity.
-   */
   constructor() {
     super();
     this.requestorId = null;
@@ -117,14 +124,18 @@ export class Connection extends EntityBase {
   }
 
   /**
-   * Method required by base class for populating data from api responses.
-   *
-   * @param {object} responseData
+   * Updates the connection from a data object with mappable key value pairs.
+   * @param {object} data
+   * @returns {this}
    */
-  populate({ requestor_id, other_user, approved_at, user_composing }) {
-    this.requestorId = requestor_id || this.requestorId;
-    this.otherUser = other_user || this.otherUser;
-    this.approvedAt = approved_at || this.approvedAt;
-    this.otherUserComposing = user_composing !== undefined ? user_composing : this.otherUserComposing;
+
+  // prettier-ignore
+  update({ requestorId, otherUser, approvedAt, userComposing }) {
+    this.requestorId = requestorId || this.requestorId;
+    this.otherUser = otherUser || this.otherUser;
+    this.approvedAt = approvedAt || this.approvedAt;
+    this.otherUserComposing = userComposing !== undefined ? userComposing : this.otherUserComposing;
+
+    return this;
   }
 }

@@ -1,4 +1,6 @@
-import { EntityBase, LocalStorageBase } from "./Entity";
+/** @module store/models/ui-notification */
+
+import { EntityBase, EntityLocalStorageBase } from "./Entity";
 
 // for applying iterative z-index to notifications as they are created
 const Z_INDEX_LOWER_BOUND = 300;
@@ -6,73 +8,66 @@ const Z_INDEX_UPPER_BOUND = 400;
 let _zIndexCounter = 300;
 
 /**
- * Represents a collection UI notifications.
+ * @class
+ * @abstract
+ * @classdesc Represents a collection of UI notifications.
  */
-export class UINotificationCollection extends LocalStorageBase {
-  /**
-   * Represents a collection UI notifications.
-   */
+export class UINotificationCollection extends EntityLocalStorageBase {
+  /** @returns {this} */
   constructor() {
-    // Endpoint is null because UI notifications don't sync state with the
-    // database. UI notifications are generated from response results and
-    // RESTless internal events and are then persisted to localstorage.
     super(UINotification, null, "notifications_ui");
+
+    return this;
   }
 
   /**
-   * Override to base class `add()` which handles incrementing a z-index
-   * counter for UI purposes.
-   *
-   * Returns true.
-   *
-   * @param {EntityBase} entity
-   * @return {true} `true`
+   * Adds a UI notification to the collection.
+   * @param {Notification} notification
+   * @return {true}
    */
-  add(entity) {
+  add(notification) {
     if (_zIndexCounter > Z_INDEX_UPPER_BOUND) _zIndexCounter = Z_INDEX_LOWER_BOUND;
 
-    entity.id = _createHashId();
+    notification.id = _createHashId();
     
-    entity.zIndex = _zIndexCounter;
+    notification.zIndex = _zIndexCounter;
 
     _zIndexCounter ++;
     
-    this.collection[entity.id] = entity;
+    this.collection[notification.id] = notification;
     
     return true;
   }
 }
 
 /**
- * Represents a UI notification.
+ * @class
+ * @classdesc Represents a UI notification.
  */
 export class UINotification extends EntityBase {
-  /**
-   * Represents a UI notification.
-   */
+  /** @returns {this} */
   constructor() {
     super();
     this.body = null;
     this.zIndex = null;
+
+    return this;
   }
 
   /**
-   * Method required by base class.
-   * 
-   * Implicitly returns null.
-   *
-   * @param {object} dataObject
-   * @return {null} `null`
+   * Updates the UI notification from a data object with mappable key value pairs.
+   * @param {object} data
+   * @return {this}
    */
-  populate({ body, zIndex }) {
+  update({ body, zIndex }) {
     this.body = body || this.body;
     this.zIndex = zIndex || this.zIndex;
+
+    return this;
   }
 }
 
-/**
- * Private function generates random hash for notification keys.
- */
+/** @ignore */
 function _createHashId() {
   const LENGTH = 8;
   const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
