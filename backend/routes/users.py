@@ -23,25 +23,25 @@ user_routes = Blueprint("user_routes", __name__, url_prefix="/api/v1/users")
 @user_routes.route("", methods=["POST"])
 @user_validate_on_post()
 def post():
-    # Two units of work exist here because a commit to the database is
-    # initially needed in order to get the user ID from the sequence. The
-    # ID is needed to establish a relationship with the newly created user
-    # and the user's email address and password.
-    json = request.json.get
+    get = request.json.get
+
     user = User(
-        first_name=json("first_name"),
-        last_name=json("last_name"))
+        first_name=get("first_name"),
+        last_name=get("last_name"))
 
     db.session.add(user)
+
     db.session.commit()
 
-    user.set_active_email_address(json("email"))
-    user.set_active_password(json("password"))
+    user.set_active_email_address(get("email"))
+
+    user.set_active_password(get("password"))
 
     db.session.commit()
 
     return jsonify({
         "message": "User created successfully",
+        "data": user.to_dict(),
     }), 201
 
 
@@ -52,7 +52,7 @@ def post():
 def get():
     return jsonify({
         "message": "Success",
-        "data": current_user.to_http_response(),
+        "data": current_user.to_dict(),
     }), 200
 
 
@@ -72,7 +72,7 @@ def patch():
 
     return jsonify({
         "message": "User updated successfully",
-        "data": current_user.to_http_response(),
+        "data": current_user.to_dict(),
     }), 200
 
 
@@ -90,7 +90,7 @@ def patch_password():
         session_user.set_active_password(json("password"))
 
     except Exception as exception:
-        raise BadRequest(response="Password is expired")
+        raise BadRequest(response="You have already used this password. Please try another.")
 
     db.session.commit()
 
@@ -116,7 +116,7 @@ def patch_email(id):
         session_user.set_active_email_address(json("email"))
 
     except Exception as exception:
-        raise BadRequest(response="Email is expired")
+        raise BadRequest(response="You have already used this email address. Please try another.")
 
     db.session.commit()
 
