@@ -1,58 +1,47 @@
+/** @module store/models/entity */
+
 /**
- * Represents an abstract collection of entities.
+ * @class
+ * @abstract
+ * @classdesc Abstract class representing a collection of entities.
  */
-export class CollectionBase {
+export class EntityCollectionBase {
   /**
-   * Represents an abstract collection of entities.
-   *
-   * @param {EntityBase} Entity Entity chosen for populating
+   * @param {EntityBase} Entity Entity managed by this collection
    * @param {String} endpoint API endpoint to which requests are sent
+   * @returns {this}
    */
   constructor(Entity, endpoint) {
     this.Entity = Entity;
     this.endpoint = endpoint;
     this.collection = {};
+
+    return this;
   }
 
   /**
-   * Initial collection population method creates entities in the
-   * collection from a provided data array.
-   *
-   * Array should contain objects with keys and values that match entity
-   * properties and property data types, as these will be overwritten on
-   * the entity if present in the data array.
-   *
-   * Inheritors of `this.Entity` should implement a method `populate` that
-   * maps key values to their entities, or otherwise an Error will be
-   * thrown.
-   *
-   * Implicitly returns null.
-   *
-   * @param {Array<Object>} dataArray
-   * @return {null} `null`
+   * Creates the initial collection of entities from an array of mappable
+   * data objects.
+   * @param {Array<Object>} data
+   * @returns {this}
    */
-  populateCollection(dataArray) {
-    dataArray.forEach((item) => {
-      const entity = new this.Entity(this.endpoint);
-
-      entity.populateEntity(item);
-
-      this.add(entity);
+  produceFrom(data) {
+    data.forEach((item) => {
+      this.add(new this.Entity(this.endpoint).produceEntityFrom(item));
     });
+
+    return this;
   }
 
   /**
-   * Returns collection filter results from predicates. Predicates are
-   * lambda functions. All predicates provided must evaluate to true on a
-   * single entity to survive the reckoning.
-   *
-   * If a single result is discovered then returns a single entity. If
-   * multiple results are discovered then returns an object containing
-   * entity results hashed with entity id's. If nothing is discovered then
-   * returns null;
-   *
+   * Returns entities filtered by predicates.
    * @param {...Function} predicates
-   * @return {Object | EntityBase | null} Collection of entities, single entity or null.
+   * @returns {object | EntityBase | null} If a single entity is filtered
+   * from the collection then that entity will be returned. If multiple
+   * entities are filtered then those entities will be returned in an
+   * object with each entity's id attribute being the key and the entity
+   * being the value. If no entities are filtered then null will be
+   * returned.
    */
   filter(...predicates) {
     const out = {};
@@ -83,52 +72,48 @@ export class CollectionBase {
   }
 
   /**
-   * Adds the entity to the collection.
-   *
-   * Returns true.
-   *
+   * Adds an entity to the collection.
    * @param {EntityBase} entity
-   * @return {true} `true`
+   * @returns {true}
    */
   add(entity) {
     this.collection[entity.id] = entity;
+
     return true;
   }
 
   /**
-   * Deletes the entity from the collection.
-   *
-   * Implicitly returns null.
-   *
+   * Removes an entity from the collection.
    * @param {EntityBase} entity
-   * @return {null} `null`
+   * @returns {true}
    */
   remove(entity) {
     delete this.collection[entity.id];
+
+    return true;
   }
 
   /**
-   * Returns the stateful representation of the collection object.
-   *
-   * @return {Object} State object
+   * Returns a Redux state copy.
+   * @returns {object} Copy of the collection.
    */
-  state() {
+  copy() {
     return Object.assign({}, this);
   }
 }
 
 /**
- * Extension of CollectionBase providing functionality for synchronizing
- * state with browser localStorage.
+ * @class
+ * @abstract
+ * @classdesc Abstract class extends CollectionBase to provide additional
+ * support for browser local storage state persistence.
  */
-export class LocalStorageBase extends CollectionBase {
+export class EntityLocalStorageBase extends EntityCollectionBase {
   /**
-   * Extension of CollectionBase providing functionality for synchronizing
-   * state with browser localStorage.
-   *
-   * @param {EntityBase} Entity Entity chosen for populating
+   * @param {EntityBase} Entity Entity managed by this collection
    * @param {String} endpoint API endpoint to which requests are sent
-   * @param {String} localStorageKey Name of storage object to sync
+   * @param {String} localStorageKey Name of local storage object
+   * @returns {this}
    */
   constructor(Entity, endpoint, localStorageKey) {
     super(Entity, endpoint);
@@ -142,21 +127,20 @@ export class LocalStorageBase extends CollectionBase {
 
     if (storageObj) this.syncFromLocalStorage(JSON.parse(storageObj));
     else {
-      const stringified = JSON.stringify(this.state());
+      const stringified = JSON.stringify(this.copy());
 
       window.localStorage.setItem(localStorageKey, stringified);
     }
+
+    return this;
   }
 
   /**
-   * Synchronize localStorage object from collection state.
-   *
-   * Returns true.
-   *
-   * @return {true} `true`
+   * Synchronizes localStorage object from collection state.
+   * @returns {true}
    */
   syncToLocalStorage() {
-    const stringified = JSON.stringify(this.state());
+    const stringified = JSON.stringify(this.copy());
 
     window.localStorage.setItem(this.localStorageKey, stringified);
 
@@ -164,29 +148,30 @@ export class LocalStorageBase extends CollectionBase {
   }
 
   /**
-   * Synchronize collection state from localStorage object.
-   *
-   * Returns true.
-   *
-   * @return {true} `true`
+   * Synchronizes collection state from localStorage object.
+   * @returns {true}
    */
   syncFromLocalStorage() {
     const stringified = window.localStorage.getItem(this.localStorageKey);
 
     const parsed = JSON.parse(stringified);
 
-    this.populateCollection(Object.values(parsed.collection));
+    this.produceFrom(Object.values(parsed.collection));
 
     return true;
   }
 }
 
 /**
- * Represents an abstract entity.
- *
- * @param {String} endpoint API endpoint to which requests are sent
+ * @class
+ * @abstract
+ * @classdesc Abstract class representing an entity.
  */
 export class EntityBase {
+  /**
+   * @param {String} endpoint API endpoint to which requests are sent
+   * @returns {this}
+   */
   constructor(endpoint) {
     this.endpoint = endpoint;
     this.id = null;
@@ -194,64 +179,53 @@ export class EntityBase {
     this.createdAt = null;
     this.updatedAt = null;
     this.deletedAt = null;
+
+    return this;
   }
 
   /**
-   * Populates entity properties from data object's key values.
-   *
-   * Data object should contain keys and values that match entity
-   * properties and property data types, as these will be overwritten on
-   * the entity if present in the data array.
-   *
-   * Inheritors of `this.Entity` should implement a method `populate` that
-   * maps key values to their entities, or otherwise an Error will be
-   * thrown.
-   *
-   * Implicitly returns null.
-   *
-   * @param {Object} dataObject
+   * Updates an entity from a data object with mappable key value pairs.
+   * @param {object} data
+   * @returns {this}
    */
-  populateEntity(dataObject) {
-    const { id, type, created_at, updated_at, deleted_at } = dataObject;
+  produceEntityFrom(data) {
+    const { id, type, createdAt, updatedAt, deletedAt } = data;
 
     // prettier-ignore
     try {
-      this.populate(dataObject);
+      this.update(data);
     }
     catch (e) {
-      throw Error("Children of EntityBase must implement a populate method.");
+      throw Error("Children of EntityBase must implement an update method.");
     }
 
-    // If the child class extends dismissible base class then run that
-    // populate method, as well.
-    if (this.populateDismissible) this.populateDismissible(dataObject);
+    if (this.produceDismissibleFrom) this.produceDismissibleFrom(data);
 
     this.id = id || this.id;
     this.type = type || this.type;
-    this.createdAt = created_at || this.createdAt;
-    this.updatedAt = updated_at || this.updatedAt;
-    this.deletedAt = deleted_at || this.deletedAt;
+    this.createdAt = createdAt || this.createdAt;
+    this.updatedAt = updatedAt || this.updatedAt;
+    this.deletedAt = deletedAt || this.deletedAt;
+
+    return this;
   }
 
   /**
-   * Returns the stateful representation of the entity object.
-   *
-   * @return {Object} State object
+   * Returns a Redux state copy.
+   * @returns {object} Copy of the entity.
    */
-  state() {
+  copy() {
     return Object.assign({}, this);
   }
 }
 
 /**
- * Extension of base class EntityBase providing additional seen and
- * dismissed properties.
+ * @class
+ * @abstract
+ * @classdesc Abstract class extends EntityBase to provide additional
+ * functionality for marking entities as seen and/or dismissed by a user.
  */
-export class DismissibleBase extends EntityBase {
-  /**
-   * Extension of base class EntityBase providing additional seen and
-   * dismissed properties.
-   */
+export class EntityDismissibleBase extends EntityBase {
   constructor() {
     super();
     this.seenAt = null;
@@ -259,17 +233,12 @@ export class DismissibleBase extends EntityBase {
   }
 
   /**
-   * Populates seen and dismissed properties automatically by inheritance
-   * of EntityBase. You shouldn't need to have to use or invoke this
-   * method.
-   *
-   * Implicitly returns null.
-   *
+   * Updates a dismissible entity from a data object with mappable key value pairs.
    * @param {Object} config
    * @return {null} `null`
    */
-  populateDismissible({ seen_at, dismissed_at }) {
-    this.seenAt = seen_at || this.createdAt;
-    this.dismissedAt = dismissed_at || this.dismissedAt;
+  produceDismissibleFrom({ seenAt, dismissedAt }) {
+    this.seenAt = seenAt || this.createdAt;
+    this.dismissedAt = dismissedAt || this.dismissedAt;
   }
 }
