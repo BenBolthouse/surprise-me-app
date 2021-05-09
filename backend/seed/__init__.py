@@ -2,14 +2,16 @@ from flask import Blueprint
 from flask.cli import AppGroup
 
 
-from .production.users import up as production_users_up
 from .production.connections import up as production_connections_up
 from .production.messages import up as production_messages_up
+from .production.notifications import up as production_notifications_up
+from .production.users import up as production_users_up
 
 from .test.connections import up as test_connections_up
 from .test.messages import up as test_messages_up
 from .test.users import up as test_users_up
 
+from .undo.notifications import down as notifications_down
 from .undo.connections import down as connections_down
 from .undo.messages import down as messages_down
 from .undo.users import down as users_down
@@ -27,6 +29,7 @@ def test():
 
 
 def down():
+    notifications_down()
     messages_down()
     connections_down()
     users_down()
@@ -37,6 +40,7 @@ def cli_all():
     production_users_up()
     production_connections_up()
     production_messages_up()
+    production_notifications_up()
 
 
 @cmd.cli.command("undo")
