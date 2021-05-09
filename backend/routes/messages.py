@@ -17,6 +17,7 @@ message_routes = Blueprint("message_routes", __name__, url_prefix="/api/v1/conne
 # Creates a new message for the given connection and handles emitting the
 # message to connected parties.
 @message_routes.route("/<connection_id>/messages", methods=["POST"])
+@login_required
 def post(connection_id):
     get = request.json.get
 
