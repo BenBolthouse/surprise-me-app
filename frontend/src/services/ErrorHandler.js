@@ -1,3 +1,5 @@
+/** @module services/error-handler */
+
 import { addUINotification } from "../store/reducers/ui-notifications";
 import { store } from "../index"
 
@@ -11,7 +13,7 @@ const DEFAULT_ERROR_MESSAGE = "There was a problem. Refreshing the page and try 
  * @classdesc Service class provides a means of catching errors and
  * displaying error notifications to the user in a graceful manner.
  */
-export default class ErrorHandler {
+class ErrorHandler {
   /** @returns {this} */
   constructor() {
     if (created) throw new Error("Cannot create instance of singleton class");
@@ -95,3 +97,5 @@ export class FatalError extends Error {
     this.type = "FATAL";
   }
 }
+
+export default ErrorHandler;

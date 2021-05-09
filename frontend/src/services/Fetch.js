@@ -1,3 +1,5 @@
+/** @module services/fetch */
+
 import { FatalError, WarningError } from "./ErrorHandler";
 import camelcase from "camelcase-keys";
 import snakecase from "snakecase-keys";
@@ -10,7 +12,7 @@ let created = false;
  * requests and responses in a predictable manner.
  * @param {String} csrfToken Anti-forgery token
  */
-export default class Fetch {
+class Fetch {
   /** @returns {this} */
   constructor(csrfToken) {
     if (created) throw new Error("Cannot create instance of singleton class");
@@ -122,3 +124,5 @@ export default class Fetch {
     return { message, data };
   }
 }
+
+export default Fetch;

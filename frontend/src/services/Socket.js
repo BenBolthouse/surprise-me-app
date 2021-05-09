@@ -1,3 +1,5 @@
+/** @module services/socket */
+
 /* eslint-disable no-undef */
 
 import { io } from "socket.io-client";
@@ -13,7 +15,7 @@ let created = false;
  * @class
  * @classdesc Service class provides connection to the socketio host.
  */
-export default class Socket {
+class Socket {
   /** @returns {this} */
   constructor() {
     if (created) throw new Error("Cannot create instance of singleton class");
@@ -102,3 +104,5 @@ function _init() {
 
   return client;
 }
+
+export default Socket;
