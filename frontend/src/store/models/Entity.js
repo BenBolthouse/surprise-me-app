@@ -118,12 +118,12 @@ export class EntityLocalStorageBase extends EntityCollectionBase {
   constructor(Entity, endpoint, localStorageKey) {
     super(Entity, endpoint);
 
+    this.localStorageKey = localStorageKey;
+
     // This checks if localstorage already has the storage object in
     // question. If it does then it'll attempt to sync with the object. If
     // not then it'll create it.
     const storageObj = window.localStorage.getItem(localStorageKey);
-
-    this.localStorageKey = localStorageKey;
 
     if (storageObj) this.syncFromLocalStorage(JSON.parse(storageObj));
     else {
@@ -148,7 +148,8 @@ export class EntityLocalStorageBase extends EntityCollectionBase {
   }
 
   /**
-   * Synchronizes collection state from localStorage object.
+   * Synchronizes collection state from localStorage object, selecting only
+   * notifications that have not yet been dismissed.
    * @returns {true}
    */
   syncFromLocalStorage() {
@@ -156,7 +157,11 @@ export class EntityLocalStorageBase extends EntityCollectionBase {
 
     const parsed = JSON.parse(stringified);
 
-    this.produceFrom(Object.values(parsed.collection));
+    let notifications = Object.values(parsed.collection);
+
+    notifications = notifications.filter(x => x.dismissedAt === null)
+
+    this.produceFrom(notifications);
 
     return true;
   }
@@ -230,6 +235,30 @@ export class EntityDismissibleBase extends EntityBase {
     super();
     this.seenAt = null;
     this.dismissedAt = null;
+  }
+
+  /**
+   * Marks an entity as dismissed by the user.
+   * @returns {this}
+   */
+  dismiss() {
+    const date = new Date().toISOString();
+
+    if (!this.seenAt) this.seenAt = date;
+
+    this.dismissedAt = date;
+
+    return this;
+  }
+
+  /**
+   * Marks an entity as seen by the user.
+   * @returns {this}
+   */
+  see() {
+    this.seenAt = new Date().toISOString();
+
+    return this;
   }
 
   /**
