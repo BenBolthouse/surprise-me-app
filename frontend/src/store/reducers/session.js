@@ -1,3 +1,5 @@
+/** @module store/reducers/session */
+
 import { Session } from "../models/Session";
 import { api, handler, socket } from "../../index";
 
