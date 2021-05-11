@@ -18,6 +18,7 @@ import configureStore from "./store";
 
 import * as connectionsActions from "./store/reducers/connections";
 import * as messagesActions from "./store/reducers/messages";
+import * as productsActions from "./store/reducers/products";
 import * as sessionActions from "./store/reducers/session";
 import * as sessionNotificationActions from "./store/reducers/session-notifications";
 import * as uiNotificationActions from "./store/reducers/ui-notifications";
@@ -29,6 +30,7 @@ if (process.env.NODE_ENV !== "production") {
   window.store = store;
   window.connectionsActions = connectionsActions;
   window.messagesActions = messagesActions;
+  window.productsActions = productsActions;
   window.sessionActions = sessionActions;
   window.sessionNotificationActions = sessionNotificationActions;
   window.uiNotificationActions = uiNotificationActions;
