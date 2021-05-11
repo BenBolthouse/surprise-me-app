@@ -9,7 +9,6 @@ let _zIndexCounter = 300;
 
 /**
  * @class
- * @abstract
  * @classdesc Represents a collection of UI notifications.
  */
 export class UINotificationCollection extends EntityLocalStorageBase {
@@ -20,7 +19,6 @@ export class UINotificationCollection extends EntityLocalStorageBase {
 
 /**
  * @class
- * @abstract
  * @classdesc Represents a collection of session notifications.
  */
 export class SessionNotificationCollection extends EntityLocalStorageBase {
@@ -42,6 +40,7 @@ export class Notification extends EntityDismissibleBase {
 
     return this;
   }
+
   /**
    * Updates the UI notification from a data object with mappable key value pairs.
    * @param {object} data
