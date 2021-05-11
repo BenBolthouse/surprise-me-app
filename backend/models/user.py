@@ -22,6 +22,14 @@ class User(db.Model, UserMixin, EntityMixin):
         db.String(128),
         nullable=True,
         default=None)
+    latitude = db.Column(
+        db.Float(precision=5),
+        nullable=False,
+        default=00.00000)
+    longitude = db.Column(
+        db.Float(precision=5),
+        nullable=False,
+        default=000.00000)
 
     _email_addresses = db.relationship(
         "Email",
