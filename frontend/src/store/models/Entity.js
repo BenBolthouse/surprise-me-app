@@ -1,4 +1,68 @@
-/** @module store/models/entity */
+/**
+ * @module store/models/entity
+ * @author Ben Bolthouse
+ * @description Entity is a solution for writing too much boilerplate Redux
+ * code.<br>
+ *
+ * I identified a trend in state management while I was writing the
+ * components for the Surprise Me app: Redux thunk follows the same old
+ * tried-and-true REST conventions. That is, Redux and Thunk manage
+ * collections and entities using standard CRUD operations found in
+ * REST.<br>
+ *
+ * There are big aspirations for this project, and big time-savings
+ * implications with the new workflow that this library introduces. For
+ * instance, let's analyze a typical, non-Entity Redux workflow:<br>
+ *
+ * 1. Create the reducer and add the reducer to the root reducer,
+ * 1. Write an action and a thunk to transact with an API endpoint,
+ * 1. Write a request body from thunk arguments to send to the API as an
+ *    async fetch request,
+ * 1. Retrieve and parse the data,
+ * 1. Dispatch the data to the reducer as a payload,
+ * 1. Reducer handles all state changes, potentially several more lines of
+ *    code,
+ * 1. Finally...the reducer returns the new copy of state.<br>
+ *
+ * While Redux gives the developer the flexibility for configuration, this
+ * (in my mind) is far too much configuration for state changes that
+ * predictably follow patterns.<br>
+ *
+ * Consider the new workflow introduced with Entity:<br>
+ *
+ * 1. Write a model that extends EntityCollectionBase (or variant of),
+ * 1. Write a model that extends EntityBase (or variant of),
+ * 1. Create the reducer and add the reducer to the root reducer,
+ * 1. Write an action and a thunk to transact with an API endpoint,
+ * 1. Use one of post, put, patch, get or delete instance methods from the
+ *    collection to transfer state to the API,
+ * 1. Dispatch the data to reducer as a payload,
+ * 1. Reducer simply returns a copy of the collection (no state management
+ *    is needed in the reducer, it has already been handled in the
+ *    thunk).<br>
+ *
+ * You may notice that there isn't even a need for a reducer in this
+ * workflow. Precisely! Future developments of Entity will do away with the
+ * need to write the reducers *and* the actions *and* the thunks. At its
+ * core, Entity will use Redux and Redux Thunk for powerful state
+ * management tools. Entity will do away with the need to configure the
+ * parts of Redux and Redux Thunk that ultimately follow patterns, so the
+ * developer can focus their attention on the interface.
+ *
+ * Now finally, let's analyze what this will look like in a future version
+ * of Entity:
+ *
+ * 1. Define your manager, collection and entity models in the
+ *    entity.config.js file,
+ * 1. Dispatch changes from frontend code using REST standards of post,
+ *    put, patch, get and delete,
+ * 1. Either receive a modified state object or a cached error message as a
+ *    result.<br>
+ *
+ * So much simpler, eh? I'm excited to continue to develop this library so
+ * I (and hopefully even you!) can stop writing excessive code. Until
+ * then...cheers!
+ */
 
 /**
  * @class
