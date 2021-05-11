@@ -11,6 +11,7 @@ const GET_CSRF_TOKEN = "session ———————————> GET_CSRF_TOKE
 const SIGN_IN = "session ———————————> SIGN_IN";
 const SIGN_OUT = "session ———————————> SIGN_OUT";
 const FETCH = "session ———————————> FETCH";
+const GET_GEOLOCATION = "session ———————————> GET_GEOLOCATION";
 
 // user management actions
 const VALIDATE = "session ———————————> VALIDATE";
@@ -34,9 +35,9 @@ export const getCsrfToken = () => (dispatch) => handler(async () => {
 /**
  * Retrieves a new session cookie for authentication and produces the
  * session state with user data.<br>
- * 
+ *
  * signIn:<br>
- * 
+ *
  * `{email, password}`
  * @param {object} signIn
  * @returns {type}
@@ -57,7 +58,7 @@ export const signIn = (signIn) => (dispatch) => handler(async () => {
  */
 export const getSession = () => (dispatch) => handler(async () => {
   const action = (payload) => ({ type: FETCH, payload });
-  
+
   const { data } = await api.get(sessionManager.endpoint);
 
   dispatch(action(data));
@@ -72,7 +73,7 @@ export const getSession = () => (dispatch) => handler(async () => {
  */
 export const logOut = () => (dispatch) => handler(async () => {
   const action = () => ({ type: SIGN_OUT });
-  
+
   socket.disconnect();
 
   await api.delete(sessionManager.endpoint);
@@ -84,9 +85,9 @@ export const logOut = () => (dispatch) => handler(async () => {
 
 /**
  * Runs validation on the session object with the provided props.<br>
- * 
+ *
  * user:<br>
- * 
+ *
  * `{ firstName, lastName, email, password, confirmPassword }`
  * @param {object} user
  * @returns Redux action for reducer
@@ -106,19 +107,38 @@ export const resetUserValidate = () => ({
 });
 
 /**
+ * Gets the current location of the browser.
+ * @returns Redux action for reducer
+ */
+
+export const getGeolocation = () => (dispatch) => handler(async () => {
+  const getCoordinates = () => {
+    return new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject);
+    });
+  }
+
+  const position = await getCoordinates();
+
+  const { latitude, longitude } = position.coords;
+
+  dispatch({ type: GET_GEOLOCATION, payload: { latitude, longitude } });
+});
+
+/**
  * Creates an application user or updates an existing user. Returns false
  * if session user validation fails.
  * @returns {true}
  */
 export const postPatchUser = (user) => (dispatch) => handler(async () => {
   const action = (payload) => ({ type: FETCH, payload });
-  
+
   sessionManager.produceEntityFrom(user);
 
   if (!sessionManager.validationResult) return false;
-  
+
   const { data } = await api.post(sessionManager.endpoint, user);
-  
+
   dispatch(action(data));
 
   return true;
@@ -149,6 +169,10 @@ const reducer = (state = sessionManager.copy(), { type, payload }) => {
       return sessionManager.copy();
 
     case POST_PATCH:
+      sessionManager.produceEntityFrom(payload);
+      return sessionManager.copy();
+
+    case GET_GEOLOCATION:
       sessionManager.produceEntityFrom(payload);
       return sessionManager.copy();
 
