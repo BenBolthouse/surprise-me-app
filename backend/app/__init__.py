@@ -45,9 +45,7 @@ app.register_blueprint(user_routes)
 app.register_blueprint(error_routes)
 app.register_blueprint(cmd)
 
-
 login_manager = LoginManager(app)
-
 
 db.init_app(app)
 migrate = Migrate(app, db)
