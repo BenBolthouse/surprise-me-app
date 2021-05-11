@@ -175,5 +175,6 @@ gunicorn.conf.py
 # don't necessarily want other to have access.
 scripts
 
-# Ignore the jsdocs out directory.
+# Ignore the jsdocs.
 *out
+*docs.md
