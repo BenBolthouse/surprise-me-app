@@ -1,5 +1,4 @@
 from flask import Blueprint
-from flask.cli import AppGroup
 
 
 from .production.connections import up as production_connections_up
