@@ -2,7 +2,7 @@ from .mixins.Entity import EntityMixin
 from .db import db
 
 
-class Product(EntityMixin):
+class Product(db.Model, EntityMixin):
     __tablename__ = "products"
 
     name = db.Column(
