@@ -1,7 +1,7 @@
 /** @module store/models/session */
 
 import validate from "validate.js";
-import { FatalError } from "../../services/ErrorHandler";
+import { FatalError, WarningError } from "../../services/ErrorHandler";
 import { EntityBase } from "./Entity";
 
 /**
@@ -23,6 +23,9 @@ export class Session extends EntityBase {
     this.csrfEndpoint = csrfEndpoint;
     this.csrfToken = null;
 
+    this.latitude = null;
+    this.longitude = null;
+
     this.showValidationErrors = false;
     this.validationResult = true;
     this.validationErrors = {
@@ -43,7 +46,7 @@ export class Session extends EntityBase {
    */
   resetValidation() {
     this.showValidationErrors = false;
-    
+
     this.validationErrors = {
       firstName: [],
       lastName: [],
@@ -54,7 +57,7 @@ export class Session extends EntityBase {
 
     return this.validationErrors;
   }
-  
+
   /**
    * Updates the session from the data object with mappable key value pairs
    * and runs validation on validation properties by default.
@@ -63,7 +66,7 @@ export class Session extends EntityBase {
    */
 
   // prettier-ignore
-  update({ firstName, lastName, email, password, confirmPassword, bio }) {
+  update({ firstName, lastName, email, password, confirmPassword, bio, latitude, longitude }) {
     this.firstName = firstName ? this._validate("firstName", firstName) : this.firstName;
     this.lastName = lastName ? this._validate("lastName", lastName) : this.lastName;
     this.email = email ? this._validate("email", email) : this.email;
@@ -71,20 +74,45 @@ export class Session extends EntityBase {
     this.confirmPassword = confirmPassword ? this._validateConfirmPassword(confirmPassword) : this.confirmPassword;
     this.bio = bio;
 
+    this.latitude = latitude ? latitude : this.latitude;
+    this.longitude = longitude ? longitude : this.longitude;
+
+    return this;
+  }
+
+  /**
+   * Throws an error if the session geolocation doesn't exist.
+   * @throws FatalError
+   * @returns {this}
+   */
+  requireGeolocation() {
+    if (!this.latitude || !this.longitude) throw new FatalError("You must authorize the app to use your browser's location.")
+
     return this;
   }
 
   /**
    * Throws an error if the session user does not exist.
-   * @throws FatalError
+   * @throws WarningError
    * @returns {this}
    */
   requireSession() {
-    if (!this.id) throw new FatalError("You must be logged in to do this.")
+    if (!this.id) throw new WarningError("You must be signed in to do this.")
 
     return this;
   }
-  
+
+  /**
+   * Throws an error if the session user exists.
+   * @throws WarningError
+   * @returns {this}
+   */
+  requireAnonymous() {
+    if (this.id) throw new WarningError("You must be signed out to do this.")
+
+    return this;
+  }
+
   _validate(propertyName, value) {
     const schema = this._validationSchemas[propertyName];
 
@@ -100,7 +128,7 @@ export class Session extends EntityBase {
     this[propertyName] = value;
 
     if (result.length) this.validationResult = false;
-    
+
     return value;
   }
 
