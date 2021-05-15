@@ -23,13 +23,6 @@ class Notification(db.Model, EntityMixin, DismissibleMixin):
         nullable=False,
         default="")
 
-    types = {
-        "CONNECTION",
-        "GIFT",
-        "MESSAGE",
-        "APP",
-    }
-
     def to_dict(self):
         return {
             **self.entity_to_dict(),
@@ -38,20 +31,3 @@ class Notification(db.Model, EntityMixin, DismissibleMixin):
             "body": self.body,
             "action": self.action,
         }
-
-    def to_ws_response(self):
-        return {
-            "status": "ok",
-            "type": "notification",
-            "data": {
-                "type": self.type,
-                "body": self.body,
-                "action": self.action,
-            }
-        }
-
-    def __init__(self, type, recipient_id, body, action):
-        self.set_type(type)
-        self.recipient_id = recipient_id
-        self.body = body
-        self.action = action
