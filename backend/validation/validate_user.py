@@ -1,3 +1,4 @@
+from flask import request
 from .utils import validator, RouteDecorator
 
 
@@ -27,42 +28,47 @@ email = {
 }
 coordinate = {
     "nullable": True,
-    "type": "string",
-    "regex": "^(-)?(?=.*[0-9]).{1,3}\.(?=.*[0-9]).{6,64}$",  # noqa
+    "type": "float",
 }
 
 
 def _post(req):
     target = {
         "password": req.json.get("password"),
-        "firstName": req.json.get("firstName"),
-        "lastName": req.json.get("lastName"),
+        "first_name": req.json.get("first_name"),
+        "last_name": req.json.get("last_name"),
         "email": req.json.get("email"),
-        "shareLocation": req.json.get("shareLocation"),
+        "latitude": req.json.get("latitude"),
+        "longitude": req.json.get("longitude"),
     }
     schema = {
         "password": {**password, **required},
-        "firstName": {**name, **required},
-        "lastName": {**name, **required},
+        "first_name": {**name, **required},
+        "last_name": {**name, **required},
         "email": {**email, **required},
-        "shareLocation": {"type": "boolean", **required},
+        "latitude": {**coordinate, **required},
+        "longitude": {**coordinate, **required},
     }
     validator(request, schema, target)
 
 
-def _patch(request):
+def _patch(req):
     target = {
-        "firstName": request.json.get("firstName"),
-        "lastName": request.json.get("lastName"),
+        "first_name": request.json.get("first_name"),
+        "last_name": request.json.get("last_name"),
+        "latitude": req.json.get("latitude"),
+        "longitude": req.json.get("longitude"),
     }
     schema = {
-        "firstName": name,
-        "lastName": name,
+        "first_name": name,
+        "last_name": name,
+        "latitude": coordinate,
+        "longitude": coordinate,
     }
     validator(request, schema, target)
 
 
-def _patch_password(request):
+def _patch_password(req):
     target = {
         "password": request.json.get("password"),
     }
@@ -72,7 +78,7 @@ def _patch_password(request):
     validator(request, schema, target)
 
 
-def _patch_email(request):
+def _patch_email(req):
     target = {
         "email": request.json.get("email"),
     }
