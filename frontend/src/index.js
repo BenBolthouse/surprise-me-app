@@ -1,13 +1,5 @@
 /* eslint-disable no-undef */
 
-import ErrorHandler from "./services/ErrorHandler";
-import Fetch from "./services/Fetch";
-import Socket from "./services/Socket";
-
-export const handler = new ErrorHandler().handler;
-export const api = new Fetch();
-export const socket = new Socket();
-
 import React from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter } from "react-router-dom";
@@ -16,12 +8,9 @@ import { Provider } from "react-redux";
 import App from "./App.jsx";
 import configureStore from "./store";
 
-import * as connectionsActions from "./store/reducers/connections";
-import * as messagesActions from "./store/reducers/messages";
-import * as productsActions from "./store/reducers/products";
-import * as sessionActions from "./store/reducers/session";
-import * as sessionNotificationActions from "./store/reducers/session-notifications";
-import * as uiNotificationActions from "./store/reducers/ui-notifications";
+import * as connectionsActions from "./store/reducers/connection.reducer";
+import * as notificationActions from "./store/reducers/notification.reducer";
+import * as userActions from "./store/reducers/user.reducer";
 
 export const store = configureStore();
 
@@ -29,11 +18,8 @@ export const store = configureStore();
 if (process.env.NODE_ENV !== "production") {
   window.store = store;
   window.connectionsActions = connectionsActions;
-  window.messagesActions = messagesActions;
-  window.productsActions = productsActions;
-  window.sessionActions = sessionActions;
-  window.sessionNotificationActions = sessionNotificationActions;
-  window.uiNotificationActions = uiNotificationActions;
+  window.notificationActions = notificationActions;
+  window.userActions = userActions;
 }
 
 // React root entry point
