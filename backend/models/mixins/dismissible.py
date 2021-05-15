@@ -58,4 +58,4 @@ class DismissibleMixin(object):
         '''
         Indicate the entity has been dismissed at the current datetime.
         '''
-        self.seen_at = datetime.now()
+        self.dismissed_at = datetime.now()
