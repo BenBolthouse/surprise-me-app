@@ -46,15 +46,16 @@ class User(db.Model, UserMixin, EntityMixin):
         return next(x for x in self._email_addresses if not x.is_deleted)
 
     def set_active_email_address(self, value):
-        for x in self._email_addresses:
-            # This prevents users from creating identical email addresses.
-            if x.value == value:
-                raise Exception("Email is expired")
+        if self._email_addresses:
+            for x in self._email_addresses:
+                # This prevents users from creating identical email addresses.
+                if x.value == value:
+                    raise Exception("Email is expired")
 
-            # Invoking this method soft deletes all existing email
-            # addresses for the user, including the current active email.
-            if not x.is_deleted:
-                x._set_deleted_at()
+                # Invoking this method soft deletes all existing email
+                # addresses for the user, including the current active email.
+                if not x.is_deleted:
+                    x._set_deleted_at()
 
         self._email_addresses.append(Email(self.id, value))
         self.set_updated_at()
@@ -80,15 +81,16 @@ class User(db.Model, UserMixin, EntityMixin):
         return next(x for x in self._passwords if not x.is_deleted)
 
     def set_active_password(self, value):
-        for x in self._passwords:
-            # This prevents users from creating identical email addresses.
-            if x.validate(value):
-                raise Exception("Password is expired")
+        if self._passwords:
+            for x in self._passwords:
+                # This prevents users from creating identical email addresses.
+                if x.validate(value):
+                    raise Exception("Password is expired")
 
-            # Invoking this method soft deletes all existing passwords for
-            # the user, including the current active password.
-            if not x.is_deleted:
-                x._set_deleted_at()
+                # Invoking this method soft deletes all existing passwords for
+                # the user, including the current active password.
+                if not x.is_deleted:
+                    x._set_deleted_at()
 
         self._passwords.append(Password(self.id, value))
         self.set_updated_at()
@@ -111,7 +113,3 @@ class User(db.Model, UserMixin, EntityMixin):
             "first_name": self.first_name,
             "last_name": self.last_name,
         }
-
-    def __init__(self, first_name, last_name):
-        self.first_name = first_name
-        self.last_name = last_name
