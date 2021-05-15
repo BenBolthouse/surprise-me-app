@@ -2,20 +2,14 @@ import { createStore, combineReducers } from "redux";
 
 import enhancer from "./enhancer";
 
-import connections from "./reducers/connections";
-import messages from "./reducers/messages";
-import products from "./reducers/products";
-import session from "./reducers/session";
-import sessionNotifications from "./reducers/session-notifications";
-import uiNotifications from "./reducers/ui-notifications";
+import connections from "./reducers/connection.reducer";
+import notifications from "./reducers/notification.reducer";
+import user from "./reducers/user.reducer";
 
 const rootReducer = combineReducers({
-  session,
   connections,
-  messages,
-  products,
-  sessionNotifications,
-  uiNotifications,
+  notifications,
+  user,
 });
 
 const configureStore = (preloadedState) =>
