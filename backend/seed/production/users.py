@@ -27,7 +27,6 @@ seed = [
         "email": "a.leblanc@email.com",
         "password": PASSWORD,
     },
-
     {
         "init": {
             "first_name": "Phil",

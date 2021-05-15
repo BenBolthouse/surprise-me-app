@@ -1,10 +1,10 @@
 from datetime import datetime
 from flask import Blueprint, jsonify, request
 from flask_login import current_user, login_required, logout_user
-from werkzeug.exceptions import InternalServerError
+from werkzeug.exceptions import BadRequest
 
 
-from models import db, User
+from models import db, User, Email
 
 
 # validation decorators
@@ -16,6 +16,25 @@ from validation import user_validate_on_patch_email
 
 user_routes = Blueprint("user_routes", __name__, url_prefix="/api/v1/users")
 
+# GET https://surprise-me.benbolt.house/api/v1/users/check_email_is_unique?email=<email>
+# Determines if an email is in use and responds accordingly.
+@user_routes.route("/check_email_is_unique", methods=["POST"])
+def check_email_is_unique():
+    get = request.args.get
+
+    email = get("email")
+
+    if Email.query.filter(Email.value == email).first():
+        raise BadRequest(response={
+            "notification": {
+                "body": f"The email address {email} is already in use. Do you already have an account?",
+                "type": "card_notifications",
+                "action_label": "Sign in here",
+                "action": f"/sign_in?email={email}",
+            }
+        })
+
+    return {}, 200
 
 # POST https://surprise-me.benbolt.house/api/v1/users
 # Creates a new unverified user in the database. Email verification is
@@ -25,23 +44,31 @@ user_routes = Blueprint("user_routes", __name__, url_prefix="/api/v1/users")
 def post():
     get = request.json.get
 
-    user = User(
-        first_name=get("first_name"),
-        last_name=get("last_name"))
+    user = User()
+    user.first_name = get("first_name")
+    user.last_name = get("last_name")
+    user.bio = get("bio")
 
     db.session.add(user)
-
     db.session.commit()
 
     user.set_active_email_address(get("email"))
-
     user.set_active_password(get("password"))
 
     db.session.commit()
 
     return jsonify({
-        "message": "User created successfully",
-        "data": user.to_dict(),
+        "data": {
+            **current_user.to_dict(),
+            "password": None,
+            "confirm_password": None,
+        },
+        "notification": {
+            "body": f"Welcome, {user.first_name}!",
+            "type": "card_notifications",
+            "action_label": "Take me to Surprise Me",
+            "action": "/#/home",
+        },
     }), 201
 
 
@@ -51,7 +78,6 @@ def post():
 @login_required
 def get():
     return jsonify({
-        "message": "Success",
         "data": current_user.to_dict(),
     }), 200
 
@@ -62,17 +88,21 @@ def get():
 @user_validate_on_patch()
 @login_required
 def patch():
-    json = request.json.get
+    get = request.json.get
 
-    session_user.update(
-        first_name=json("first_name"),
-        last_name=json("last_name"))
+    current_user.first_name = get("first_name")
+    current_user.last_name = get("last_name")
+    current_user.bio = get("bio")
 
     db.session.commit()
 
     return jsonify({
-        "message": "User updated successfully",
         "data": current_user.to_dict(),
+        "notification": {
+            "body": "Your profile has been updated.",
+            "type": "popup_notifications",
+            "delay": 3,
+        }
     }), 200
 
 
@@ -84,18 +114,32 @@ def patch():
 @user_validate_on_patch_password()
 @login_required
 def patch_password():
-    json = request.json.get
+    get = request.json.get
 
     try:
-        session_user.set_active_password(json("password"))
+        current_user.set_active_password(get("password"))
 
     except Exception as exception:
-        raise BadRequest(response="You have already used this password. Please try another.")
+        raise BadRequest(response={
+            "notification": {
+                "body": "You have already used this password. Please use another.",
+                "type": "popup_notifications",
+                "delay": 3,
+            }
+        })
 
     db.session.commit()
 
     return jsonify({
-        "message": "Password updated successfully",
+        "data": {
+            "password": None,
+            "confirm_password": None,
+        },
+        "notification": {
+            "body": "Your password has been updated",
+            "type": "popup_notifications",
+            "delay": 3,
+        }
     }), 200
 
 
@@ -106,22 +150,29 @@ def patch_password():
 @user_validate_on_patch_email()
 @login_required
 def patch_email(id):
-    json = request.json.get
+    get = request.json.get
 
     try:
-        # * Important to prevent users with fake unverified email
-        # * addresses having continued authorized access.
-        logout_user()
-
-        session_user.set_active_email_address(json("email"))
+        session_user.set_active_email_address(get("email"))
 
     except Exception as exception:
-        raise BadRequest(response="You have already used this email address. Please try another.")
+        raise BadRequest(response={
+            "notification": {
+                "body": "You have already used this email address. Please use another.",
+                "type": "popup_notifications",
+                "delay": 3,
+            }
+        })
 
     db.session.commit()
 
+    logout_user()
+
     return jsonify({
-        "message": "Email updated successfully",
+        "notification": {
+            "body": "Email updated successfully. You have been signed out until you verify your email address. Please check your email for the verification link.",
+            "type": "card_notifications",
+        }
     }), 200
 
 
@@ -130,16 +181,18 @@ def patch_email(id):
 @user_routes.route("", methods=["DELETE"])
 @login_required
 def delete_soft(id):
-    # * The user has opted out of further sessions and this session
-    # * must be deleted.
-    logout_user()
-
     session_user.set_deleted_at()
 
     db.session.commit()
 
+    logout_user()
+
     return jsonify({
-        "message": "User was successfully removed",
+        "notification": {
+            "body": "Your account has been deleted",
+            "type": "popup_notifications",
+            "delay": 3,
+        }
     }), 200
 
 

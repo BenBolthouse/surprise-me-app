@@ -37,14 +37,22 @@ def post():
     # handle requests for non-existent approvers
     if approver is None or approver.is_deleted:
         raise BadRequest(response={
-            "message": "User does not exist",
+            "notification": {
+                "body": "The user you requested to connect with doesn't exist.",
+                "type": "popup_notifications",
+                "delay": 3,
+            },
         })
 
     # In the case of an existing, active connection we'll send the client a
     # reminder that they are already connected to this user.
     if existing_connection and not existing_connection.is_deleted:
         raise BadRequest(response={
-            "message": "Connection already exists",
+            "notification": {
+                "body": "You are already connected with this user.",
+                "type": "popup_notifications",
+                "delay": 3,
+            },
         })
 
     # If the route compiles to this point then it means we're either
@@ -54,7 +62,6 @@ def post():
         connection = existing_connection
         connection.rejoin(current_user.id)
 
-        message = "Existing connection restored"
         status_code = 200
 
     else:
@@ -63,31 +70,39 @@ def post():
         db.session.add(connection)
         db.session.commit()
 
-        message = "Connection created successfully"
         status_code = 201
 
-    notification = Notification(
-        "CONNECTION",
-        approver.id,
-        f"{current_user.first_name} {current_user.last_name} wants to connect",
-        f"{Config.PUBLIC_URL}/connections/{connection.id}/approval")
-
-    # Emit a websocket message to the approver's room if available.
-    emit("connection",
-         notification.to_ws_response(),
-         namespace="notifications",
-         room=f"user_{approver.id}")
+    notification = Notification()
+    notification.recipient_id = approver.id
+    notification.type = "bell_notification"
+    notification.body = f"{current_user.first_name} {current_user.last_name} wants to connect with you."
+    notification.action = f"/#/approvals/{connection.id}"
 
     db.session.add(notification)
     db.session.commit()
 
+    # Emit a notification to the approver's user notifications channel.
+    emit("receive_user_notification", {
+        "data": connection.to_dict(approver_id),
+        "notification": {
+            "id": notification.id,
+            "body": notification.body,
+            "type": notification.type,
+            "action": notification.action,
+        }
+    }, room=f"user_notifications_{approver_id}")
+
     return jsonify({
-        "message": message,
-        "data": connection.to_dict(current_user),
+        "data": connection.to_dict(current_user.id),
+        "notification": {
+            "body": f"A connection request has been sent to {approver.first_name}.",
+            "type": "popup_notifications",
+            "delay": 3,
+        },
     }), status_code
 
 
-# GET https://surprise-me.benbolt.house/api/v1/users/<id>/connections
+# GET https://surprise-me.benbolt.house/api/v1/connections
 # Retrieves all of a logged in user's own pending and approved connections.
 @connection_routes.route("", methods=["GET"])
 @login_required
@@ -103,7 +118,6 @@ def get():
     connections = [x.to_dict(current_user.id) for x in connections]
 
     return jsonify({
-        "message": "Success",
         "data": connections,
     }), 200
 
@@ -119,19 +133,31 @@ def patch_approve(id):
 
     if connection is None:
         raise BadRequest(response={
-            "message": "Connection does not exist",
+            "notification": {
+                "body": "This connection request longer exists.",
+                "type": "popup_notifications",
+                "delay": 3,
+            },
         })
 
     # handle requests for connections for which the user isn't approver
     if connection.approver_id != current_user.id:
         raise Forbidden(response={
-            "message": "User not approver",
+            "notification": {
+                "body": "You cannot approve this connection.",
+                "type": "popup_notifications",
+                "delay": 3,
+            },
         })
 
     # handle requests for connections that are already approved
     if connection.approved_at is not None:
         raise BadRequest(response={
-            "message": "Connection already approved",
+            "notification": {
+                "body": "This connection is already approved.",
+                "type": "popup_notifications",
+                "delay": 3,
+            },
         })
 
     connection.approve()
@@ -139,8 +165,12 @@ def patch_approve(id):
     db.session.commit()
 
     return jsonify({
-        "message": "Connection approved successfully",
-        "data": connection.to_dict(current_user),
+        "data": connection.to_dict(current_user.id),
+        "notification": {
+            "body": "Connection approved",
+            "type": "popup_notifications",
+            "delay": 3,
+        },
     }), 200
 
 
@@ -155,13 +185,21 @@ def patch_deny(id):
 
     if connection is None:
         raise BadRequest(response={
-            "message": "Connection does not exist",
+            "notification": {
+                "body": "This connection request longer exists.",
+                "type": "popup_notifications",
+                "delay": 3,
+            },
         })
 
     # handle requests for connections for which the user isn't approver
     if connection.approver_id != current_user.id:
         raise Forbidden(response={
-            "message": "User not approver",
+            "notification": {
+                "body": "You cannot deny this connection.",
+                "type": "popup_notifications",
+                "delay": 3,
+            },
         })
 
     connection.deny()
@@ -169,8 +207,12 @@ def patch_deny(id):
     db.session.commit()
 
     return jsonify({
-        "message": "Connection denied successfully",
-        "data": connection.to_dict(current_user),
+        "data": connection.to_dict(current_user.id),
+        "notification": {
+            "body": "Connection request removed",
+            "type": "popup_notifications",
+            "delay": 3,
+        },
     }), 200
 
 
@@ -188,7 +230,11 @@ def delete_soft(id):
 
     if connection is None:
         raise Forbidden(response={
-            "message": "User not member",
+            "notification": {
+                "body": "You cannot leave this connection.",
+                "type": "popup_notifications",
+                "delay": 3,
+            },
         })
 
     connection.leave()
@@ -196,8 +242,12 @@ def delete_soft(id):
     db.session.commit()
 
     return jsonify({
-        "message": "Connection deleted successfully",
-        "data": connection.to_dict(current_user),
+        "data": connection.to_dict(current_user.id),
+        "notification": {
+            "body": "You have left the connection.",
+            "type": "popup_notifications",
+            "delay": 3,
+        },
     }), 200
 
 
@@ -226,13 +276,11 @@ def handle_composing_message(payload):
 
     # handle requests for non-existent connections
     if not connection or connection.is_deleted:
-        raise SocketIOError("Connection not found")
+        raise SocketIOError()
 
     other_user = connection.other_user(current_user.id)
 
     recipient_id = other_user.id
-
-    message_room_name = f"message_room_{recipient_id}"
 
     response = {
         "id": connection_id,
@@ -240,4 +288,4 @@ def handle_composing_message(payload):
     }
 
     # emit to user's message room
-    socketio.emit("composing_message", response, to=message_room_name)
+    socketio.emit("composing_message", response, to=f"message_room_{recipient_id}")

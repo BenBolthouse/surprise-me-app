@@ -16,19 +16,18 @@ error_routes = Blueprint("errors_routes", __name__)
 @app.errorhandler(NotFound)
 @app.errorhandler(Forbidden)
 @app.errorhandler(Unauthorized)
+@app.errorhandler(InternalServerError)
 def handle_werkzeug_exceptions(exception):
     return jsonify(exception.response), exception.code
 
 
 # Handle 500 range errors and raised exceptions.
-@app.errorhandler(InternalServerError)
 @app.errorhandler(Exception)
 def handle_all_other_exceptions(exception):
     return jsonify({
-        "message": "There was an unexpected internal server error",
-        "data": {
-            "details": exception.name,
-            "traceback": format_stack(),
+        "notification": {
+            "body": "An error ocurred. Please refresh your browser and try again. If this issue persists then contact us.",
+            "type": "card_notifications",
         },
     }), 500
 

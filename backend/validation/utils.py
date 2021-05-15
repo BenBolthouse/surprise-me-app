@@ -12,8 +12,11 @@ def validator(request, schema, target):
     validator = Validator(schema)
     if not validator.validate(target):
         raise BadRequest(response={
-            "message": "Data validation failed.",
-            "data": validator.errors
+            "notification": {
+                "body": "Some of the provided information is invalid. Please correct the errors and try again.",
+                "type": "popup_notifications",
+                "delay": 5,
+            },
         })
     return request
 
@@ -26,6 +29,7 @@ class RouteDecorator:
     param `req` Callback function whose first argument is the request context\\
     param `res` Callback function whose first argument is the response context
     """
+
     def __init__(self, req=None, res=None):
         self.req = req
         self.res = res

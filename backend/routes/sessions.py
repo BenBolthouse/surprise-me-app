@@ -22,12 +22,20 @@ def post():
 
     if not email:
         raise BadRequest(response={
-            "message": "Invalid email address.",
+            "notification": {
+                "body": "Invalid email address",
+                "type": "popup_notifications",
+                "delay": 3,
+            },
         })
 
     if email.is_deleted:
         raise BadRequest(response={
-            "message": "Email address is expired.",
+            "notification": {
+                "body": "Email address is expired. Please use the email address associated with your account.",
+                "type": "popup_notifications",
+                "delay": 5,
+            },
         })
 
     user = User.query.get(email.user_id)
@@ -36,14 +44,22 @@ def post():
 
     if not password_is_valid:
         raise BadRequest(response={
-            "message": "Password is invalid. Please try again.",
+            "notification": {
+                "body": "Invalid password",
+                "type": "popup_notifications",
+                "delay": 3,
+            },
         })
 
     login_user(user)
 
     return jsonify({
-        "message": "Success",
         "data": user.to_dict(),
+        "notification": {
+            "body": f"Welcome back, {user.first_name}!",
+            "type": "popup_notifications",
+            "delay": 3,
+        },
     }), 201
 
 
@@ -59,7 +75,6 @@ def get():
         data = {}
 
     return jsonify({
-        "message": "Success",
         "data": data,
     }), 200
 
@@ -70,8 +85,16 @@ def get():
 @session_routes.route("", methods=["DELETE"])
 @login_required
 def delete():
-    response = make_response({"message": "Success"})
+    response = make_response({
+        "notification": {
+            "body": "You have signed out. See you again soon!",
+            "type": "popup_notifications",
+            "delay": 3,
+        },
+    })
+
     response.delete_cookie("session")
+
     return response
 
 

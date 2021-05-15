@@ -33,31 +33,50 @@ def post(connection_id):
     # handle bad requests for non-member users
     if not connection:
         raise BadRequest(response={
-            "message": "User not connected to recipient user",
+            "notification": {
+                "body": "You cannot send a message to this user.",
+                "type": "popup_notifications",
+                "delay": 3,
+            },
         })
 
     other_user = connection.other_user(current_user.id)
     recipient_id = other_user.id
 
-    message_room_name = f"message_room_{recipient_id}"
+    message = Message()
+    message.connection_id = int(connection_id)
+    message.sender_id = current_user.id
+    message.recipient_id = recipient_id
+    message.body = body
 
-    message = Message(int(connection_id), current_user.id, recipient_id, body)
+    notification = Notification()
+    notification.recipient_id = recipient_id
+    notification.type = "message"
+    notification.body = body,
+    notification.action = f"/#/connections/{connection.id}"
 
     db.session.add(message)
+    db.session.add(notification)
     db.session.commit()
 
-    response = {
-        "message": "Success",
-        "data": {
-            "connection_id": int(connection_id),
-            "messages": [message.to_dict()],
-        }
-    }
-
     # emit to user's message room
-    socketio.emit("deliver_message", response, to=message_room_name)
+    socketio.emit("deliver_message", {
+        "data": message.to_dict(),
+        "notification": {
+            "body": {
+                "sender_name": current_user.first_name,
+                "sender_id": current_user.id,
+                "message": body,
+            },
+            "action": f"/#/connections/{connection_id}/messages",
+            "type": "message_notifications",
+            "delay": 3,
+        },
+    }, to=f"message_{recipient_id}")
 
-    return jsonify(response), 201
+    return jsonify({
+        "data": message.to_dict(),
+    }), 201
 
 
 # GET https://surprise-me.benbolt.house/api/v1/connections/<connection_id>/messages
@@ -70,9 +89,7 @@ def get(connection_id):
 
     # handle bad requests for poorly-formatted requests
     if not offset or not limit:
-        raise BadRequest(response={
-            "message": "Missing request args"
-        })
+        raise BadRequest()
 
     connection = Connection.query.filter(
         and_(
@@ -84,7 +101,11 @@ def get(connection_id):
     # handle bad requests for non-member users
     if not connection or connection.is_deleted:
         raise Forbidden(response={
-            "message": "User not member",
+            "notification": {
+                "body": "This connection no longer exists.",
+                "type": "popup_notifications",
+                "delay": 3,
+            },
         })
 
     # get offset limit of messages and format for json response
@@ -97,11 +118,7 @@ def get(connection_id):
     messages = [x.to_dict() for x in messages]
 
     return jsonify({
-        "message": "Success",
-        "data": {
-            "connection_id": int(connection_id),
-            "messages": messages,
-        }
+        "data": messages,
     }), 200
 
 
@@ -114,7 +131,6 @@ def patch(connection_id, id):
     get = request.json.get
 
     body = get("body")
-    updated_at = get("updated_at")
 
     connection = Connection.query.filter(
         and_(
@@ -126,13 +142,15 @@ def patch(connection_id, id):
     # handle bad requests for non-member users
     if not connection or connection.is_deleted:
         raise BadRequest(response={
-            "message": "User not connected to recipient user",
+            "notification": {
+                "body": "This connection no longer exists.",
+                "type": "popup_notifications",
+                "delay": 3,
+            },
         })
 
     other_user = connection.other_user(current_user.id)
     recipient_id = other_user.id
-
-    message_room_name = f"message_room_{recipient_id}"
 
     message = Message.query.filter(
         and_(
@@ -142,26 +160,20 @@ def patch(connection_id, id):
 
     # handle requests for non-existend messages
     if not message or message.is_deleted:
-        raise BadRequest(response={
-            "message": "Message does not exist",
-        })
+        raise BadRequest()
 
-    message.update(body=body, updated_at=updated_at)
+    message.update(body=body)
 
     db.session.commit()
 
-    response = {
-        "message": "Success",
-        "data": {
-            "connection_id": int(connection_id),
-            "messages": [message.to_dict()],
-        }
-    }
-
     # emit to user's message room
-    socketio.emit("amend_message", response, to=message_room_name)
+    socketio.emit("amend_message", {
+        "data": message.to_dict(),
+    }, to=f"message_{recipient_id}")
 
-    return jsonify(response), 201
+    return jsonify({
+        "data": message.to_dict(),
+    }), 201
 
 
 # DELETE https://surprise-me.benbolt.house/api/v1/connections/<connection_id>/messages/<id>
@@ -180,13 +192,15 @@ def delete(connection_id, id):
     # handle bad requests for non-member users
     if not connection or connection.is_deleted:
         raise BadRequest(response={
-            "message": "User not connected to recipient user",
+            "notification": {
+                "body": "This connection no longer exists.",
+                "type": "popup_notifications",
+                "delay": 3,
+            },
         })
 
     other_user = connection.other_user(current_user.id)
     recipient_id = other_user.id
-
-    message_room_name = f"message_room_{recipient_id}"
 
     message = Message.query.filter(
         and_(
@@ -197,22 +211,22 @@ def delete(connection_id, id):
     # handle requests for non-existend messages
     if not message or message.is_deleted:
         raise BadRequest(response={
-            "message": "Message does not exist",
+            "notification": {
+                "body": "This message no longer exists.",
+                "type": "popup_notifications",
+                "delay": 3,
+            },
         })
 
-    message.update(deleted_at=datetime.now())
+    message.set_deleted_at()
 
     db.session.commit()
 
-    response = {
-        "message": "Success",
-        "data": {
-            "connection_id": int(connection_id),
-            "messages": [message.to_deleted_dict()],
-        }
-    }
-
     # emit to user's message room
-    socketio.emit("discard_message", response, to=message_room_name)
+    socketio.emit("discard_message", {
+        "data": message.to_deleted_dict(),
+    }, to=f"message_room_{recipient_id}")
 
-    return jsonify(response), 201
+    return jsonify({
+        "data": message.to_deleted_dict(),
+    }), 201

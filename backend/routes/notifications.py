@@ -19,13 +19,14 @@ def post():
 
 
 # GET https://surprise-me.benbolt.house/api/v1/notifications
-# Retrieves all unseen and non-dismissed notifications for a user.
-@notification_routes.route("", methods=["GET"])
+# Retrieves all unseen and non-dismissed notifications for a user by type.
+@notification_routes.route("/<type>", methods=["GET"])
 @login_required
-def get():
+def get(type):
     notifications = Notification.query.filter(
         and_(
             Notification.recipient_id == current_user.id,
+            Notification.type == f"{type}_notification",
             Notification.dismissed_at == None))\
         .order_by(Notification.created_at.desc())\
         .all()  # noqa
@@ -33,13 +34,12 @@ def get():
     notifications = [x.to_dict() for x in notifications]
 
     return jsonify({
-        "message": "Success",
         "data": notifications,
     }), 200
 
 
-# Updates a collection of notification as seen.
 # PATCH https://surprise-me.benbolt.house/api/v1/notifications/see
+# Updates a collection of notification as seen.
 @notification_routes.route("/see", methods=["PATCH"])
 @login_required
 def patch_see():
@@ -50,12 +50,14 @@ def patch_see():
     for x in notifications:
         notification = Notification.query.get(x)
 
-        notification.seen_at = datetime.now()
+        notification.set_seen_at()
 
     db.session.commit()
 
+    notifications = [x.to_dict() for x in notifications]
+
     return jsonify({
-        "message": "Success",
+        "data": notifications,
     }), 200
 
 
@@ -71,10 +73,13 @@ def patch_dismiss():
     for x in notifications:
         notification = Notification.query.get(x)
 
-        notification.dismissed_at = datetime.now()
+        notification.set_seen_at()
+        notification.set_dismissed_at()
 
     db.session.commit()
 
+    notifications = [x.to_dict() for x in notifications]
+
     return jsonify({
-        "message": "Success",
+        "data": notifications,
     }), 200

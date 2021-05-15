@@ -39,7 +39,7 @@ def test__connections_routes__POST___create(seed, client, headers, login):
     notification = Notification.query.filter(Notification.recipient_id == 3).first()
     assert notification.recipient.id == 3
     assert notification.body == "UserA UserA wants to connect"
-    assert notification.action == f"{Config.PUBLIC_URL}/connections/4/approval"
+    assert notification.action == f"/connections/4/approval"
 
 
 def test__connections_routes__POST___create_fails_existing_active_connection(client, headers, login):
@@ -269,4 +269,4 @@ def test__connections_routes__POST___create_restores_deleted_connection(client, 
     notification = Notification.query.filter(Notification.recipient_id == 1).first()
     assert notification.recipient.id == 1
     assert notification.body == "UserC UserC wants to connect"
-    assert notification.action == f"{Config.PUBLIC_URL}/connections/4/approval"
+    assert notification.action == f"/connections/4/approval"
