@@ -32,6 +32,14 @@
                 background-color: global.$color-success;
                 color: white;
             }
+            &.warning {
+                background-color: global.$color-warning;
+                color: white;
+            }
+            &.fatal {
+                background-color: global.$color-fatal;
+                color: white;
+            }
             &.show {
                 animation: show $duration ease 0s 1 forwards;
             }
