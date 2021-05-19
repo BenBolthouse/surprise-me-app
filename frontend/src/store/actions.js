@@ -62,15 +62,15 @@ export const connections = {
   },
   approve: (id) => async (dispatch) => {
     const data = await req.patch("/api/v1/connections" + `/${id}/approve`);
-    return dispatch({ type: `connections/${id}/APPROVE`, payload: data });
+    return dispatch({ type: `connections/APPROVE`, payload: data });
   },
   deny: (id) => async (dispatch) => {
     const data = await req.patch("/api/v1/connections" + `/${id}/deny`);
-    return dispatch({ type: `connections/${id}/DENY`, payload: data });
+    return dispatch({ type: `connections/DENY`, payload: data });
   },
   leave: (id) => async (dispatch) => {
     const data = await req.destroy("/api/v1/connections" + `/${id}`);
-    return dispatch({ type: `connections/${id}/LEAVE`, payload: data });
+    return dispatch({ type: `connections/LEAVE`, payload: data });
   },
 };
 
