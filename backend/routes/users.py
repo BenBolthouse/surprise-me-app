@@ -16,6 +16,7 @@ from validation import user_validate_on_patch_email
 
 user_routes = Blueprint("user_routes", __name__, url_prefix="/api/v1/users")
 
+
 # GET https://surprise-me.benbolt.house/api/v1/users/check_email_is_unique?email=<email>
 # Determines if an email is in use and responds accordingly.
 @user_routes.route("/check_email_is_unique", methods=["POST"])
@@ -34,7 +35,10 @@ def check_email_is_unique():
             }
         })
 
-    return {}, 200
+    return jsonify({
+        "data": True,
+    }), 200
+
 
 # POST https://surprise-me.benbolt.house/api/v1/users
 # Creates a new unverified user in the database. Email verification is

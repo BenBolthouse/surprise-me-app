@@ -11,17 +11,28 @@ from app import app, socketio
 error_routes = Blueprint("errors_routes", __name__)
 
 
-# Handle 400 range API errors.
+@app.errorhandler(Unauthorized)
+def handle_unauth(exception):
+    if not exception.response:
+        exception.response = {
+            "notification": {
+                "body": "You must be signed in to do this.",
+                "type": "popup",
+                "duration": 3,
+            }
+        }
+
+    return jsonify(exception.response), exception.code
+
+
 @app.errorhandler(BadRequest)
 @app.errorhandler(NotFound)
 @app.errorhandler(Forbidden)
-@app.errorhandler(Unauthorized)
 @app.errorhandler(InternalServerError)
 def handle_werkzeug_exceptions(exception):
     return jsonify(exception.response), exception.code
 
 
-# Handle 500 range errors and raised exceptions.
 @app.errorhandler(Exception)
 def handle_all_other_exceptions(exception):
     return jsonify({

@@ -8,18 +8,14 @@ import { Provider } from "react-redux";
 import App from "./App.jsx";
 import configureStore from "./store";
 
-import * as connectionsActions from "./store/reducers/connection.reducer";
-import * as notificationActions from "./store/reducers/notification.reducer";
-import * as userActions from "./store/reducers/user.reducer";
+import * as actions from "./store/actions";
 
 export const store = configureStore();
 
 // Make Redux available on window only in development
 if (process.env.NODE_ENV !== "production") {
   window.store = store;
-  window.connectionsActions = connectionsActions;
-  window.notificationActions = notificationActions;
-  window.userActions = userActions;
+  window.actions = actions;
 }
 
 // React root entry point

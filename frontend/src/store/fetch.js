@@ -1,10 +1,13 @@
+/* eslint-disable no-unused-vars */
+
+import { store } from "..";
+
 /** @module services/fetch */
 
-import { store } from ".";
 import camelcase from "camelcase-keys";
 import snakecase from "snakecase-keys";
-import userManager from "./store/models/user.model";
-import * as notificationActions from "./store/reducers/notification.reducer";
+
+import * as actions from "./actions";
 
 /**
  * Sends a get request.
@@ -49,14 +52,6 @@ export async function patch(url, body) {
   return await this.fetch(url, { method: "PATCH", body });
 }
 
-const defaultOptions = {
-  method: "GET",
-  headers: {
-    "Content-Type": "application/json",
-    Accept: "application/json",
-  },
-};
-
 /**
  * Sends a delete request.
  * @param {String} url Request URL
@@ -69,14 +64,26 @@ export async function destroy(url) {
 
 /** @ignore */
 export async function fetch(url, options = {}) {
+  const csrf = store.getState().session.csrfToken;
+
+  const defaultOptions = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+  };
+
   const request = { ...defaultOptions, ...options };
 
-  if ("POST PUT PATCH DELETE".includes(request.method)) {
+  const stateChangeReq = "POST PUT PATCH DELETE".includes(request.method);
+
+  if (stateChangeReq) {
     if (request.body) {
       const convertCase = snakecase(request.body, { deep: true });
       request.body = JSON.stringify(convertCase);
     }
-    request.headers["X-CSRFToken"] = userManager.csrfToken;
+    request.headers["X-CSRFToken"] = csrf;
   }
 
   let response = await window.fetch(url, request);
@@ -85,11 +92,19 @@ export async function fetch(url, options = {}) {
 
   const { notification, data, status } = response;
 
-  if (notification) {
-    store.dispatch(notificationActions.addNotification(notification));
-  }
+  if (notification)
+    switch (notification.type) {
+      case "popup":
+        store.dispatch(actions.notifications.popup.create(notification));
+        break;
+      case "card":
+        store.dispatch(actions.notifications.card.create(notification));
+        break;
+    }
 
   if (status >= 400) throw Error();
 
-  return { data };
+  if (stateChangeReq) store.dispatch(actions.session.getCsrf());
+
+  return data;
 }

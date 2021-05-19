@@ -1,6 +1,8 @@
+from datetime import datetime
 from flask import current_app, Blueprint, jsonify, make_response, request
-from flask_login import current_user, login_required, login_user
+from flask_login import current_user, login_required, login_user, logout_user
 from flask_socketio import join_room, leave_room, send
+from flask_wtf.csrf import generate_csrf
 from socketio.exceptions import ConnectionRefusedError
 from werkzeug.exceptions import BadRequest
 
@@ -12,10 +14,19 @@ from models import Email, User
 session_routes = Blueprint("session_routes", __name__, url_prefix="/api/v1/sessions")
 
 
-# POST https://surprise-me.benbolt.house/api/v1/session
+# POST https://surprise-me.benbolt.house/api/v1/sessions
 # Creates a new user session and sends a session cookie to the client.
 @session_routes.route("", methods=["POST"])
 def post():
+    if current_user.is_active:
+        raise BadRequest(response={
+            "notification": {
+                "body": "You are already signed in.",
+                "type": "popup",
+                "deladurationy": 3,
+            },
+        })
+
     json = request.json.get
 
     email = Email.query.filter(Email.value == json("email")).first()
@@ -24,8 +35,8 @@ def post():
         raise BadRequest(response={
             "notification": {
                 "body": "Invalid email address",
-                "type": "popup_notifications",
-                "delay": 3,
+                "type": "popup",
+                "duration": 3,
             },
         })
 
@@ -33,8 +44,8 @@ def post():
         raise BadRequest(response={
             "notification": {
                 "body": "Email address is expired. Please use the email address associated with your account.",
-                "type": "popup_notifications",
-                "delay": 5,
+                "type": "popup",
+                "duration": 5,
             },
         })
 
@@ -46,40 +57,61 @@ def post():
         raise BadRequest(response={
             "notification": {
                 "body": "Invalid password",
-                "type": "popup_notifications",
-                "delay": 3,
+                "type": "popup",
+                "duration": 3,
             },
         })
 
     login_user(user)
 
     return jsonify({
-        "data": user.to_dict(),
+        "data": {
+            "active": True,
+            "timestamp": datetime.now().isoformat(),
+        },
         "notification": {
             "body": f"Welcome back, {user.first_name}!",
-            "type": "popup_notifications",
-            "delay": 3,
+            "type": "popup",
+            "duration": 2,
+            "importance": "success",
         },
     }), 201
 
 
-# GET https://surprise-me.benbolt.house/api/v1/session Retrieves session
-# data and sends to the client if authenticated, otherwise sends an OK
-# response without data. This prevents error code responses if the user
-# isn't logged in.
+# GET https://surprise-me.benbolt.house/api/v1/sessions/csrf
+# Issues a new anti CSRF token to the client in a JSON body.
+@session_routes.route("/csrf", methods=["GET"])
+def getCsrf():
+    return jsonify({
+        "data": {
+            "csrf_token": generate_csrf(),
+        },
+    }), 200
+
+
+# GET https://surprise-me.benbolt.house/api/v1/sessions
+# Retrieves session data and sends to the client if authenticated,
+# otherwise sends an OK response without data. This prevents error code
+# responses if the user isn't logged in.
 @session_routes.route("", methods=["GET"])
 def get():
     if current_user.is_active:
-        data = current_user.to_dict()
+        data = {
+            "active": True,
+            "timestamp": datetime.now().isoformat(),
+        }
     else:
-        data = {}
+        data = {
+            "active": False,
+            "timestamp": datetime.now().isoformat(),
+        }
 
     return jsonify({
         "data": data,
     }), 200
 
 
-# DELETE https://surprise-me.benbolt.house/api/v1/session
+# DELETE https://surprise-me.benbolt.house/api/v1/sessions
 # Deletes the session via deletion of the session cookie on the response to
 # the client.
 @session_routes.route("", methods=["DELETE"])
@@ -87,13 +119,15 @@ def get():
 def delete():
     response = make_response({
         "notification": {
-            "body": "You have signed out. See you again soon!",
-            "type": "popup_notifications",
-            "delay": 3,
+            "body": "You have signed out",
+            "type": "popup",
+            "duration": 3,
         },
     })
 
-    response.delete_cookie("session")
+    logout_user()
+
+    test = response.delete_cookie("session", path="/")
 
     return response
 

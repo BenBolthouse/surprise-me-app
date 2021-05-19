@@ -4,11 +4,13 @@ import enhancer from "./enhancer";
 
 import connections from "./reducers/connection.reducer";
 import notifications from "./reducers/notification.reducer";
+import session from "./reducers/session.reducer";
 import user from "./reducers/user.reducer";
 
 const rootReducer = combineReducers({
   connections,
   notifications,
+  session,
   user,
 });
 
