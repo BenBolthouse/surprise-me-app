@@ -39,8 +39,8 @@ def post():
         raise BadRequest(response={
             "notification": {
                 "body": "The user you requested to connect with doesn't exist.",
-                "type": "popup_notifications",
-                "delay": 3,
+                "type": "popup",
+                "duration": 4,
             },
         })
 
@@ -50,8 +50,8 @@ def post():
         raise BadRequest(response={
             "notification": {
                 "body": "You are already connected with this user.",
-                "type": "popup_notifications",
-                "delay": 3,
+                "type": "popup",
+                "duration": 3,
             },
         })
 
@@ -96,8 +96,8 @@ def post():
         "data": connection.to_dict(current_user.id),
         "notification": {
             "body": f"A connection request has been sent to {approver.first_name}.",
-            "type": "popup_notifications",
-            "delay": 3,
+            "type": "popup",
+            "duration": 4,
         },
     }), status_code
 
@@ -135,8 +135,8 @@ def patch_approve(id):
         raise BadRequest(response={
             "notification": {
                 "body": "This connection request longer exists.",
-                "type": "popup_notifications",
-                "delay": 3,
+                "type": "popup",
+                "duration": 3,
             },
         })
 
@@ -145,8 +145,8 @@ def patch_approve(id):
         raise Forbidden(response={
             "notification": {
                 "body": "You cannot approve this connection.",
-                "type": "popup_notifications",
-                "delay": 3,
+                "type": "popup",
+                "duration": 3,
             },
         })
 
@@ -155,8 +155,8 @@ def patch_approve(id):
         raise BadRequest(response={
             "notification": {
                 "body": "This connection is already approved.",
-                "type": "popup_notifications",
-                "delay": 3,
+                "type": "popup",
+                "duration": 3,
             },
         })
 
@@ -168,8 +168,8 @@ def patch_approve(id):
         "data": connection.to_dict(current_user.id),
         "notification": {
             "body": "Connection approved",
-            "type": "popup_notifications",
-            "delay": 3,
+            "type": "popup",
+            "delay": 2,
         },
     }), 200
 
@@ -187,7 +187,7 @@ def patch_deny(id):
         raise BadRequest(response={
             "notification": {
                 "body": "This connection request longer exists.",
-                "type": "popup_notifications",
+                "type": "popup",
                 "delay": 3,
             },
         })
@@ -197,7 +197,7 @@ def patch_deny(id):
         raise Forbidden(response={
             "notification": {
                 "body": "You cannot deny this connection.",
-                "type": "popup_notifications",
+                "type": "popup",
                 "delay": 3,
             },
         })
@@ -210,8 +210,8 @@ def patch_deny(id):
         "data": connection.to_dict(current_user.id),
         "notification": {
             "body": "Connection request removed",
-            "type": "popup_notifications",
-            "delay": 3,
+            "type": "popup",
+            "delay": 2,
         },
     }), 200
 
@@ -232,7 +232,7 @@ def delete_soft(id):
         raise Forbidden(response={
             "notification": {
                 "body": "You cannot leave this connection.",
-                "type": "popup_notifications",
+                "type": "popup",
                 "delay": 3,
             },
         })
@@ -245,7 +245,7 @@ def delete_soft(id):
         "data": connection.to_dict(current_user.id),
         "notification": {
             "body": "You have left the connection.",
-            "type": "popup_notifications",
+            "type": "popup",
             "delay": 3,
         },
     }), 200

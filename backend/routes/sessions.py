@@ -23,7 +23,7 @@ def post():
             "notification": {
                 "body": "You are already signed in.",
                 "type": "popup",
-                "deladurationy": 3,
+                "duration": 2,
             },
         })
 
@@ -36,7 +36,8 @@ def post():
             "notification": {
                 "body": "Invalid email address",
                 "type": "popup",
-                "duration": 3,
+                "duration": 2,
+                "importance": "info",
             },
         })
 
@@ -46,6 +47,7 @@ def post():
                 "body": "Email address is expired. Please use the email address associated with your account.",
                 "type": "popup",
                 "duration": 5,
+                "importance": "info",
             },
         })
 
@@ -58,7 +60,8 @@ def post():
             "notification": {
                 "body": "Invalid password",
                 "type": "popup",
-                "duration": 3,
+                "duration": 2,
+                "importance": "info",
             },
         })
 
