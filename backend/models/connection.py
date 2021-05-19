@@ -62,6 +62,7 @@ class Connection(db.Model, EntityMixin):
         return {
             **self.entity_to_dict(),
             "requestor_id": self.requestor_id,
+            "approver_id": self.approver_id,
             "other_user": self.other_user(user_id).to_public_dict(),
             "approved_at": self.approved_at.isoformat() if self.approved_at else None,
         }
