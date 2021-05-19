@@ -1,13 +1,13 @@
 /* eslint-disable no-unused-vars */
 
-import { store } from "..";
+import { store } from ".";
 
 /** @module services/fetch */
 
 import camelcase from "camelcase-keys";
 import snakecase from "snakecase-keys";
 
-import * as actions from "./actions";
+import * as actions from "./store/actions";
 
 /**
  * Sends a get request.
