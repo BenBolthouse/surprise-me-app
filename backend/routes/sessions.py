@@ -37,7 +37,6 @@ def post():
                 "body": "Invalid email address",
                 "type": "popup",
                 "duration": 2,
-                "importance": "info",
             },
         })
 
@@ -47,7 +46,6 @@ def post():
                 "body": "Email address is expired. Please use the email address associated with your account.",
                 "type": "popup",
                 "duration": 5,
-                "importance": "info",
             },
         })
 
@@ -61,7 +59,6 @@ def post():
                 "body": "Invalid password",
                 "type": "popup",
                 "duration": 2,
-                "importance": "info",
             },
         })
 
@@ -152,9 +149,9 @@ def connect():
 
 # EVENT join
 # Joins a user to a room.
-@socketio.on("join")
+@socketio.on("rooms/join")
 def connect(payload):
-    room_id = payload["room_id"]
+    room_id = payload["id"]
 
     join_room(room_id)
 
@@ -163,9 +160,9 @@ def connect(payload):
 
 # EVENT leave
 # Removes a user from a room.
-@socketio.on("leave")
+@socketio.on("rooms/leave")
 def connect(payload):
-    room_id = payload["room_id"]
+    room_id = payload["id"]
 
     join_room(room_id)
 
