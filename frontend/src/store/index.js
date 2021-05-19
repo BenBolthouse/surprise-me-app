@@ -2,8 +2,8 @@ import { createStore, combineReducers } from "redux";
 
 import enhancer from "./enhancer";
 
-import connections from "./reducers/connection.reducer";
-import notifications from "./reducers/notification.reducer";
+import connections from "./reducers/connections.reducer";
+import notifications from "./reducers/notifications.reducer";
 import session from "./reducers/session.reducer";
 import user from "./reducers/user.reducer";
 
