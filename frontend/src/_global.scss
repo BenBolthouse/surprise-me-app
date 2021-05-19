@@ -1,13 +1,13 @@
-// ** «««««««««««««««««««««««« Colors »»»»»»»»»»»»»»»»»»»»»»»» **
-
-$color-info: hsl(200, 100%, 40%);
+$color-info: hsl(200, 100%, 45%);
 $color-info-light: hsl(200, 100%, 50%);
-$color-success: hsl(140, 100%, 40%);
+$color-info-x-light: hsl(200, 100%, 80%);
+$color-success: hsl(140, 100%, 45%);
 $color-success-light: hsl(140, 100%, 50%);
-$color-warning: hsl(50, 100%, 40%);
+$color-warning: hsl(50, 100%, 45%);
 $color-warning-light: hsl(50, 100%, 50%);
-$color-fatal: hsl(340, 100%, 40%);
+$color-fatal: hsl(340, 100%, 45%);
 $color-fatal-light: hsl(340, 100%, 50%);
+$color-fatal-x-light: hsl(340, 100%, 80%);
 
 $blk-5: hsl(0, 0%, 5%);
 $blk-10: hsl(0, 0%, 10%);
@@ -28,10 +28,11 @@ $blk-80: hsl(0, 0%, 80%);
 $blk-85: hsl(0, 0%, 85%);
 $blk-90: hsl(0, 0%, 90%);
 $blk-95: hsl(0, 0%, 95%);
+$blk-98: hsl(0, 0%, 98%);
 
-// ** «««««««««««««««««««««««« Layout »»»»»»»»»»»»»»»»»»»»»»»» **
-
-$screen-size-sm: 0rem;
-$screen-size-md: 32rem;
-$screen-size-lg: 48rem;
-$screen-size-dt: 64rem;
+$screen-size-mobile-s: (320px);
+$screen-size-mobile-m: (375px);
+$screen-size-mobile-l: (425px);
+$screen-size-tablet: (768px);
+$screen-size-laptop: (1024px);
+$screen-size-laptop-l: (1440px);
