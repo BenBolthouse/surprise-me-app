@@ -1,5 +1,6 @@
 import * as req from "./fetch";
 import socketClient from "./socketio";
+import { store } from ".."
 
 export const session = {
   post: (props) => async (dispatch) => {
@@ -48,26 +49,27 @@ export const user = {
 };
 
 export const connections = {
-  _url: "/api/v1/connections",
-
   post: (approverId) => async (dispatch) => {
-    const data = await req.post(connections._url, approverId);
+    const data = await req.post("/api/v1/connections", approverId);
     return dispatch({ type: "connections/POST", payload: data });
   },
   get: () => async (dispatch) => {
-    const data = await req.get(connections._url);
-    return dispatch({ type: "connections/GET", payload: data });
+    const data = await req.get("/api/v1/connections");
+    return dispatch({
+      type: "connections/GET",
+      payload: { userId: store.getState().user.id, connections: data },
+    });
   },
   approve: (id) => async (dispatch) => {
-    const data = await req.patch(connections._url + `/${id}/approve`);
+    const data = await req.patch("/api/v1/connections" + `/${id}/approve`);
     return dispatch({ type: `connections/${id}/APPROVE`, payload: data });
   },
   deny: (id) => async (dispatch) => {
-    const data = await req.patch(connections._url + `/${id}/deny`);
+    const data = await req.patch("/api/v1/connections" + `/${id}/deny`);
     return dispatch({ type: `connections/${id}/DENY`, payload: data });
   },
   leave: (id) => async (dispatch) => {
-    const data = await req.destroy(connections._url + `/${id}`);
+    const data = await req.destroy("/api/v1/connections" + `/${id}`);
     return dispatch({ type: `connections/${id}/LEAVE`, payload: data });
   },
 };
