@@ -40,7 +40,7 @@ const PopupNotifications = ({ children }) => {
 
   return (
     <>
-      <div className="popup-notifications-view">
+      <div className="view popup-notifications-view">
         <div className="container">
           {!notification ? null :
             <div className={notificationClasses}>
