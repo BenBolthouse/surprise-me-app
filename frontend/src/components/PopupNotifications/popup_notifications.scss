@@ -1,16 +1,10 @@
 @use "../../global" as global;
 
 .popup-notifications-view {
-    grid-template-rows: 1fr 4rem;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    grid-template-rows: 8rem 1fr;
     z-index: 401;
     .container {
         $duration: 0.25s;
-        grid-row: 2 / 3;
         overflow: hidden;
         position: relative;
         .notification {
@@ -49,21 +43,21 @@
             @keyframes show {
                 0% {
                     opacity: 0;
-                    top: 100%;
+                    bottom: 100%;
                 }
                 100% {
                     opacity: 1;
-                    top: 0%;
+                    bottom: 0%;
                 }
             }
             @keyframes hide {
                 0% {
                     opacity: 1;
-                    top: 0%;
+                    bottom: 0%;
                 }
                 100% {
                     opacity: 0;
-                    top: 100%;
+                    bottom: 100%;
                 }
             }
         }
