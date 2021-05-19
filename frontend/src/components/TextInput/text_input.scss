@@ -1,0 +1,89 @@
+@use "../../global" as global;
+
+.text-input {
+    height: 5rem;
+    position: relative;
+    z-index: 200;
+    input {
+        font-size: 1.25rem;
+        border: 1px solid global.$blk-40;
+        border-radius: 4px;
+        height: 4rem;
+        line-height: 1.5rem;
+        outline: none;
+        min-width: (280rem / 16);
+        margin-top: 1rem;
+        padding: 14px 1rem 0;
+        &:focus {
+            border-color: global.$color-info;
+            box-shadow: 0 0 0 4px global.$color-info-x-light;
+        }
+    }
+    label {
+        position: absolute;
+        top: 30px;
+        left: 18px;
+        color: global.$blk-50;
+        font-size: (11rem / 16);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .icon {
+        position: absolute;
+        place-content: center center;
+        top: 1rem;
+        color: global.$blk-80;
+        font-size: 2rem;
+        width: 4rem;
+        height: 4rem;
+    }
+    .icon-help,
+    .icon-errors {
+        cursor: pointer;
+        display: none;
+        position: absolute;
+        font-size: 2rem;
+        width: 2rem;
+        height: 2rem;
+        bottom: 1rem;
+        right: 1rem;
+    }
+    .icon-help {
+        color: global.$color-info;
+        z-index: 201;
+    }
+    .icon-errors {
+        color: white;
+        z-index: 202;
+        &:hover {
+            color: global.$color-fatal-light;
+        }
+    }
+    &.tried.errors {
+        input {
+            border-color: global.$color-fatal;
+            box-shadow: 0 0 0 4px global.$color-fatal-x-light;
+        }
+        .icon-errors {
+            display: block;
+            animation: icon-bounce 1.5s ease 0.25s 1 forwards;
+        }
+        // prettier-ignore
+        @keyframes icon-bounce {
+            0%   { transform: scale(0.8,0.8) translateY(2px); }
+            20%   { transform: scale(1,1) translateY(-8px); color: global.$color-fatal; }
+            30%   { transform: scale(1,1) translateY(0); }
+            34%   { transform: scale(1,1) translateY(-2px); }
+            36%   { transform: scale(1,1) translateY(0); }
+            100%   { transform: scale(1,1) translateY(0); color: global.$color-fatal; }
+        }
+    }
+    &.has-icon {
+        input {
+            padding-left: 4rem;
+        }
+        label {
+            left: 66px;
+        }
+    }
+}
