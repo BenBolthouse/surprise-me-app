@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 
 import * as actions from "../store/actions";
+import socketClient from "../store/socketio";
 
 /**
  * Component sits below the high order components in the tree to handle
@@ -14,8 +15,9 @@ import * as actions from "../store/actions";
  */
 export const Authenticated = ({ children }) => {
   const dispatch = useDispatch();
-  const session = useSelector(x => x.session);
   const history = useHistory();
+  const session = useSelector(x => x.session);
+  const user = useSelector(x => x.user);
 
   const [mounted, setMounted] = useState(false);
 
@@ -24,10 +26,25 @@ export const Authenticated = ({ children }) => {
     else {
       dispatch(actions.user.get());
       dispatch(actions.connections.get());
-
-      setMounted(true);
     }
   }, [session.active]);
+
+  useEffect(() => {
+    if (user.id) {
+      socketClient.connect();
+      socketClient.emit("rooms/join", { id: "notifications/bell/" + user.id });
+      socketClient.emit("rooms/join", { id: "notifications/message/" + user.id });
+      socketClient.emit("rooms/join", { id: "messages/" + user.id });
+
+      setMounted(true);
+
+      return () => {
+        socketClient.disconnect();
+
+        console.log("Socketio Client: Disconnected from host on user sign out.");
+      }
+    }
+  }, [user.id])
 
   return !mounted ? null : children;
 };
