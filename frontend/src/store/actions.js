@@ -1,4 +1,4 @@
-import * as req from "./fetch";
+import * as req from "../fetch";
 import socketClient from "./socketio";
 import { store } from ".."
 
