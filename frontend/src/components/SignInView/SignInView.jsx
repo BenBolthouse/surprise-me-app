@@ -13,17 +13,17 @@ import Loader from "react-loaders";
 import 'loaders.css/src/animations/square-spin.scss'
 
 import * as actions from "../../store/actions";
-import TextInput from "../../components/TextInput/TextInput";
+import TextInput from "../Inputs/TextInputs";
 
 import "./sign_in_view.css";
-import { Link } from "react-router-dom";
+import { ButtonFill, ButtonOutline } from "../Buttons/Buttons";
 
 const SignInView = () => {
   const dispatch = useDispatch();
   const formRef = useRef(null);
-  const buttonRef = useRef(null);
 
   const [fetching, setFetching] = useState(false);
+  const [allowTry, setAllowTry] = useState(false);
   const [email, setEmail] = useState({ value: "", errors: [], showErrors: false });
   const [password, setPassword] = useState({ value: "" });
 
@@ -77,7 +77,7 @@ const SignInView = () => {
       && email.value.length
       && password.value.length;
 
-    buttonRef.current.disabled = !readyToTry;
+    setAllowTry(!readyToTry);
   }, [fetching, email.errors, email.value, password.value])
 
   return (
@@ -123,13 +123,16 @@ const SignInView = () => {
             formName="sign-in"
             label="Password"
             obscure={true} />
-          <button
-            ref={buttonRef}
-            type="submit">
-            Go
-          </button>
+          <ButtonFill
+            onClick={formOnSubmit}
+            disabled={allowTry}
+            importance="info">
+            Sign in
+          </ButtonFill>
         </form>
-        <Link to="sign-up">Sign up</Link>
+        <ButtonOutline to="/sign-up">
+          Create an account
+        </ButtonOutline>
       </div>
     </div>
   );

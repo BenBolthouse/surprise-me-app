@@ -10,49 +10,15 @@
         margin-top: 8rem;
         padding: 1rem;
         h1 {
+            color: global.$blk-80;
             font-family: "Source Sans Pro", Arial, Helvetica, sans-serif;
             font-size: 2.5rem;
             font-weight: 400;
             margin: 1rem 0;
             text-align: center;
         }
-        button {
-            cursor: pointer;
-            background-color: global.$color-info;
-            border: none;
-            border-radius: 4px;
-            color: white;
-            display: block;
-            font-size: 1rem;
-            width: 100%;
-            height: 4rem;
+        .button {
             margin-top: 1rem;
-            &:focus,
-            &:hover {
-                background-color: global.$color-info-light;
-            }
-            &:disabled {
-                cursor: not-allowed;
-                background-color: global.$blk-80;
-                color: white;
-            }
-        }
-        a {
-            border: 1px solid global.$color-info;
-            color: global.$color-info;
-            border-radius: 4px;
-            font-size: 1rem;
-            height: 4rem;
-            line-height: 3.75rem;
-            margin-top: 1rem;
-            outline: none;
-            text-decoration: none;
-            text-align: center;
-            &:focus,
-            &:hover {
-                border: 1px solid global.$color-info-light;
-                color: global.$color-info-light;
-            }
         }
     }
     .fetching {
