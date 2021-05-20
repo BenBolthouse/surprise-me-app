@@ -6,7 +6,7 @@ import {
   IoHelpCircleOutline as Help
 } from "react-icons/io5"
 
-import "./text_input.css";
+import "./text_inputs.css";
 
 const TextInput = (props) => {
   const {
