@@ -61,3 +61,11 @@ export const ButtonOutline = (props) => {
     {props.children}
   </Button>
 };
+
+export const ButtonText = (props) => {
+  const _props = { ...props, type: "button-text" };
+
+  return <Button {..._props}>
+    {props.children}
+  </Button>
+};

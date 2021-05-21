@@ -14,7 +14,7 @@
         border-radius: 4px;
         cursor: pointer;
         font-size: (18rem / 16);
-        min-height: 4rem;
+        height: 4rem;
         width: 100%;
         margin: 0;
         padding: 0;
@@ -92,6 +92,41 @@
                 cursor: not-allowed;
                 border-color: global.$blk-90;
                 color: global.$blk-60;
+            }
+        }
+    }
+    &.button-text {
+        &.info button {
+            color: global.$color-info;
+            &:focus,
+            &:hover {
+                color: global.$color-info-light;
+            }
+        }
+        &.success button {
+            color: global.$color-success;
+            &:focus,
+            &:hover {
+                color: global.$color-success-light;
+            }
+        }
+        &.gray button {
+            color: global.$blk-20;
+            &:focus,
+            &:hover {
+                color: global.$blk-60;
+            }
+        }
+        button {
+            background: none;
+            border: none;
+            font-size: 1rem;
+            &:disabled {
+                cursor: not-allowed;
+                color: global.$blk-60;
+                &:hover {
+                    color: global.$blk-60;
+                }
             }
         }
     }
