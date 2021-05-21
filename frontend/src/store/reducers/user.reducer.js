@@ -13,6 +13,9 @@ const model = {
 
 const reducer = (state = model, { type, payload }) => {
   switch (type) {
+    case "user/POST_EMAIL_UNIQUE":
+      return { ...state, ...payload };
+
     case "user/POST":
       return { ...state, ...payload };
 
