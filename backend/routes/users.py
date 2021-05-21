@@ -19,20 +19,15 @@ user_routes = Blueprint("user_routes", __name__, url_prefix="/api/v1/users")
 
 # GET https://surprise-me.benbolt.house/api/v1/users/check_email_is_unique?email=<email>
 # Determines if an email is in use and responds accordingly.
-@user_routes.route("/check_email_is_unique", methods=["POST"])
-def check_email_is_unique():
-    get = request.args.get
+@user_routes.route("/email_unique", methods=["POST"])
+def email_unique():
+    get = request.json.get
 
     email = get("email")
 
     if Email.query.filter(Email.value == email).first():
         raise BadRequest(response={
-            "notification": {
-                "body": f"The email address {email} is already in use. Do you already have an account?",
-                "type": "card_notifications",
-                "action_label": "Sign in here",
-                "action": f"/sign_in?email={email}",
-            }
+            "data": False,
         })
 
     return jsonify({
