@@ -26,6 +26,10 @@ export const user = {
     const data = await req.post("/api/v1/users", props);
     return dispatch({ type: "user/POST", payload: data });
   },
+  postEmailUnique: (props) => async (dispatch) => {
+    const data = await req.post("/api/v1/users/email_unique", props);
+    return dispatch({ type: "user/POST_EMAIL_UNIQUE", payload: data });
+  },
   get: () => async (dispatch) => {
     const data = await req.get("/api/v1/users");
     return dispatch({ type: "user/GET", payload: data });
