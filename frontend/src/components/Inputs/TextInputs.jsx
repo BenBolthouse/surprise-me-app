@@ -1,6 +1,7 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   IoAlertCircleOutline as Errors,
   IoHelpCircleOutline as Help
@@ -21,15 +22,17 @@ const TextInput = (props) => {
     formName,
     label,
     obscure,
+    disabled,
   } = props;
 
-  const [value, setValue] = useState("");
+  const inputRef = useRef(null);
+
   const [focused, setFocused] = useState(false);
   const [trying, setTrying] = useState(false);
   const [tried, setTried] = useState(false);
 
   const inputOnChange = (evt) => {
-    setValue(evt.target.value);
+    onChange(evt);
     onChange && onChange(evt);
   }
 
@@ -44,13 +47,9 @@ const TextInput = (props) => {
   }
 
   useEffect(() => {
-    if (value.length) {
-      setTrying(true)
-    }
-    else {
-      setTrying(false)
-    }
-  }, [value.length, tried])
+    if (inputRef.current.value.length) setTrying(true)
+    else setTrying(false)
+  }, [inputRef, tried])
 
   const inputClassList = () => {
     let output = "text-input ";
@@ -58,7 +57,7 @@ const TextInput = (props) => {
     output += focused ? "focused " : "not-focused ";
     output += trying ? "trying " : "not-trying ";
     output += tried ? "tried " : "not-tried ";
-    output += errors.length ? "errors " : "no-errors ";
+    output += errors && errors.length ? "errors " : "no-errors ";
     output += icon ? "has-icon" : "no-icon";
 
     return output;
@@ -68,14 +67,22 @@ const TextInput = (props) => {
 
   return (
     <div className={inputClassList()}>
-      {!icon ? null : <div className="icon">{icon}</div>}
-      <label htmlFor={`text-input_${formName}-${name}`}>{label}</label>
-      <input type={inputType}
+      {!icon ? null :
+        <div className="icon">
+          {icon}
+        </div>
+      }
+      <label htmlFor={`text-input_${formName}-${name}`}>
+        {label}
+      </label>
+      <input
+        ref={inputRef}
+        type={inputType}
         name={name} id={`text-input_${formName}-${name}`}
         onChange={inputOnChange}
         onFocus={inputOnFocus}
         onBlur={inputOnBlur}
-        value={value} />
+        disabled={disabled} />
       <Errors className="icon-errors" onClick={onErrorClick || null} />
       <Help className="icon-help" onClick={onHelpClick || null} />
     </div>
