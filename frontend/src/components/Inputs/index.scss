@@ -1,0 +1,168 @@
+@use "../global"as global;
+
+.user-input {
+
+    &.email,
+    &.text,
+    &.text-password {
+        height: 5rem;
+        position: relative;
+        z-index: 800;
+
+        input {
+            border: 1px solid global.$blk-40;
+            border-radius: 4px;
+            font-size: 1.25rem;
+            height: 4rem;
+            line-height: 1.5rem;
+            outline: none;
+            min-width: (280rem / 16);
+            margin-top: 1rem;
+            padding: 14px 1rem 0;
+
+            &:focus {
+                border-color: global.$color-info;
+                box-shadow: 0 0 0 4px global.$color-info-x-light;
+            }
+        }
+
+        label {
+            position: absolute;
+            top: 30px;
+            left: 18px;
+            color: global.$blk-50;
+            font-size: (11rem / 16);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .icon-visual {
+            place-content: center center;
+            position: absolute;
+            top: 1rem;
+            bottom: 1rem;
+            left: 0;
+            color: global.$blk-80;
+            font-size: 2rem;
+            width: 3.5rem;
+            height: 4rem;
+        }
+
+        .icon-eye,
+        .icon-help,
+        .icon-errors {
+            place-content: center center;
+            position: absolute;
+            top: 1rem;
+            bottom: 1rem;
+            right: 0.75rem;
+            cursor: pointer;
+            color: global.$blk-80;
+            font-size: 2rem;
+            width: 2rem;
+            height: 4rem;
+        }
+
+        .icon-eye {
+            z-index: 803;
+            display: none;
+            color: global.$blk-50;
+
+            &:hover {
+                color: global.$blk-60;
+            }
+        }
+
+        .icon-errors {
+            z-index: 802;
+            display: none;
+            color: global.$color-fatal;
+            opacity: 0;
+
+            &:hover {
+                color: global.$color-fatal-light;
+            }
+        }
+
+        .icon-help {
+            z-index: 801;
+            display: none;
+            color: global.$color-info;
+        }
+
+        &.tried.errors {
+            input {
+                border-color: global.$color-fatal;
+                box-shadow: 0 0 0 4px global.$color-fatal-x-light;
+            }
+
+            .icon-errors {
+                display: grid;
+                animation: errors-bounce 1.5s ease 0.25s 1 forwards;
+            }
+
+            .icon-eye {
+                animation: eye-shift 0.75s ease 0s 1 forwards;
+            }
+
+            @keyframes errors-bounce {
+                0% {
+                    transform: scale(0.8, 0.8) translateY(2px);
+                    opacity: 0;
+                }
+
+                20% {
+                    transform: scale(1, 1) translateY(-8px);
+                    opacity: 1;
+                }
+
+                30% {
+                    transform: scale(1, 1) translateY(0);
+                }
+
+                34% {
+                    transform: scale(1, 1) translateY(-2px);
+                }
+
+                36% {
+                    transform: scale(1, 1) translateY(0);
+                }
+
+                100% {
+                    transform: scale(1, 1) translateY(0);
+                    opacity: 1;
+                }
+            }
+
+            @keyframes eye-shift {
+                0% {
+                    transform: translateX(0);
+                }
+
+                50% {
+                    transform: translateX(-42px);
+                }
+
+                100% {
+                    transform: translateX(-38px);
+                }
+            }
+        }
+
+        &.has-icon {
+            input {
+                padding-left: 3.5rem;
+            }
+
+            label {
+                left: 58px;
+            }
+        }
+    }
+
+    &.text-password {
+        .icon-eye {
+            display: grid;
+        }
+    }
+}
