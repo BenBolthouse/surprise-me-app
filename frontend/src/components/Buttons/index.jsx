@@ -3,7 +3,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-import "./buttons.css";
+import "./index.css";
 
 const Button = (props) => {
   const {
