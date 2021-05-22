@@ -14,7 +14,6 @@ import { useDispatch } from "react-redux";
 import * as actions from "../../../store/actions";
 import * as validate from "../../_validations";
 
-// Styles for individual frames imported on the parent component.
 import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
 
 // prettier-ignore
@@ -85,10 +84,12 @@ const BasicInfoFrame = ({
     },
     formOnSubmit: () => {
       const valid =
-        validation.firstName() && validation.lastName() && validation.email();
+        validation.firstName() &&
+        validation.lastName() &&
+        validation.email();
 
       if (valid) {
-        setFramePosition(1);
+        setFramePosition(framePosition + 1);
         setState({
           ...state,
           firstName: firstName.value,
@@ -159,6 +160,7 @@ const BasicInfoFrame = ({
   // once the user has advanced to another position.
   useEffect(() => {
     if (framePosition !== 0) setFormDisable(true);
+    else if (framePosition === 0) setFormDisable(false);
   }, [framePosition]);
 
   // Side effect matches the email value to a regex pattern. If it matches
@@ -241,19 +243,18 @@ const BasicInfoFrame = ({
           ]}
         />
       </form>
-      {emailFetching ? (
+      {emailFetching ?
         <div className="email-fetching">
           <Loader type="TailSpin" color="#555" height={48} width={48} />
-        </div>
-      ) : (
-          <div className={classList.emailInUse}>
-            <span>It looks like this email is already in use.</span>
-            <span>Do you already have an account?</span>
-            <ButtonFill to={`/sign-in?email=${email.value}`} importance="info">
-              Sign in
+        </div> :
+        <div className={classList.emailInUse}>
+          <span>It looks like this email is already in use.</span>
+          <span>Do you already have an account?</span>
+          <ButtonFill to={`/sign-in?email=${email.value}`} importance="info">
+            Sign in
           </ButtonFill>
-          </div>
-        )}
+        </div>
+      }
       <ButtonFill
         onClick={events.formOnSubmit}
         disabled={nextDisable}
