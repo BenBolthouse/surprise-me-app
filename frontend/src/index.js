@@ -5,7 +5,7 @@ import ReactDOM from "react-dom";
 import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 
-import App from "./App.jsx";
+import App from "./components/App.jsx";
 import configureStore from "./store";
 
 import * as actions from "./store/actions";
