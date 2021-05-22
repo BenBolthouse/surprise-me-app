@@ -1,13 +1,15 @@
-@use "../../global" as global;
+@use "../global"as global;
 
 .popup-notifications-view {
     grid-template-rows: 8rem 1fr;
-    z-index: 401;
-    > .container {
+    z-index: 910;
+
+    >.container {
         $duration: 0.25s;
         overflow: hidden;
         position: relative;
-        > .notification {
+
+        >.notification {
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
@@ -18,43 +20,53 @@
             height: 2rem;
             padding: 0.5rem 1rem;
             white-space: nowrap;
+
             &.info {
                 background-color: global.$color-info;
                 color: white;
             }
+
             &.success {
                 background-color: global.$color-success;
                 color: white;
             }
+
             &.warning {
                 background-color: global.$color-warning;
                 color: white;
             }
+
             &.fatal {
                 background-color: global.$color-fatal;
                 color: white;
             }
+
             &.show {
                 animation: show $duration ease 0s 1 forwards;
             }
+
             &.hide {
                 animation: hide $duration ease 0s 1 forwards;
             }
+
             @keyframes show {
                 0% {
                     opacity: 0;
                     bottom: 100%;
                 }
+
                 100% {
                     opacity: 1;
                     bottom: 0%;
                 }
             }
+
             @keyframes hide {
                 0% {
                     opacity: 1;
                     bottom: 0%;
                 }
+
                 100% {
                     opacity: 0;
                     bottom: 100%;
