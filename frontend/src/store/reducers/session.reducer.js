@@ -4,15 +4,17 @@ const model = {
 };
 
 const reducer = (state = model, { type, payload }) => {
+  const data = payload ? payload.data : null;
+
   switch (type) {
     case "session/POST":
-      return { ...state, ...payload };
+      return { ...state, ...data };
 
     case "session/GET":
-      return { ...state, ...payload };
+      return { ...state, ...data };
 
     case "session/GET_CSRF":
-      return { ...state, ...payload };
+      return { ...state, ...data };
 
     case "session/DELETE":
       return model;

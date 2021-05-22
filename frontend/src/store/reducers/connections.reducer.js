@@ -25,30 +25,31 @@ const removeFromCollections = (id, ...sources) => {
 
 const reducer = (state = model, { type, payload }) => {
   const stateCopy = { ...state };
+  const data = payload ? payload.data : null;
 
   switch (type) {
     case "connections/POST":
-      stateCopy.requested.push(payload);
+      stateCopy.requested.push(data);
       return stateCopy;
 
     case "connections/GET":
-      stateCopy.requested = payload.connections.filter((x) => {
-        const a = x.requestorId === payload.userId;
+      stateCopy.requested = data.connections.filter((x) => {
+        const a = x.requestorId === data.userId;
         const b = x.approvedAt === null;
         return a && b;
       });
-      stateCopy.pending = payload.connections.filter((x) => {
-        const a = x.requestorId !== payload.userId;
+      stateCopy.pending = data.connections.filter((x) => {
+        const a = x.requestorId !== data.userId;
         const b = x.approvedAt === null;
         return a && b;
       });
-      stateCopy.approved = payload.connections.filter(
+      stateCopy.approved = data.connections.filter(
         (x) => x.approvedAt !== null
       );
       return stateCopy;
 
     case "connections/APPROVE":
-      moveToCollection(payload.id, stateCopy.pending, stateCopy.approved);
+      moveToCollection(data.id, stateCopy.pending, stateCopy.approved);
       return stateCopy;
 
     case "connections/DENY":

@@ -12,24 +12,26 @@ const model = {
 };
 
 const reducer = (state = model, { type, payload }) => {
+  const data = payload ? payload.data : null;
+
   switch (type) {
     case "user/POST_EMAIL_UNIQUE":
-      return { ...state, ...payload };
+      return { ...state, ...data };
 
     case "user/POST":
-      return { ...state, ...payload };
+      return { ...state, ...data };
 
     case "user/GET":
-      return { ...state, ...payload };
+      return { ...state, ...data };
 
     case "user/PATCH":
-      return { ...state, ...payload };
+      return { ...state, ...data };
 
     case "user/PATCH_EMAIL":
-      return { ...state, ...payload };
+      return { ...state, ...data };
 
     case "user/PATCH_PASSWORD":
-      return { ...state, ...payload };
+      return { ...state, ...data };
 
     case "user/DELETE":
       return model;
