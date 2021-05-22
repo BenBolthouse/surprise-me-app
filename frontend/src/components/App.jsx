@@ -2,16 +2,13 @@ import React, { useEffect, useState } from "react"
 import { Switch, Route } from "react-router-dom"
 // import { UINotificationOverlay } from "./components/UINotificationOverlay/UINotificationOverlay";
 
-import "./reset.css";
-import "./App.css";
-import SplashView from "./components/SplashView/SplashView";
-import SignUpView from "./components/SignUpView/SignUpView";
-import SignInView from "./components/SignInView/SignInView";
-import { Authenticated, Anonymous } from "./components/SessionWrapper";
+import "./app.css";
+import { SignInView, SignUpView, SplashView } from "./views";
+import { Authenticated, Anonymous } from "./SessionWrapper";
 
-import * as actions from "./store/actions";
+import * as actions from "../store/actions";
 import { useDispatch, useSelector } from "react-redux";
-import PopupNotifications from "./components/PopupNotifications/PopupNotifications";
+import PopupNotifications from "./PopupNotifications/PopupNotifications";
 
 const App = () => {
   const session = useSelector(x => x.session);
