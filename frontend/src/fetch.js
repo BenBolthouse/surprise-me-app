@@ -87,10 +87,13 @@ export async function fetch(url, options = {}) {
   }
 
   let response = await window.fetch(url, request);
+
+  const { status } = response;
+
   response = await response.json();
   response = camelcase(response, { deep: true });
 
-  const { notification, data, status } = response;
+  const { notification, data } = response;
 
   if (notification)
     switch (notification.type) {
@@ -102,9 +105,7 @@ export async function fetch(url, options = {}) {
         break;
     }
 
-  if (status >= 400) throw Error();
-
   if (stateChangeReq) store.dispatch(actions.session.getCsrf());
 
-  return data;
+  return { data, status };
 }
