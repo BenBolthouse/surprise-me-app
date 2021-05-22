@@ -13,10 +13,10 @@ import Loader from "react-loaders";
 import 'loaders.css/src/animations/square-spin.scss'
 
 import * as actions from "../../store/actions";
-import TextInput from "../Inputs/TextInputs";
+import { PasswordInput, TextInput } from "../Inputs/TextInputs";
 
 import "./sign_in_view.css";
-import { ButtonFill, ButtonOutline } from "../Buttons/Buttons";
+import { ButtonFill, ButtonText } from "../Buttons/Buttons";
 
 const SignInView = () => {
   const dispatch = useDispatch();
@@ -108,21 +108,24 @@ const SignInView = () => {
         <form ref={formRef} onSubmit={formOnSubmit}>
           <TextInput
             icon={<Email />}
+            autoFocus={true}
             onChange={emailOnChange}
             onBlur={emailOnBlur}
             onErrorClick={emailOnErrorClick}
             errors={email.errors}
             name="email"
             formName="sign-in"
-            label="Email" />
-          <TextInput
+            label="Email"
+          />
+          <PasswordInput
             icon={<Lock />}
             onChange={passwordOnChange}
             errors={[]}
             name="password"
             formName="sign-in"
             label="Password"
-            obscure={true} />
+            obscure={true}
+          />
           <ButtonFill
             onClick={formOnSubmit}
             disabled={allowTry}
@@ -130,9 +133,11 @@ const SignInView = () => {
             Sign in
           </ButtonFill>
         </form>
-        <ButtonOutline to="/sign-up">
+        <ButtonText
+          to="/sign-up"
+          importance="info">
           Create an account
-        </ButtonOutline>
+        </ButtonText>
       </div>
     </div>
   );

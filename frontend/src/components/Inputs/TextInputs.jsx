@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /* eslint-disable react/prop-types */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -9,21 +9,25 @@ import {
 
 import "./text_inputs.css";
 
-const TextInput = (props) => {
+const Input = (props) => {
   const {
-    icon,
-    onChange,
-    onFocus,
-    onBlur,
-    onHelpClick,
-    onErrorClick,
-    errors,
-    name,
-    formName,
-    label,
-    obscure,
+    autoFocus,
     disabled,
+    errors,
+    fetching,
+    formName,
+    icon,
+    label,
+    name,
+    onBlur,
+    onChange,
+    onErrorClick,
+    onFocus,
+    onHelpClick,
+    tried: _tried,
   } = props;
+
+  const production = process.env.NODE_ENV === "production";
 
   const inputRef = useRef(null);
 
@@ -51,9 +55,14 @@ const TextInput = (props) => {
     else setTrying(false)
   }, [inputRef, tried])
 
+  useEffect(() => {
+    if (_tried) setTried(true)
+  }, [_tried])
+
   const inputClassList = () => {
     let output = "text-input ";
 
+    output += fetching ? "fetching " : "not-fetching ";
     output += focused ? "focused " : "not-focused ";
     output += trying ? "trying " : "not-trying ";
     output += tried ? "tried " : "not-tried ";
@@ -62,8 +71,6 @@ const TextInput = (props) => {
 
     return output;
   }
-
-  const inputType = obscure ? "password" : "text";
 
   return (
     <div className={inputClassList()}>
@@ -76,17 +83,35 @@ const TextInput = (props) => {
         {label}
       </label>
       <input
-        ref={inputRef}
-        type={inputType}
-        name={name} id={`text-input_${formName}-${name}`}
         onChange={inputOnChange}
         onFocus={inputOnFocus}
         onBlur={inputOnBlur}
-        disabled={disabled} />
+        ref={inputRef}
+        name={name} id={`text-input_${formName}-${name}`}
+        disabled={disabled}
+        autoComplete={production ? "on" : "chrome-off"}
+        autoFocus={autoFocus || false}
+      />
       <Errors className="icon-errors" onClick={onErrorClick || null} />
       <Help className="icon-help" onClick={onHelpClick || null} />
     </div>
   )
 }
 
-export default TextInput;
+export const TextInput = (props) => {
+  const _props = {...props, inputType: "text"}
+
+  return <Input {..._props} />
+}
+
+export const EmailInput = (props) => {
+  const _props = {...props, inputType: "email"}
+
+  return <Input {..._props} />
+}
+
+export const PasswordInput = (props) => {
+  const _props = {...props, inputType: "password"}
+
+  return <Input {..._props} />
+}

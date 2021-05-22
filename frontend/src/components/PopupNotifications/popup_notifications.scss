@@ -3,12 +3,11 @@
 .popup-notifications-view {
     grid-template-rows: 8rem 1fr;
     z-index: 401;
-    .container {
+    > .container {
         $duration: 0.25s;
         overflow: hidden;
         position: relative;
-        .notification {
-            display: block;
+        > .notification {
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
@@ -18,6 +17,7 @@
             line-height: 1rem;
             height: 2rem;
             padding: 0.5rem 1rem;
+            white-space: nowrap;
             &.info {
                 background-color: global.$color-info;
                 color: white;
