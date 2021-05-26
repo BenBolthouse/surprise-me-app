@@ -178,3 +178,6 @@ scripts
 # Ignore the jsdocs.
 *out
 *docs.md
+
+# Ignore temp directory where temp files are held.
+temp
