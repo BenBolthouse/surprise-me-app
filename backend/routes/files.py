@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 from flask_login import login_required
-from werkzeug import secure_filename
+from werkzeug.utils import secure_filename
 from os import path
 
 from .utilities import random_string
