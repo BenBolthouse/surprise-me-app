@@ -1,4 +1,4 @@
-from string import ascii_lowercase, ascii_numbers
+import string
 
 
 def random_string(length):
@@ -7,5 +7,5 @@ def random_string(length):
     length.
     '''
 
-    letters = ascii_lowercase + ascii_numbers
+    letters = string.ascii_lowercase + string.ascii_numbers
     return (''.join(random.choice(letters) for i in range(length)))
