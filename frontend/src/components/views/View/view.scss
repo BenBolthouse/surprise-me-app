@@ -1,0 +1,121 @@
+@use "../../global"as global;
+
+$opacityFadeSpeed: 0.25s;
+
+.view {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+
+    >.view-errors {
+        place-content: center center;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 901;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity $opacityFadeSpeed;
+        -webkit-transition: opacity $opacityFadeSpeed;
+
+        >.center {
+            position: relative;
+            background-color: global.$blk-98;
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 0 1.5rem;
+
+            >h2 {
+                color: global.$blk-50;
+                font-size: 1rem;
+                line-height: 1.5rem;
+                margin: 0.5rem 0 2rem;
+                text-align: center;
+            }
+
+            >ul {
+                >li {
+                    display: grid;
+                    grid-template-columns: 2rem auto;
+                    line-height: 1.25rem;
+                    margin-bottom: 0.5rem;
+
+                    >.check {
+                        width: 2rem;
+                        height: 1.25rem;
+                    }
+                }
+            }
+
+            >.close {
+                position: absolute;
+                z-index: 902;
+                cursor: pointer;
+                color: black;
+                font-size: 2rem;
+                width: 2rem;
+                height: 2rem;
+                opacity: 0.7;
+                top: 1rem;
+                right: 1rem;
+
+                &:hover {
+                    opacity: 1;
+                }
+            }
+
+        }
+
+        @media screen and (min-width: global.$screen-size-mobile-l) {
+            >.center {
+                padding: 2.5rem;
+                min-width: global.$screen-size-mobile-m;
+                max-width: global.$screen-size-tablet;
+            }
+        }
+
+        &.show {
+            pointer-events: all;
+            opacity: 1;
+        }
+
+        &.hide {
+            pointer-events: none;
+            opacity: 0;
+        }
+    }
+
+    >.view-awaiting {
+        place-content: center center;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 900;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity $opacityFadeSpeed;
+        -webkit-transition: opacity $opacityFadeSpeed;
+
+        &.show {
+            pointer-events: all;
+            opacity: 1;
+        }
+
+        &.hide {
+            pointer-events: none;
+            opacity: 0;
+        }
+    }
+
+    >.view-content {
+        z-index: 100;
+    }
+}
