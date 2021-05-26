@@ -3,12 +3,11 @@ import { Switch, Route } from "react-router-dom"
 // import { UINotificationOverlay } from "./components/UINotificationOverlay/UINotificationOverlay";
 
 import "./app.css";
-import { SignInView, SignUpView, SplashView } from "./views";
+import { PopupNotificationsView, SignInView, SignUpView, SplashView } from "./views";
 import { Authenticated, Anonymous } from "./SessionWrapper";
 
 import * as actions from "../store/actions";
 import { useDispatch, useSelector } from "react-redux";
-import PopupNotifications from "./PopupNotifications/PopupNotifications";
 
 const App = () => {
   const session = useSelector(x => x.session);
@@ -26,7 +25,7 @@ const App = () => {
   }, [session.timestamp])
 
   return !mounted ? null : (
-    <PopupNotifications>
+    <PopupNotificationsView>
       <Switch>
         <Route exact path="/start">
           <Anonymous>
@@ -49,7 +48,7 @@ const App = () => {
           </Authenticated>
         </Route>
       </Switch>
-    </PopupNotifications>
+    </PopupNotificationsView>
   );
 };
 

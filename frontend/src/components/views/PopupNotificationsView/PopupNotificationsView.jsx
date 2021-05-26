@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
-import "./popup_notifications.css";
+import "./popup_notifications_view.css";
 
 const PopupNotifications = ({ children }) => {
   const notifications = useSelector(x => x.notifications.popup);
