@@ -14,7 +14,7 @@ import {
 import { ButtonFill, ButtonOutline } from "../../Buttons";
 import { PasswordInput, TextInput } from "../../Inputs";
 import * as actions from "../../../store/actions";
-import * as validate from "../../_validations";
+import * as validate from "../../_validation";
 
 import "loaders.css/src/animations/square-spin.scss";
 import "./sign_in_view.css";

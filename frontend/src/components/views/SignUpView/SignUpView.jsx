@@ -5,6 +5,7 @@ import { IoCloseCircleOutline as Close } from "react-icons/io5";
 
 import "./sign_up_view.css";
 import BasicInfoFrame from "./_frame_BasicInfo";
+import BioAndPictureFrame from "./_frame_BioAndPicture";
 import PasswordFrame from "./_frame_Password";
 
 const SignUpView = () => {
@@ -18,7 +19,7 @@ const SignUpView = () => {
   });
   const [errors, setErrors] = useState([]);
   const [errorsVisible, setErrorsVisible] = useState(false);
-  const [framePosition, setFramePosition] = useState(0);
+  const [framePosition, setFramePosition] = useState(2);
 
   // ——— events ———————————————————————————————————————————————————————————————
   const events = {
@@ -71,6 +72,7 @@ const SignUpView = () => {
         <div className="frame-container" ref={frameContainerRef}>
           <BasicInfoFrame {...props} />
           <PasswordFrame {...props} />
+          <BioAndPictureFrame {...props} />
         </div>
       </div>
     </div>

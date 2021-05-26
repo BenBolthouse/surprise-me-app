@@ -1,17 +1,14 @@
 /* eslint-disable react/prop-types */
 
 import React, { useEffect, useState } from "react";
-import { PasswordInput } from "../../Inputs";
 
 import {
   IoLockOpenOutline as Lock,
 } from "react-icons/io5";
 
 import { ButtonFill, ButtonText } from "../../Buttons";
-import * as validate from "../../_validations";
-
-
-// Styles for individual frames imported on the parent component.
+import { PasswordInput } from "../../Inputs";
+import * as validate from "../../_validation";
 
 const PasswordFrame = ({
   framePosition,
@@ -165,7 +162,7 @@ const PasswordFrame = ({
       >
         Next
       </ButtonFill>
-      <span>Step 1 of 4</span>
+      <span>Step 2 of 4</span>
     </div>
   );
 }
