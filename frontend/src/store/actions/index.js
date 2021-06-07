@@ -1,64 +1,64 @@
-import { fetch } from "../../utilities";
+import { post, get, patch, destroy } from "../../utilities";
 import { socketIoClient } from "../socketIoClient";
 import { store } from "../.."
 
 export const session = {
   post: (props) => async (dispatch) => {
-    const { data, status } = await fetch.post("/api/v1/sessions", props);
+    const { data, status } = await post("/api/v1/sessions", props);
     return dispatch({ type: "session/POST", payload: { data, status } });
   },
   get: () => async (dispatch) => {
-    const { data, status } = await fetch.get("/api/v1/sessions");
+    const { data, status } = await get("/api/v1/sessions");
     return dispatch({ type: "session/GET", payload: { data, status } });
   },
   getCsrf: () => async (dispatch) => {
-    const { data, status } = await fetch.get("/api/v1/sessions/csrf");
+    const { data, status } = await get("/api/v1/sessions/csrf");
     return dispatch({ type: "session/GET_CSRF", payload: { data, status } });
   },
   delete: () => async (dispatch) => {
-    await fetch.destroy("/api/v1/sessions");
+    await destroy("/api/v1/sessions");
     return dispatch({ type: "session/DELETE" });
   },
 };
 
 export const user = {
   post: (props) => async (dispatch) => {
-    const { data, status } = await fetch.post("/api/v1/users", props);
+    const { data, status } = await post("/api/v1/users", props);
     return dispatch({ type: "user/POST", payload: { data, status } });
   },
   postEmailUnique: (props) => async (dispatch) => {
-    const { data, status } = await fetch.post("/api/v1/users/email_unique", props);
+    const { data, status } = await post("/api/v1/users/email_unique", props);
     return dispatch({ type: "user/POST_EMAIL_UNIQUE", payload: { data, status } });
   },
   get: () => async (dispatch) => {
-    const { data, status } = await fetch.get("/api/v1/users");
+    const { data, status } = await get("/api/v1/users");
     return dispatch({ type: "user/GET", payload: { data, status } });
   },
   patch: (props) => async (dispatch) => {
-    const { data, status } = await fetch.patch("/api/v1/users", props);
+    const { data, status } = await patch("/api/v1/users", props);
     return dispatch({ type: "user/PATCH", payload: { data, status } });
   },
   patchEmail: (email) => async (dispatch) => {
-    const { data, status } = await fetch.patch("/api/v1/users/email", email);
+    const { data, status } = await patch("/api/v1/users/email", email);
     return dispatch({ type: "user/PATCH_EMAIL", payload: { data, status } });
   },
   patchPassword: (password) => async (dispatch) => {
-    const { data, status } = await fetch.patch("/api/v1/users/password", password);
+    const { data, status } = await patch("/api/v1/users/password", password);
     return dispatch({ type: "user/PATCH_PASSWORD", payload: { data, status } });
   },
   delete: () => async (dispatch) => {
-    await fetch.destroy("/api/v1/users");
+    await destroy("/api/v1/users");
     return dispatch({ type: "user/DELETE" });
   },
 };
 
 export const connections = {
   post: (approverId) => async (dispatch) => {
-    const { data, status } = await fetch.post("/api/v1/connections", approverId);
+    const { data, status } = await post("/api/v1/connections", approverId);
     return dispatch({ type: "connections/POST", payload: { data, status } });
   },
   get: () => async (dispatch) => {
-    const { data, status } = await fetch.get("/api/v1/connections");
+    const { data, status } = await get("/api/v1/connections");
     return dispatch({
       type: "connections/GET",
       payload: {
@@ -68,15 +68,15 @@ export const connections = {
     });
   },
   approve: (id) => async (dispatch) => {
-    const { data, status } = await fetch.patch("/api/v1/connections" + `/${id}/approve`);
+    const { data, status } = await patch("/api/v1/connections" + `/${id}/approve`);
     return dispatch({ type: `connections/APPROVE`, payload: { data, status } });
   },
   deny: (id) => async (dispatch) => {
-    const { data, status } = await fetch.patch("/api/v1/connections" + `/${id}/deny`);
+    const { data, status } = await patch("/api/v1/connections" + `/${id}/deny`);
     return dispatch({ type: `connections/DENY`, payload: { data, status } });
   },
   leave: (id) => async (dispatch) => {
-    const { data, status } = await fetch.destroy("/api/v1/connections" + `/${id}`);
+    const { data, status } = await destroy("/api/v1/connections" + `/${id}`);
     return dispatch({ type: `connections/LEAVE`, payload: { data, status } });
   },
 };
@@ -84,22 +84,22 @@ export const connections = {
 export const messages = {
   post: (props) => async (dispatch) => {
     const url = `/api/v1/connections/${props.connectionId}/messages`;
-    const { data, status } = await fetch.post(url, props);
+    const { data, status } = await post(url, props);
     return dispatch({ type: "messages/POST", payload: { data, status } });
   },
   get: (props) => async (dispatch) => {
     const url = `/api/v1/connections/${props.connectionId}/messages`;
-    const { data, status } = await fetch.get(url);
+    const { data, status } = await get(url);
     return dispatch({ type: "messages/GET", payload: { data, status } });
   },
   patch: (props) => async (dispatch) => {
     const url = `/api/v1/connections/${props.connectionId}/messages/${props.id}`;
-    const { data, status } = await fetch.patch(url, props);
+    const { data, status } = await patch(url, props);
     return dispatch({ type: `messages/PATCH`, payload: { data, status } });
   },
   delete: (props) => async (dispatch) => {
     const url = `/api/v1/connections/${props.connectionId}/messages/${props.id}`;
-    const { data, status } = await fetch.destroy(url);
+    const { data, status } = await destroy(url);
     return dispatch({ type: `messages/DELETE`, payload: { data, status } });
   },
 };
@@ -119,13 +119,13 @@ socketIoClient.on("messages/events/delete", (payload) => ({
 export const notifications = {
   get: () => async (dispatch) => {
     const url = `/api/v1/notifications`;
-    const { data, status } = await fetch.get(url);
+    const { data, status } = await get(url);
     return dispatch({ type: `notifications/GET`, payload: { data, status } });
   },
   bell: {
     dismiss: (idArray) => async (dispatch) => {
       const url = `/api/v1/notifications/dismiss`;
-      const { data, status } = await fetch.patch(url, { ids: idArray });
+      const { data, status } = await patch(url, { ids: idArray });
       return dispatch({ type: `notifications/bell/DISMISS`, payload: { data, status } });
     },
   },
@@ -142,7 +142,7 @@ export const notifications = {
   message: {
     dismiss: (idArray) => async (dispatch) => {
       const url = `/api/v1/notifications/dismiss`;
-      const { data, status } = await fetch.patch(url, { ids: idArray });
+      const { data, status } = await patch(url, { ids: idArray });
       return dispatch({ type: `notifications/message/DISMISS`, payload: { data, status } });
     },
   },
