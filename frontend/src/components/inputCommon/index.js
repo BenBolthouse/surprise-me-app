@@ -1,9 +1,14 @@
 /* eslint-disable react/prop-types */
 
-import { Fragment, useEffect, createElement as element } from "react";
+import { Fragment, useEffect, createElement } from "react";
 import { validate } from "validate.js";
 
-export function InputErrors({ name, errors }) {
+export function InputErrors(props) {
+  let { name, errors, element } = props;
+
+  if (!element) element = {};
+
+  // prettier-ignore
   if (errors && errors.length) {
     const errorsElements = () =>
       errors.map((error, i) => {
@@ -11,24 +16,23 @@ export function InputErrors({ name, errors }) {
           key: name + "-input-error-" + i,
           children: error,
         };
-        return element("li", errorElement);
+        return createElement("li", errorElement);
       });
-    return element("ul", null, errorsElements());
-  } else {
-    return null;
+    return createElement("ul", element, errorsElements());
   }
+  else return null;
 }
 
-export function InputIconShowErrors({ errors, icon}) {
+export function InputIconOnErrors(props) {
+  let { errors, icon, element } = props;
+
+  if (!element) element = {};
+
+  // prettier-ignore
   if (errors && errors.length) {
-    const iconElement = {
-      className: "input-icon-show-errors",
-      children: icon,
-    }
-    return element("div", iconElement);
-  } else {
-    return null;
+    return createElement("div", element, icon);
   }
+  else return null;
 }
 
 export function InputValidationHandler(props) {
@@ -42,10 +46,7 @@ export function InputValidationHandler(props) {
   } = props;
 
   function validateAttributes() {
-    const errors = validate(
-      validationAttributes,
-      validationConstraints,
-    );
+    const errors = validate(validationAttributes, validationConstraints);
     if (errors) {
       setState({ ...state, errors: errors[name] });
     } else {
@@ -57,5 +58,5 @@ export function InputValidationHandler(props) {
     validateAttributes();
   }, [state.value]);
 
-  return element(Fragment, null, children)
+  return createElement(Fragment, null, children);
 }
