@@ -2,7 +2,12 @@
 
 import React, { useEffect, useState } from "react";
 
-import { IoAlertCircleSharp as Errors } from "react-icons/io5"
+import {
+  IoAlertCircleSharp as Errors,
+  IoCloseCircleSharp as Close,
+  IoEyeSharp as ShowPassword,
+  IoEyeOffSharp as HidePassword,
+} from "react-icons/io5"
 
 import {
   EmailInput,
@@ -81,7 +86,10 @@ export function SignInView() {
     setState: setEmail,
     validationAttributes: { email: email.value },
     validationConstraints: { email: validationConstraints.required },
-    showErrorsIcon: <Errors />,
+    icons: {
+      showErrors: <Errors />,
+      hideErrors: <Close />,
+    }
   }
 
   const passwordInputProps = {
@@ -91,7 +99,12 @@ export function SignInView() {
     setState: setPassword,
     validationAttributes: { password: password.value },
     validationConstraints: { password: validationConstraints.required },
-    showErrorsIcon: <Errors />,
+    icons: {
+      showErrors: <Errors />,
+      hideErrors: <Close />,
+      showPassword: <ShowPassword />,
+      hidePassword: <HidePassword />,
+    }
   }
 
   const submitButtonElement = {
