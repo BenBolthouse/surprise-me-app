@@ -23,12 +23,14 @@ export function SignInView() {
     value: "",
     errors: [],
     showErrors: false,
+    tried: false,
   });
 
   const [password, setPassword] = useState({
     value: "",
     errors: [],
     showErrors: false,
+    tried: false,
   });
 
   const [showErrors, setShowErrors] = useState(false);
@@ -36,22 +38,6 @@ export function SignInView() {
   const [canSubmit, setCanSubmit] = useState(false);
 
   function handleFormOnSubmit(e) {
-    e.preventDefault();
-  }
-
-  function handleEmailOnChange(e) {
-    setEmail({ ...email, value: e.target.value });
-  }
-
-  function handleEmailOnBlur(e) {
-    e.preventDefault();
-  }
-
-  function handlePasswordOnChange(e) {
-    setPassword({ ...password, value: e.target.value });
-  }
-
-  function handlePasswordOnBlur(e) {
     e.preventDefault();
   }
 
@@ -67,21 +53,8 @@ export function SignInView() {
     className: "view-dim " + (showErrors ? "show" : "hide"),
   }
 
-  const emailInputElement = {
-    onChange: handleEmailOnChange,
-    onBlur: handleEmailOnBlur,
-    value: email.value,
-  }
-
-  const passwordInputElement = {
-    onChange: handlePasswordOnChange,
-    onBlur: handlePasswordOnBlur,
-    value: password.value,
-  }
-
   const emailInputProps = {
     name: "email",
-    element: emailInputElement,
     state: email,
     setState: setEmail,
     validationAttributes: { email: email.value },
@@ -89,12 +62,12 @@ export function SignInView() {
     icons: {
       showErrors: <Errors />,
       hideErrors: <Close />,
-    }
+    },
+    tryOn: "onblur",
   }
 
   const passwordInputProps = {
     name: "password",
-    element: passwordInputElement,
     state: password,
     setState: setPassword,
     validationAttributes: { password: password.value },
@@ -104,7 +77,8 @@ export function SignInView() {
       hideErrors: <Close />,
       showPassword: <ShowPassword />,
       hidePassword: <HidePassword />,
-    }
+    },
+    tryOn: "onblur",
   }
 
   const submitButtonElement = {
@@ -118,13 +92,7 @@ export function SignInView() {
       email.value.length && !email.errors.length &&
       password.value.length && !password.errors.length);
 
-    // prettier-ignore
-    if (_canSubmit) {
-      setCanSubmit(true);
-    }
-    else {
-      setCanSubmit(false);
-    }
+      setCanSubmit(_canSubmit);
   }, [email.value, password.value])
 
   // Side effect detects changes in showErrors values for inputs and sets
@@ -132,13 +100,7 @@ export function SignInView() {
   useEffect(() => {
     const _showErrors = (email.showErrors || password.showErrors);
 
-    // prettier-ignore
-    if (_showErrors) {
-      setShowErrors(true);
-    }
-    else {
-      setShowErrors(false);
-    }
+    setShowErrors(_showErrors);
   }, [email.showErrors, password.showErrors])
 
   return (
