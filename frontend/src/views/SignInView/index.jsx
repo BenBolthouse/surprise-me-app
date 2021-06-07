@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 
+import { useDispatch } from "react-redux";
 import React, { useEffect, useState } from "react";
 
 import {
@@ -16,9 +17,13 @@ import {
   ViewRouteMatchHandler,
 } from "../../components";
 
+import { actions } from "../../store";
+
 import { validationConstraints } from "../../utilities";
 
 export function SignInView() {
+  const dispatch = useDispatch();
+
   const [email, setEmail] = useState({
     value: "",
     errors: [],
@@ -37,8 +42,19 @@ export function SignInView() {
 
   const [canSubmit, setCanSubmit] = useState(false);
 
-  function handleFormOnSubmit(e) {
+  const [submitting, setSubmitting] = useState(false);
+
+  async function handleFormOnSubmit(e) {
     e.preventDefault();
+
+    setSubmitting(true);
+
+    await dispatch(actions.session.post({
+      email: email.value,
+      password: password.value
+    }));
+
+    setSubmitting(false);
   }
 
   const centerElement = {
@@ -47,6 +63,7 @@ export function SignInView() {
 
   const formElement = {
     onSubmit: handleFormOnSubmit,
+    "br-awaiting": submitting.toString(),
   }
 
   const showErrorsElement = {
@@ -66,6 +83,10 @@ export function SignInView() {
     tryOn: "onblur",
   }
 
+  const submitButtonElement = {
+    disabled: !canSubmit,
+  }
+
   const passwordInputProps = {
     name: "password",
     state: password,
@@ -81,10 +102,6 @@ export function SignInView() {
     tryOn: "onblur",
   }
 
-  const submitButtonElement = {
-    disabled: !canSubmit,
-  }
-
   // Side effect disables the form submit button if errors are present or
   // values are empty.
   useEffect(() => {
@@ -92,7 +109,7 @@ export function SignInView() {
       email.value.length && !email.errors.length &&
       password.value.length && !password.errors.length);
 
-      setCanSubmit(_canSubmit);
+    setCanSubmit(_canSubmit);
   }, [email.value, password.value])
 
   // Side effect detects changes in showErrors values for inputs and sets
