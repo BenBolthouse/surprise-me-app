@@ -1,20 +1,30 @@
 /* eslint-disable react/prop-types */
 
-import { createElement, useState } from "react";
+import { Fragment, createElement, useState } from "react";
 
 import {
   InputErrors,
   InputIconOnErrors,
+  InputStateHtmlHandler,
   InputValidationHandler,
 } from "../inputCommon";
 
 function emailInput(props) {
   const { name, element, state, setState, icons } = props;
 
+  // Following is added to props dynamically via HTTP state wrapper in
+  // inputCommon module:
+  const { setTrying } = props;
+
   const inputElement = {
     key: name + "-input",
     type: "text",
     ...element,
+    value: state.value,
+    onChange: function (e) {
+      setState({ ...state, value: e.target.value });
+      setTrying(e.target.value.length > 0);
+    },
   };
 
   const errorsComponent = {
@@ -50,7 +60,7 @@ function emailInput(props) {
     },
   };
 
-  return createElement("div", null, [
+  return createElement(Fragment, null, [
     createElement("input", inputElement),
     createElement(InputErrors, errorsComponent),
     createElement(InputIconOnErrors, showErrorsComponent),
@@ -62,12 +72,20 @@ export function EmailInput(props) {
   return createElement(
     InputValidationHandler,
     props,
-    createElement(emailInput, props)
+    createElement(
+      InputStateHtmlHandler,
+      props,
+      createElement(emailInput, props)
+    )
   );
 }
 
 function passwordInput(props) {
   const { name, element, state, setState, icons } = props;
+
+  // Following is added to props dynamically via HTTP state wrapper in
+  // inputCommon module:
+  const { setTrying } = props;
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -75,6 +93,11 @@ function passwordInput(props) {
     key: name + "-input",
     type: showPassword ? "text" : "password",
     ...element,
+    value: state.value,
+    onChange: function (e) {
+      setState({ ...state, value: e.target.value });
+      setTrying(e.target.value.length > 0);
+    },
   };
 
   const errorsComponent = {
@@ -124,7 +147,7 @@ function passwordInput(props) {
     return null;
   }
 
-  return createElement("div", null, [
+  return createElement(Fragment, null, [
     createElement("input", inputElement),
     createElement(InputErrors, errorsComponent),
     createElement(InputIconOnErrors, showErrorsComponent),
@@ -137,6 +160,10 @@ export function PasswordInput(props) {
   return createElement(
     InputValidationHandler,
     props,
-    createElement(passwordInput, props)
+    createElement(
+      InputStateHtmlHandler,
+      props,
+      createElement(passwordInput, props)
+    )
   );
 }
