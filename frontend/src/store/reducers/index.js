@@ -4,8 +4,8 @@ import { sessionReducer } from "./reducer.session";
 import { userReducer } from "./reducer.user";
 
 export default {
-  connectionsReducer,
-  notificationsReducer,
-  sessionReducer,
-  userReducer,
+  connections: connectionsReducer,
+  notifications: notificationsReducer,
+  session: sessionReducer,
+  user: userReducer,
 };
