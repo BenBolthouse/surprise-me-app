@@ -2,10 +2,10 @@
 
 import { createElement } from "react";
 
-import { InputErrors, InputValidationHandler } from "../inputCommon";
+import { InputErrors, InputIconShowErrors, InputValidationHandler } from "../inputCommon";
 
 function emailInput(props) {
-  const { name, element, state } = props;
+  const { name, element, state, showErrorsIcon } = props;
 
   const inputElement = {
     key: name + "-input",
@@ -19,9 +19,17 @@ function emailInput(props) {
     errors: state.errors,
   }
 
+  const showErrorsComponent = {
+    key: name + "-input-icon-show-errors",
+    name: name,
+    errors: state.errors,
+    icon: showErrorsIcon,
+  }
+
   return createElement("div", null, [
     createElement("input", inputElement),
     createElement(InputErrors, errorsComponent),
+    createElement(InputIconShowErrors, showErrorsComponent),
   ])
 }
 
@@ -31,7 +39,7 @@ export function EmailInput(props) {
 }
 
 function passwordInput(props) {
-  const { name, element, state } = props;
+  const { name, element, state, showErrorsIcon } = props;
 
   const inputElement = {
     key: name + "-input",
@@ -45,9 +53,17 @@ function passwordInput(props) {
     errors: state.errors,
   }
 
+  const showErrorsComponent = {
+    key: name + "-input-icon-show-errors",
+    name: name,
+    errors: state.errors,
+    icon: showErrorsIcon,
+  }
+
   return createElement("div", null, [
     createElement("input", inputElement),
     createElement(InputErrors, errorsComponent),
+    createElement(InputIconShowErrors, showErrorsComponent),
   ])
 }
 

@@ -31,6 +31,10 @@ import {
  * First argument of validation.js validate function
  * @param {object} validationConstraints
  * Second argument of validation.js validate function
+ * @param {React.Component} showErrorsIcon
+ * Icon displayed when errors are present
+ * @param {React.Component} hideErrorsIcon
+ * Icon displayed when errors are visible
  */
 export const EmailInput = _EmailInput;
 
@@ -55,6 +59,10 @@ export const EmailInput = _EmailInput;
  * First argument of validation.js validate function
  * @param {object} validationConstraints
  * Second argument of validation.js validate function
+ * @param {React.Component} showErrorsIcon
+ * Icon displayed when errors are present
+ * @param {React.Component} hideErrorsIcon
+ * Icon displayed when errors are visible
  */
 export const PasswordInput = _PasswordInput;
 

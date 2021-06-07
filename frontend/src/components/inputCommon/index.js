@@ -19,6 +19,18 @@ export function InputErrors({ name, errors }) {
   }
 }
 
+export function InputIconShowErrors({ errors, icon}) {
+  if (errors && errors.length) {
+    const iconElement = {
+      className: "input-icon-show-errors",
+      children: icon,
+    }
+    return element("div", iconElement);
+  } else {
+    return null;
+  }
+}
+
 export function InputValidationHandler(props) {
   const {
     name,
