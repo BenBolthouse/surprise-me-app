@@ -6,23 +6,23 @@ import snakecase from "snakecase-keys";
 import { actions } from "../../store";
 
 export async function get(url) {
-  return await this.fetch(url, { method: "GET" });
+  return await fetch(url, { method: "GET" });
 }
 
 export async function post(url, body) {
-  return await this.fetch(url, { method: "POST", body });
+  return await fetch(url, { method: "POST", body });
 }
 
 export async function put(url, body) {
-  return await this.fetch(url, { method: "PUT", body });
+  return await fetch(url, { method: "PUT", body });
 }
 
 export async function patch(url, body) {
-  return await this.fetch(url, { method: "PATCH", body });
+  return await fetch(url, { method: "PATCH", body });
 }
 
 export async function destroy(url) {
-  return await this.fetch(url, { method: "DELETE" });
+  return await fetch(url, { method: "DELETE" });
 }
 
 export async function fetch(url, options = {}) {
