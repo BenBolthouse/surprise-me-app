@@ -7,6 +7,8 @@ import {
   Fragment,
 } from "react";
 
+import "./styles.css";
+
 function viewRouteMatchHandler(props) {
   let { path, exact, children } = props;
 

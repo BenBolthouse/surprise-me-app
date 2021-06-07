@@ -3,6 +3,8 @@ import { Switch, Route } from "react-router-dom";
 
 import { SignInView, SignUpView, StartView } from "./views";
 
+import "./styles/index.css";
+
 const App = () => {
   return (
     <Switch>
