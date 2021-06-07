@@ -31,10 +31,9 @@ import {
  * First argument of validation.js validate function
  * @param {object} validationConstraints
  * Second argument of validation.js validate function
- * @param {React.Component} showErrorsIcon
- * Icon displayed when errors are present
- * @param {React.Component} hideErrorsIcon
- * Icon displayed when errors are visible
+ * @param {object} icons
+ * Collection of React icon components: `{ showErrors,
+ * hideErrors, showHelp, hideHelp, showPassword, hidePassword }`
  */
 export const EmailInput = _EmailInput;
 
@@ -59,10 +58,9 @@ export const EmailInput = _EmailInput;
  * First argument of validation.js validate function
  * @param {object} validationConstraints
  * Second argument of validation.js validate function
- * @param {React.Component} showErrorsIcon
- * Icon displayed when errors are present
- * @param {React.Component} hideErrorsIcon
- * Icon displayed when errors are visible
+ * @param {object} icons
+ * Collection of React icon components: `{ showErrors,
+ * hideErrors, showHelp, hideHelp, showPassword, hidePassword }`
  */
 export const PasswordInput = _PasswordInput;
 
