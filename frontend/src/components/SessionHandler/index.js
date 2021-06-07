@@ -1,21 +1,20 @@
 /* eslint-disable react/prop-types */
 
+import { actions } from "../../store";
 import { createElement, Fragment, useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 import { Redirect } from "react-router-dom";
-import { useSession, useSessionUser } from "../../hooks";
+import { useDispatch, useSelector } from "react-redux";
 
 export function SessionHandler(props) {
   const { children } = props;
 
-  const getSession = useSession();
-  const getSessionUser = useSessionUser();
+  const dispatch = useDispatch();
 
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     async function go() {
-      const active = await getSession();
+      const active = await dispatch(actions.session.get());
 
       // Here we invoke hooks to retrieve data to build the user
       // experience. In the last step we'll assign "true" to a state
@@ -24,7 +23,7 @@ export function SessionHandler(props) {
       // Place your data request hooks here. Remember to await them because
       // you'll likely have dependent hooks.
       if (active === true) {
-        await getSessionUser();
+        await dispatch(actions.user.get())
 
       }
       // Final step of the data retrieval side effect is setting the
