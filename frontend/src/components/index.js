@@ -1,6 +1,12 @@
 /** @module components */
 
 import {
+  SessionHandler as _SessionHandler,
+  Authenticated as _Authenticated,
+  Anonymous as _Anonymous,
+} from "./SessionHandler";
+
+import {
   EmailInput as _EmailInput,
   PasswordInput as _PasswordInput,
 } from "./inputTextTypes";
@@ -9,6 +15,35 @@ import {
   View as _View,
   ViewRouteMatchHandler as _ViewRouteMatchHandler,
 } from "./View";
+
+/**
+ * @function
+ * @description
+ * Component wraps the whole application and handles setup of the user
+ * interface by requesting session-related data which is then dispatched to
+ * Redux.
+ */
+export const SessionHandler = _SessionHandler;
+
+/**
+ * @function
+ * @description
+ * Component wraps views to provide an automatic redirect in the event that
+ * a session doesn't exist.
+ * @param {String} redirect
+ * The path to redirect to if the user does not have an active session
+ */
+export const Authenticated = _Authenticated;
+
+/**
+ * @function
+ * @description
+ * Component wraps views to provide an automatic redirect in the event that
+ * a session exists.
+ * @param {String} redirect
+ * The path to redirect to if the user has an active session
+ */
+export const Anonymous = _Anonymous;
 
 /**
  * @function
