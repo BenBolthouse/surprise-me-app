@@ -1,14 +1,13 @@
 /* eslint-disable no-undef */
 
-import React from "react";
-import ReactDOM from "react-dom";
 import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
+import React from "react";
+import ReactDOM from "react-dom";
 
-import App from "./components/App.jsx";
-import configureStore from "./store";
-
-import * as actions from "./store/actions";
+import { configureStore } from "./store/configureStore";
+import { actions } from "./store";
+import App from "./App.jsx";
 
 export const store = configureStore();
 

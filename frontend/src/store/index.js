@@ -1,20 +1,16 @@
-import { createStore, combineReducers } from "redux";
+/** @module store */
 
-import enhancer from "./enhancer";
+import {socketIoClient as _socketIoClient} from "./socketIoClient";
+import * as _actions from "./actions";
 
-import connections from "./reducers/connections.reducer";
-import notifications from "./reducers/notifications.reducer";
-import session from "./reducers/session.reducer";
-import user from "./reducers/user.reducer";
+/**
+ * @constant
+ * @description Redux actions library
+ */
+export const actions = _actions;
 
-const rootReducer = combineReducers({
-  connections,
-  notifications,
-  session,
-  user,
-});
-
-const configureStore = (preloadedState) =>
-  createStore(rootReducer, preloadedState, enhancer);
-
-export default configureStore;
+/**
+ * @constant
+ * @description SocketIO configuration and events routes.
+ */
+export const socketIoClient = _socketIoClient;

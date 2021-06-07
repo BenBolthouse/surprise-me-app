@@ -1,0 +1,35 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Frontend",
+      "request": "launch",
+      "type": "pwa-chrome",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}/react"
+    },
+    {
+      "name": "Debug Backend",
+      "args": ["run", "--no-debugger"],
+      "cwd": "${workspaceFolder}/backend",
+      "envFile": "${workspaceFolder}/env/.development.env",
+      "jinja": false,
+      "module": "flask",
+      "request": "launch",
+      "type": "python"
+    },
+    {
+      "name": "Test",
+      // Configuration for VS Code Test Explorer for Python
+      // Properties in this configuration apply to on-the-fly test debugging
+      // available through Test Explorer.
+      "console": "internalConsole",
+      "cwd": "${workspaceFolder}/backend",
+      "envFile": "${workspaceFolder}/backend/.env.test",
+      "justMyCode": true,
+      "request": "test",
+      "stopOnEntry": false,
+      "type": "python"
+    }
+  ]
+}

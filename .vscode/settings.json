@@ -1,0 +1,9 @@
+{
+  "python.linting.enabled": true,
+  "python.linting.pycodestyleEnabled": true,
+  "python.linting.pylintEnabled": false,
+  "python.pythonPath": "C:\\Users\\AppAcademy\\.virtualenvs\\surprise-me-app-_Op8hOJS\\Scripts\\python.exe",
+  "python.testing.pytestEnabled": true,
+  "python.testing.unittestEnabled": false,
+  "testExplorer.showOnRun": false
+}
