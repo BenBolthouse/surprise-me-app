@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 
+import { IoAlertCircleSharp as Errors } from "react-icons/io5"
+
 import {
   EmailInput,
   PasswordInput,
@@ -15,12 +17,16 @@ export function SignInView() {
   const [email, setEmail] = useState({
     value: "",
     errors: [],
+    showErrors: false,
   });
 
   const [password, setPassword] = useState({
     value: "",
     errors: [],
+    showErrors: false,
   });
+
+  const [showErrors, setShowErrors] = useState(false);
 
   const [canSubmit, setCanSubmit] = useState(false);
 
@@ -45,11 +51,15 @@ export function SignInView() {
   }
 
   const centerElement = {
-    className: "center",
+    className: "view-content center",
   }
 
   const formElement = {
     onSubmit: handleFormOnSubmit,
+  }
+
+  const showErrorsElement = {
+    className: "view-dim " + (showErrors ? "show" : "hide"),
   }
 
   const emailInputElement = {
@@ -71,6 +81,7 @@ export function SignInView() {
     setState: setEmail,
     validationAttributes: { email: email.value },
     validationConstraints: { email: validationConstraints.required },
+    showErrorsIcon: <Errors />,
   }
 
   const passwordInputProps = {
@@ -80,6 +91,7 @@ export function SignInView() {
     setState: setPassword,
     validationAttributes: { password: password.value },
     validationConstraints: { password: validationConstraints.required },
+    showErrorsIcon: <Errors />,
   }
 
   const submitButtonElement = {
@@ -93,16 +105,33 @@ export function SignInView() {
       email.value.length && !email.errors.length &&
       password.value.length && !password.errors.length);
 
+    // prettier-ignore
     if (_canSubmit) {
       setCanSubmit(true);
-    } else {
+    }
+    else {
       setCanSubmit(false);
     }
-  }, [email, password])
+  }, [email.value, password.value])
+
+  // Side effect detects changes in showErrors values for inputs and sets
+  // the showErrors state accordingly.
+  useEffect(() => {
+    const _showErrors = (email.showErrors || password.showErrors);
+
+    // prettier-ignore
+    if (_showErrors) {
+      setShowErrors(true);
+    }
+    else {
+      setShowErrors(false);
+    }
+  }, [email.showErrors, password.showErrors])
 
   return (
     <ViewRouteMatchHandler exact path="/start/sign-in">
       <View name="sign-in">
+        <div {...showErrorsElement} />
         <div {...centerElement}>
           <h1>Sign in</h1>
           <form {...formElement}>
