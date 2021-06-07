@@ -20,7 +20,10 @@ import {
  * state variable and update function** of a parent component whom is
  * utilizing `React.useState`.
  * @param {String} name
- * Name of the view; must be uniquely named in the application scope
+ * Name of the input; must match the name of the variable given for
+ * `state`, e.g. if `state` is an implementation of `React.useState` as
+ * such: `var [foobar, setFoobar] = useState({...})` then `name` must also
+ * equal "foobar".
  * @param {object} element
  * Element props for the input element
  * @param {object} state
@@ -34,6 +37,10 @@ import {
  * @param {object} icons
  * Collection of React icon components: `{ showErrors,
  * hideErrors, showHelp, hideHelp, showPassword, hidePassword }`
+ * @param {String} tryOn
+ * Indicates the event which triggers the input to "try", i.e. display
+ * validation results, if any. Available options are **onload**,
+ * **onchange**, **onblur**, and **onfocus**. Defaults to **onchange**.
  */
 export const EmailInput = _EmailInput;
 
@@ -47,7 +54,10 @@ export const EmailInput = _EmailInput;
  * state variable and update function** of a parent component whom is
  * utilizing `React.useState`.
  * @param {String} name
- * Name of the input; must be uniquely named in the application scope
+ * Name of the input; must match the name of the variable given for
+ * `state`, e.g. if `state` is an implementation of `React.useState` as
+ * such: `var [foobar, setFoobar] = useState({...})` then `name` must also
+ * equal "foobar".
  * @param {object} element
  * Element props for the input element
  * @param {object} state
@@ -61,6 +71,10 @@ export const EmailInput = _EmailInput;
  * @param {object} icons
  * Collection of React icon components: `{ showErrors,
  * hideErrors, showHelp, hideHelp, showPassword, hidePassword }`
+ * @param {String} tryOn
+ * Indicates the event which triggers the input to "try", i.e. display
+ * validation results, if any. Available options are **onload**,
+ * **onchange**, **onblur**, and **onfocus**. Defaults to **onchange**.
  */
 export const PasswordInput = _PasswordInput;
 
@@ -69,7 +83,7 @@ export const PasswordInput = _PasswordInput;
  * @description
  * Component renders an application view.
  * @param {String} name
- * Name of the input; must be uniquely named in the application scope
+ * Name of the view; must be uniquely named in the application scope
  */
 export const View = _View;
 
@@ -85,6 +99,6 @@ export const View = _View;
  * The URL path to match
  * @param {Boolean} exact
  * Same as the react-dom-router's Route component prop `exact`; will only
- * match if exact
+ * match if exactly the path provided
  */
 export const ViewRouteMatchHandler = _ViewRouteMatchHandler;
