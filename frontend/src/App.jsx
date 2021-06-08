@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Switch, Route } from "react-router-dom";
 
-import { SignInView, SignUpView } from "./views";
+import { SignInView, SignUpView, StartView } from "./views";
 
 import "./styles/index.css";
 import { Anonymous, Authenticated, SessionHandler } from "./components";
@@ -35,7 +35,7 @@ const App = () => {
         <Route path="/start">
           <Anonymous redirect="/app">
             <SignInView />
-            {/* <StartView /> */}
+            <StartView />
           </Anonymous>
         </Route>
         <Route path="/app">
