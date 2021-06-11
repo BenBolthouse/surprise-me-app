@@ -1,49 +1,9 @@
 /** @module components */
 
 import {
-  SessionHandler as _SessionHandler,
-  Authenticated as _Authenticated,
-  Anonymous as _Anonymous,
-} from "./SessionHandler";
-
-import {
   EmailInput as _EmailInput,
   PasswordInput as _PasswordInput,
-} from "./inputTextTypes";
-
-import {
-  View as _View,
-  ViewRouteMatchHandler as _ViewRouteMatchHandler,
-} from "./View";
-
-/**
- * @function
- * @description
- * Component wraps the whole application and handles setup of the user
- * interface by requesting session-related data which is then dispatched to
- * Redux.
- */
-export const SessionHandler = _SessionHandler;
-
-/**
- * @function
- * @description
- * Component wraps views to provide an automatic redirect in the event that
- * a session doesn't exist.
- * @param {String} redirect
- * The path to redirect to if the user does not have an active session
- */
-export const Authenticated = _Authenticated;
-
-/**
- * @function
- * @description
- * Component wraps views to provide an automatic redirect in the event that
- * a session exists.
- * @param {String} redirect
- * The path to redirect to if the user has an active session
- */
-export const Anonymous = _Anonymous;
+} from "./interface/inputTextTypes";
 
 /**
  * @function
@@ -112,28 +72,3 @@ export const EmailInput = _EmailInput;
  * **onchange**, **onblur**, and **onfocus**. Defaults to **onchange**.
  */
 export const PasswordInput = _PasswordInput;
-
-/**
- * @function
- * @description
- * Component renders an application view.
- * @param {String} name
- * Name of the view; must be uniquely named in the application scope
- */
-export const View = _View;
-
-/**
- * @function
- * @description
- * Renders `components.View` with an additional HTML attribute
- * `br-view-match` whose value equals "match" or "no-match" based on URL
- * path matching.
- * @param {String} name
- * Name of the view; must be uniquely named in the application scope
- * @param {String} path
- * The URL path to match
- * @param {Boolean} exact
- * Same as the react-dom-router's Route component prop `exact`; will only
- * match if exactly the path provided
- */
-export const ViewRouteMatchHandler = _ViewRouteMatchHandler;

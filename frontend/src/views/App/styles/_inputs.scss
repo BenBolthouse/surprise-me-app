@@ -1,0 +1,143 @@
+@use "../../../constants" as *;
+
+.input-group {
+    display: block;
+}
+
+.input-group.email-input-group,
+.input-group.password-input-group {
+    position: relative;
+    width: 100%;
+    height: 5rem;
+    z-index: 10;
+
+    input {
+        border: 1px solid #888;
+        border-radius: 4px;
+        font-size: (22rem / 16);
+        line-height: 2rem;
+        margin: 1rem 0 0;
+        padding: 22px 1rem 8px;
+        width: 100%;
+        height: 4rem;
+        z-index: 1;
+    }
+
+    label {
+        position: absolute;
+        top: 28px;
+        left: 18px;
+        font-size: $TEXT_SIZE_2;
+    }
+
+    .icon {
+        $size: 2rem;
+        cursor: pointer;
+        position: absolute;
+        width: $size;
+        height: $size;
+
+        * {
+            font-size: $size;
+        }
+
+        &.show-errors {
+            color: $COLORS_ERROR;
+            top: 2rem;
+            right: 1rem;
+            opacity: 0;
+            z-index: 3;
+        }
+
+        &.hide-errors {
+            color: white;
+            top: -2rem;
+            right: 1rem;
+            z-index: 3;
+        }
+
+        &.show-hide-password {
+            color: #bbb;
+            top: 2rem;
+            right: 1rem;
+            z-index: 2;
+        }
+    }
+
+    .errors {
+        border-radius: 4px;
+        position: absolute;
+        top: 6rem;
+        left: 0;
+        right: 0;
+        background-color: white;
+        padding: 1rem;
+    }
+
+    &[br-tried="false"] {
+        .show-errors,
+        .hide-errors {
+            display: none;
+        }
+    }
+
+    &[br-tried="true"] {
+        &[br-has-errors="true"] {
+            .show-errors {
+                animation: shift-error 0.25s ease-out .125s 1 forwards;
+
+                @keyframes shift-error {
+                    0% {
+                        opacity: 0;
+                        transform: scale(0, 0);
+                    }
+
+                    70% {
+                        opacity: 1;
+                        transform: scale(1.1, 1.1);
+                    }
+
+                    100% {
+                        opacity: 1;
+                        transform: scale(1, 1);
+                    }
+                }
+            }
+            .show-hide-password {
+                animation: shift-password 0.125s ease-out 0s 1 forwards;
+
+                @keyframes shift-password {
+                    0% {
+                        transform: translateX(0);
+                    }
+
+                    100% {
+                        transform: translateX(-2.25rem);
+                    }
+                }
+            }
+        }
+
+
+    }
+
+    &[br-show-errors="false"] {
+        .errors {
+            display: none;
+        }
+
+        .hide-errors {
+            display: none;
+        }
+    }
+
+    &[br-show-errors="true"] {
+        .errors {
+            display: block;
+        }
+
+        .hide-errors {
+            display: block;
+        }
+    }
+}

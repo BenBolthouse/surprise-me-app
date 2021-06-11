@@ -6,10 +6,6 @@ export const required = {
 };
 
 export const password = {
-  presence: {
-    allowEmpty: false,
-    message: "is required.",
-  },
   format: {
     pattern:
       /^(?!.* )(?=.*\d)(?=.+\W)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,32}$/,
@@ -19,10 +15,6 @@ export const password = {
 };
 
 export const email = {
-  presence: {
-    allowEmpty: false,
-    message: "is required.",
-  },
   format: {
     pattern:
       /^(?:(?:[\w`~!#$%^&*\-=+;:{}'|,?/]+(?:(?:\.(?:"(?:\\?[\w`~!#$%^&*\-=+;:{}'|,?/.()<>[\] @]|\\"|\\\\)*"|[\w`~!#$%^&*\-=+;:{}'|,?/]+))*\.[\w`~!#$%^&*\-=+;:{}'|,?/]+)?)|(?:"(?:\\?[\w`~!#$%^&*\-=+;:{}'|,?/.()<>[\] @]|\\"|\\\\)+"))@(?:[a-zA-Z\d-]+(?:\.[a-zA-Z\d-]+)*\.[a-zA-Z].{1,4})$/,

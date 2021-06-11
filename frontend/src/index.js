@@ -5,9 +5,10 @@ import { Provider } from "react-redux";
 import React from "react";
 import ReactDOM from "react-dom";
 
-import { configureStore } from "./store/configureStore";
+import { App } from "./views";
+
 import { actions } from "./store";
-import App from "./App.jsx";
+import { configureStore } from "./store/configureStore";
 
 export const store = configureStore();
 

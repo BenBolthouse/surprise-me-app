@@ -1,0 +1,22 @@
+.view {
+    position: absolute;
+    display: grid;
+    width: 100%;
+    height: 100%;
+
+    .view-dim {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+
+        &.show {
+            display: block;
+        }
+
+        &.hide {
+            display: none;
+        }
+    }
+}

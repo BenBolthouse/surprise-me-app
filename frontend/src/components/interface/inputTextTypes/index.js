@@ -17,6 +17,7 @@ function emailInput(props) {
   const { setTrying } = props;
 
   const inputElement = {
+    id: name + "-input",
     key: name + "-input",
     type: "text",
     ...element,
@@ -26,6 +27,12 @@ function emailInput(props) {
       setTrying(e.target.value.length > 0);
     },
   };
+
+  const labelElement = {
+    key: name + "-input-label",
+    htmlFor: name + "-input",
+    children: name.toUpperCase(),
+  }
 
   const errorsComponent = {
     key: name + "-input-errors",
@@ -62,6 +69,7 @@ function emailInput(props) {
 
   return createElement(Fragment, null, [
     createElement("input", inputElement),
+    createElement("label", labelElement),
     createElement(InputErrors, errorsComponent),
     createElement(InputIconOnErrors, showErrorsComponent),
     createElement(InputIconOnErrors, hideErrorsComponent),
@@ -74,7 +82,7 @@ export function EmailInput(props) {
     props,
     createElement(
       InputStateHtmlHandler,
-      props,
+      {...props, type: "email"},
       createElement(emailInput, props)
     )
   );
@@ -90,6 +98,7 @@ function passwordInput(props) {
   const [showPassword, setShowPassword] = useState(false);
 
   const inputElement = {
+    id: name + "-input",
     key: name + "-input",
     type: showPassword ? "text" : "password",
     ...element,
@@ -99,6 +108,12 @@ function passwordInput(props) {
       setTrying(e.target.value.length > 0);
     },
   };
+
+  const labelElement = {
+    key: name + "-input-label",
+    htmlFor: name + "-input",
+    children: name.toUpperCase(),
+  }
 
   const errorsComponent = {
     key: name + "-input-errors",
@@ -149,6 +164,7 @@ function passwordInput(props) {
 
   return createElement(Fragment, null, [
     createElement("input", inputElement),
+    createElement("label", labelElement),
     createElement(InputErrors, errorsComponent),
     createElement(InputIconOnErrors, showErrorsComponent),
     createElement(InputIconOnErrors, hideErrorsComponent),
@@ -162,7 +178,7 @@ export function PasswordInput(props) {
     props,
     createElement(
       InputStateHtmlHandler,
-      props,
+      {...props, type: "password"},
       createElement(passwordInput, props)
     )
   );

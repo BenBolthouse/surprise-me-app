@@ -2,8 +2,6 @@
 
 import React, { createContext, useState } from "react";
 
-import { View } from "../../components";
-
 export const SignUpContext = createContext();
 
 export function SignUpView() {
@@ -44,9 +42,9 @@ export function SignUpView() {
 
   return (
     <SignUpContext.Provider value={{ viewState, setViewState }}>
-      <View name="sign-up">
+      <div className="sign-up">
         <div>Hello</div>
-      </View>
+      </div>
     </SignUpContext.Provider>
   )
 }

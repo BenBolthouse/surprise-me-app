@@ -1,28 +1,34 @@
 /* eslint-disable react/prop-types */
 
+import { useRouteMatch } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import React, { useEffect, useState } from "react";
 
 import {
   IoAlertCircleSharp as Errors,
   IoCloseCircleSharp as Close,
-  IoEyeSharp as ShowPassword,
-  IoEyeOffSharp as HidePassword,
+  IoEyeOutline as ShowPassword,
+  IoEyeOffOutline as HidePassword,
 } from "react-icons/io5"
 
 import {
   EmailInput,
   PasswordInput,
-  View,
-  ViewRouteMatchHandler,
 } from "../../components";
 
 import { actions } from "../../store";
 
 import { validationConstraints } from "../../utilities";
 
+import "./styles.css";
+
 export function SignInView() {
   const dispatch = useDispatch();
+
+  const pathMatch = useRouteMatch({
+    path: "/start/sign-in",
+    exact: true,
+  });
 
   const [email, setEmail] = useState({
     value: "",
@@ -57,6 +63,11 @@ export function SignInView() {
     setSubmitting(false);
   }
 
+  const viewComponent = {
+    className: "view sign-in-view",
+    "view-path-match": pathMatch ? "match" : "no-match",
+  }
+
   const centerElement = {
     className: "view-content center",
   }
@@ -75,7 +86,12 @@ export function SignInView() {
     state: email,
     setState: setEmail,
     validationAttributes: { email: email.value },
-    validationConstraints: { email: validationConstraints.required },
+    validationConstraints: {
+      email: {
+        ...validationConstraints.required,
+        ...validationConstraints.email,
+      }
+    },
     icons: {
       showErrors: <Errors />,
       hideErrors: <Close />,
@@ -121,18 +137,16 @@ export function SignInView() {
   }, [email.showErrors, password.showErrors])
 
   return (
-    <ViewRouteMatchHandler exact path="/start/sign-in">
-      <View name="sign-in">
-        <div {...showErrorsElement} />
-        <div {...centerElement}>
-          <h1>Sign in</h1>
-          <form {...formElement}>
-            <EmailInput {...emailInputProps} />
-            <PasswordInput {...passwordInputProps} />
-            <button {...submitButtonElement}>Go</button>
-          </form>
-        </div>
-      </View>
-    </ViewRouteMatchHandler>
+    <div {...viewComponent}>
+      <div {...showErrorsElement} />
+      <div {...centerElement}>
+        <h1>Sign in</h1>
+        <form {...formElement}>
+          <EmailInput {...emailInputProps} />
+          <PasswordInput {...passwordInputProps} />
+          <button {...submitButtonElement}>Go</button>
+        </form>
+      </div>
+    </div>
   );
 }

@@ -1,8 +1,15 @@
 /** @module views */
 
+import { App as _App } from "./App";
 import { SignInView as _SignInView } from "./SignInView";
 import { SignUpView as _SignUpView } from "./SignUpView";
 import { StartView as _StartView } from "./StartView";
+
+/**
+ * @function
+ * @description Component renders the application.
+ */
+export const App = _App;
 
 /**
  * @function

@@ -1,0 +1,41 @@
+@use "../../constants"as c;
+
+.view.sign-in-view {
+    transition: left 0.25s ease-in-out;
+    -webkit-transition: left 0.25s ease-in-out;
+    z-index: 50;
+
+    .view-dim {
+        background-color: rgba(0, 0, 0, 0.75);
+        z-index: 51;
+    }
+
+    .view-content {
+        display: grid;
+        align-self: center;
+        width: 100%;
+
+        @media screen and (min-width: c.$MEDIA_WIDTH_MOBILE_L) {
+            justify-self: center;
+            width: c.$MEDIA_WIDTH_MOBILE_L;
+        }
+
+        .input-group {
+            &[br-show-errors="false"] {
+                z-index: inherit;
+            }
+
+            &[br-show-errors="true"] {
+                z-index: 52;
+            }
+        }
+    }
+
+    &[view-path-match="no-match"] {
+        left: 100%;
+    }
+
+    &[view-path-match="match"] {
+        left: 0;
+    }
+}

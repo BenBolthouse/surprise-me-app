@@ -68,19 +68,22 @@ export function InputValidationHandler(props) {
 }
 
 export function InputStateHtmlHandler(props) {
-  let { state, tryOn, children: input } = props;
+  let { state, tryOn, type, children: input } = props;
 
   if (!tryOn) tryOn = "onchange";
 
   const [trying, setTrying] = useState(false);
   const [tried, setTried] = useState(false);
   const [focused, setFocused] = useState(false);
+  const [hasErrors, setHasErrors] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
 
   const wrapperElement = {
+    className: "input-group " + type + "-input-group",
     "br-trying": trying.toString(),
     "br-tried": tried.toString(),
     "br-focused": focused.toString(),
+    "br-has-errors": hasErrors.toString(),
     "br-show-errors": showErrors.toString(),
     onLoad: function () {
       if (tryOn === "onload") setTried(true);
@@ -96,11 +99,17 @@ export function InputStateHtmlHandler(props) {
     },
   };
 
-  // Side effect detects changes of showErrors in state and updates this
+  // Side effect detects changes in showErrors in state and updates this
   // component's state, accordingly.
   useEffect(() => {
     setShowErrors(state.showErrors);
   }, [state.showErrors]);
+
+  // Side effect detects changes in errors in state and updates this
+  // component's state, accordingly.
+  useEffect(() => {
+    setHasErrors(state.errors.length > 0);
+  }, [state.errors]);
 
   const childInputClone = cloneElement(input, {
     ...input.props,
