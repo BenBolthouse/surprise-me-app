@@ -41,6 +41,7 @@
     "loaders.css": "^0.1.2",
     "randomstring": "^1.2.1",
     "react": "^17.0.1",
+    "react-brilliant-interface": "file:modules/react-brilliant-interface",
     "react-dom": "^17.0.1",
     "react-icons": "^4.2.0",
     "react-loader-spinner": "^4.0.0",
