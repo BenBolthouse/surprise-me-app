@@ -122,5 +122,5 @@ dist
 docs/
 docs.md
 
-# css files will be preprocessed on deployment
+# CSS files will be preprocessed on deployment
 *.css*
