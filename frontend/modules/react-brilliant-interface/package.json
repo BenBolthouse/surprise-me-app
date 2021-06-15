@@ -1,0 +1,18 @@
+{
+  "name": "react-brilliant-interface",
+  "version": "0.1.0",
+  "description": "A library of highly-dynamic and interactive React components.",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ben Bolthouse",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": "*",
+    "validate.js": "*"
+  }
+}
